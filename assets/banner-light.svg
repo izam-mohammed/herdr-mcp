@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400" width="1200" height="400" role="img" aria-labelledby="t d">
+  <title id="t">herdr-mcp</title>
+  <desc id="d">A red tie, promoted to manage three AI agent panes: one working (allegedly), one blocked (on you), one done (it says).</desc>
+  <defs>
+    <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.2" fill="#e2e8f0"/>
+    </pattern>
+    <linearGradient id="glow" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ef4444" stop-opacity="0.10"/>
+      <stop offset="1" stop-color="#ef4444" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="400" rx="24" fill="#f8fafc"/>
+  <rect width="1200" height="400" rx="24" fill="url(#dots)"/>
+  <circle cx="735" cy="205" r="170" fill="url(#glow)"/>
+
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">
+    <!-- left: the pitch -->
+    <text x="64" y="92" font-size="17" fill="#64748b">$ herdr-mcp --role=middle-management</text>
+    <text x="62" y="168" font-size="72" font-weight="700" fill="#0f172a">herdr-mcp</text>
+    <text x="64" y="218" font-size="21" fill="#334155">Your AI agents finally have a manager.</text>
+    <text x="64" y="252" font-size="21" fill="#64748b">It's also an AI. Obviously.</text>
+
+    <g font-size="15">
+      <rect x="64" y="300" width="118" height="34" rx="17" fill="#ffffff" stroke="#cbd5e1"/>
+      <text x="123" y="322" text-anchor="middle" fill="#334155">herds tabs</text>
+      <rect x="194" y="300" width="127" height="34" rx="17" fill="#ffffff" stroke="#cbd5e1"/>
+      <text x="257" y="322" text-anchor="middle" fill="#334155">nags agents</text>
+      <rect x="333" y="300" width="127" height="34" rx="17" fill="#ffffff" stroke="#cbd5e1"/>
+      <text x="396" y="322" text-anchor="middle" fill="#334155">reads panes</text>
+    </g>
+
+    <!-- the org chart -->
+    <g stroke="#94a3b8" stroke-width="2" stroke-dasharray="6 6" fill="none">
+      <path d="M770 205 H800 V117 H838"/>
+      <path d="M770 205 H838"/>
+      <path d="M800 205 V293 H838"/>
+    </g>
+
+    <!-- speech bubble -->
+    <rect x="600" y="58" width="236" height="46" rx="12" fill="#0f172a"/>
+    <path d="M700 104 L716 104 L704 120 Z" fill="#0f172a"/>
+    <text x="718" y="87" font-size="17" text-anchor="middle" fill="#f8fafc">per my last prompt…</text>
+
+    <!-- the manager: just a tie -->
+    <g transform="translate(732 195) scale(1.35) translate(-732 -195)">
+    <polygon points="722,146 742,146 738,160 726,160" fill="#dc2626"/>
+    <polygon points="726,160 738,160 746,228 732,244 718,228" fill="#ef4444"/>
+    <path d="M722 182 L742 172 M720 206 L744 194" stroke="#b91c1c" stroke-width="3"/>
+    </g>
+    <text x="732" y="318" font-size="14" text-anchor="middle" fill="#64748b">promoted to management</text>
+
+    <!-- the reports -->
+    <g font-size="15">
+      <rect x="838" y="82" width="300" height="70" rx="10" fill="#ffffff" stroke="#d5dde8"/>
+      <circle cx="856" cy="98" r="4" fill="#cbd5e1"/><circle cx="870" cy="98" r="4" fill="#cbd5e1"/><circle cx="884" cy="98" r="4" fill="#cbd5e1"/>
+      <text x="856" y="134" fill="#0f172a">claude · w1:p1</text>
+      <rect x="1024" y="114" width="96" height="26" rx="13" fill="#dcfce7"/>
+      <text x="1072" y="132" text-anchor="middle" fill="#15803d">working</text>
+      <text x="1120" y="100" text-anchor="end" font-size="13" fill="#64748b">(allegedly)</text>
+
+      <rect x="838" y="170" width="300" height="70" rx="10" fill="#ffffff" stroke="#d5dde8"/>
+      <circle cx="856" cy="186" r="4" fill="#cbd5e1"/><circle cx="870" cy="186" r="4" fill="#cbd5e1"/><circle cx="884" cy="186" r="4" fill="#cbd5e1"/>
+      <text x="856" y="222" fill="#0f172a">codex · w2:p1</text>
+      <rect x="1024" y="202" width="96" height="26" rx="13" fill="#fef3c7"/>
+      <text x="1072" y="220" text-anchor="middle" fill="#b45309">blocked</text>
+      <text x="1120" y="188" text-anchor="end" font-size="13" fill="#64748b">(on you)</text>
+
+      <rect x="838" y="258" width="300" height="70" rx="10" fill="#ffffff" stroke="#d5dde8"/>
+      <circle cx="856" cy="274" r="4" fill="#cbd5e1"/><circle cx="870" cy="274" r="4" fill="#cbd5e1"/><circle cx="884" cy="274" r="4" fill="#cbd5e1"/>
+      <text x="856" y="310" fill="#0f172a">claude · w3:p2</text>
+      <rect x="1024" y="290" width="96" height="26" rx="13" fill="#dbeafe"/>
+      <text x="1072" y="308" text-anchor="middle" fill="#1d4ed8">done</text>
+      <text x="1120" y="276" text-anchor="end" font-size="13" fill="#64748b">(it says)</text>
+    </g>
+  </g>
+</svg>
