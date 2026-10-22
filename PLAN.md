@@ -7,6 +7,8 @@ ticked here when all its boxes are.
 
 - [ ] `plans/01-first-version.md` - the Rust server, the safety defaults,
   and tab management from Claude Code.
+- [ ] `plans/09-quality-gates.md` - a 90 % coverage floor in the check and
+  the shared security gate on every PR, before any later plan lands.
 
 ### Phase 2: control the rest of herdr
 
@@ -31,3 +33,8 @@ ticked here when all its boxes are.
 
 - [ ] `plans/08-release.md` - one-command install without a Rust
   toolchain.
+
+### Phase 6: a page for people
+
+- [ ] `plans/10-site.md` - a one-page site on GitHub Pages, once there is
+  something to install and the repository is public.
