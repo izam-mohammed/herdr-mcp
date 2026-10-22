@@ -1,5 +1,9 @@
 <p align="center">
-  <img src="assets/banner.svg" alt="herdr-mcp: a block cursor in a red tie, managing three AI agents" width="100%">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/banner-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/banner-light.svg">
+    <img src="assets/banner-light.svg" alt="herdr-mcp: a block cursor in a red tie, managing three AI agents" width="100%">
+  </picture>
 </p>
 
 <p align="center"><em>You gave your AI agents their own terminals. Now one of them gets to be the boss.</em></p>
