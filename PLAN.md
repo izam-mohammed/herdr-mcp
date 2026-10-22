@@ -31,3 +31,7 @@ ticked here when all its boxes are.
 
 - [ ] `plans/08-release.md` - one-command install without a Rust
   toolchain.
+
+### Phase 6: repository hygiene
+
+- [ ] `plans/12-repo-hygiene.md` - a security policy and an MIT licence.
