@@ -92,7 +92,7 @@ asks for update PRs and says where to report a vulnerability.
 
 ### Phase 3: licence
 
-- [ ] The MIT text lands (expected in `LICENSE`) with
+- [x] The MIT text lands (expected in `LICENSE`) with
   `Copyright (c) 2026 Izam Mohammed`, and the README ends
   with `MIT, see [LICENSE](LICENSE).`.
 
