@@ -38,3 +38,8 @@ ticked here when all its boxes are.
 
 - [ ] `plans/10-site.md` - a one-page site on GitHub Pages, once there is
   something to install and the repository is public.
+
+### Phase 7: the detailed docs
+
+- [ ] `plans/11-docs.md` - an mdBook documentation site at `/docs/`, with
+  the tool, resource and prompt reference generated from the server.
