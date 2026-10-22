@@ -23,10 +23,12 @@
     <text x="64" y="252" font-size="21" fill="#8b93a1">It's also an AI. Obviously.</text>
 
     <g font-size="15">
-      <rect x="64" y="300" width="70" height="34" rx="17" fill="#151922" stroke="#3f4757"/>
-      <text x="99" y="322" text-anchor="middle" fill="#cbd5e1">MCP</text>
-      <rect x="146" y="300" width="130" height="34" rx="17" fill="#151922" stroke="#3f4757"/>
-      <text x="211" y="322" text-anchor="middle" fill="#cbd5e1">no standups</text>
+      <rect x="64" y="300" width="118" height="34" rx="17" fill="#151922" stroke="#3f4757"/>
+      <text x="123" y="322" text-anchor="middle" fill="#cbd5e1">herds tabs</text>
+      <rect x="194" y="300" width="127" height="34" rx="17" fill="#151922" stroke="#3f4757"/>
+      <text x="257" y="322" text-anchor="middle" fill="#cbd5e1">nags agents</text>
+      <rect x="333" y="300" width="127" height="34" rx="17" fill="#151922" stroke="#3f4757"/>
+      <text x="396" y="322" text-anchor="middle" fill="#cbd5e1">reads panes</text>
     </g>
 
     <!-- the org chart -->
