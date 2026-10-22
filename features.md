@@ -23,9 +23,11 @@ This server is worth having for what Bash can't give cleanly:
 
 ## How herdr is reached
 
-- **Transport:** newline-delimited JSON over a Unix domain socket. One request per line,
-  `{"id","method","params"}`, and the response echoes the `id`. Errors come back as
-  `{"id","error":{"code","message"}}`.
+- **Transport:** newline-delimited JSON over a Unix domain socket, `{"id","method","params"}`,
+  and the response echoes the `id`. Errors come back as `{"id","error":{"code","message"}}`.
+  **One request per connection**: a second request on the same connection is never answered
+  (measured 22/10/2026), so every call opens its own connection (~0.15-0.4 ms). Only
+  `events.subscribe` keeps its connection open to stream events.
 - **Socket path**, resolved in herdr's own order:
   1. an explicit session name (server config or tool argument);
   2. `HERDR_SOCKET_PATH`;
@@ -177,6 +179,9 @@ Requirements, from herdr's subscription rules:
   connection, and record the gap so `herdr_events_recent` can say events were missed.
 - If any pane in a subscription filter doesn't exist, herdr rejects the whole request and closes the
   connection. Pane-scoped filters are validated against `pane.list` first.
+- `pane.agent_status_changed`, `pane.output_matched` and `pane.scroll_changed` need a `pane_id`
+  per subscription entry. Watching every agent means one entry per pane, and a new subscription
+  when panes are created or closed (`plans/05-events.md`).
 - Ordering is only guaranteed within one subscription entry. Events are invalidation signals, not a
   replay log.
 - Reconnect with backoff if the herdr server restarts (`herdr update --handoff`, `server stop`).
@@ -237,7 +242,7 @@ Short MCP prompts the user can pick from the client:
 
 - **Transport to the client:** stdio first (what Claude Code uses for a local server). Streamable HTTP
   is a later option.
-- **Install:** one command, no setup step. Registered with
+- **Install:** one command, no setup step (`plans/08-release.md`). Registered with
   `claude mcp add herdr -- <command>` in any of the claude profiles.
 - **Config:** CLI flags and env vars only (session, read-only, limits). No config file needed.
 - **Logging:** to stderr (stdout is the MCP channel), with a `--debug` flag that logs socket traffic.
@@ -256,13 +261,15 @@ Short MCP prompts the user can pick from the client:
 - Remote machines (`herdr --machine`, `--remote`). Possible later, through herdr's own SSH support.
 - Managing herdr's config, plugins, integrations or updates.
 
-## Open decisions
+## Decisions
 
-- **Language and SDK:** TypeScript with the official `@modelcontextprotocol/sdk`, or Python with the
-  official `mcp` package run through `uv`. Both are on this machine (node 22, uv 0.13). The deciding
-  factors are the long-lived socket and the event buffer, which both handle.
-- **Tool count:** the full list is about 60 tools, which is a lot for a model to choose from.
-  Alternatives: fewer, broader tools (e.g. one `herdr_tab` tool with an `action` argument), or
-  registering groups by flag (`--tools tabs,agents,events`).
-- **Push events:** whether to build resource-update notifications at all, after testing what
-  Claude Code does with them.
+Made in the plans (`PLAN.md`), 22/10/2026:
+
+- **Language and SDK:** Rust with the official `rmcp` SDK, over Go, TypeScript and Python, on
+  measured start time, memory and CPU (`plans/01-first-version.md` decision 1,
+  `docs/research/01-first-version.md`).
+- **Tool count:** narrow `herdr_<area>_<verb>` tools, registered in groups (`--tools`), all on by
+  default; Claude Code's tool search loads only names upfront (`plans/01-first-version.md`
+  decision 4).
+- **Push events:** not built until a client is shown to act on them
+  (`plans/07-resources-and-prompts.md` decision 1).
