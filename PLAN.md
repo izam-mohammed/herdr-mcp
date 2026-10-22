@@ -34,4 +34,4 @@ ticked here when all its boxes are.
 
 ### Phase 6: repository hygiene
 
-- [ ] `plans/12-repo-hygiene.md` - a security policy and an MIT licence.
+- [x] `plans/12-repo-hygiene.md` - a security policy and an MIT licence.
