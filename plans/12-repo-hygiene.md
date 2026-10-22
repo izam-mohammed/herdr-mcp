@@ -78,14 +78,14 @@ asks for update PRs and says where to report a vulnerability.
 
 ### Phase 1: topics
 
-- [ ] The repository topics set from the README and description, recorded
+- [x] The repository topics set from the README and description, recorded
   here: `ai-agents`, `claude-code`, `codex`, `herdr`, `mcp`,
   `mcp-server`, `rust`, `terminal`; check: `gh repo view izam-mohammed/herdr-mcp --json repositoryTopics`
   lists them.
 
 ### Phase 2: security policy
 
-- [ ] `SECURITY.md` says only the latest commit on `main` gets fixes, how
+- [x] `SECURITY.md` says only the latest commit on `main` gets fixes, how
   to report privately to `@izam-mohammed`, what happens next, and the
   scope (the `herdr-mcp` server, its tools and its refusals, the install
   path).
