@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400" width="1200" height="400" role="img" aria-labelledby="t d">
   <title id="t">herdr-mcp</title>
-  <desc id="d">A terminal block cursor wearing a red tie, promoted to manage three AI agent panes: one working (allegedly), one blocked (on you), one done (it says).</desc>
+  <desc id="d">A red tie, promoted to manage three AI agent panes: one working (allegedly), one blocked (on you), one done (it says).</desc>
   <defs>
     <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse">
       <circle cx="2" cy="2" r="1.2" fill="#1f2430"/>
@@ -25,10 +25,8 @@
     <g font-size="15">
       <rect x="64" y="300" width="70" height="34" rx="17" fill="#151922" stroke="#3f4757"/>
       <text x="99" y="322" text-anchor="middle" fill="#cbd5e1">MCP</text>
-      <rect x="146" y="300" width="78" height="34" rx="17" fill="#151922" stroke="#3f4757"/>
-      <text x="185" y="322" text-anchor="middle" fill="#cbd5e1">Rust</text>
-      <rect x="236" y="300" width="222" height="34" rx="17" fill="#151922" stroke="#3f4757"/>
-      <text x="347" y="322" text-anchor="middle" fill="#cbd5e1">3.6 MB of judgement</text>
+      <rect x="146" y="300" width="130" height="34" rx="17" fill="#151922" stroke="#3f4757"/>
+      <text x="211" y="322" text-anchor="middle" fill="#cbd5e1">no standups</text>
     </g>
 
     <!-- the org chart -->
@@ -43,12 +41,13 @@
     <path d="M700 104 L716 104 L704 120 Z" fill="#f5f5f4"/>
     <text x="718" y="87" font-size="17" text-anchor="middle" fill="#111827">per my last prompt…</text>
 
-    <!-- the manager: a block cursor wearing a tie -->
-    <rect x="700" y="140" width="64" height="124" rx="4" fill="#f5f5f4"/>
+    <!-- the manager: just a tie -->
+    <g transform="translate(732 195) scale(1.35) translate(-732 -195)">
     <polygon points="722,146 742,146 738,160 726,160" fill="#dc2626"/>
     <polygon points="726,160 738,160 746,228 732,244 718,228" fill="#ef4444"/>
     <path d="M722 182 L742 172 M720 206 L744 194" stroke="#b91c1c" stroke-width="3"/>
-    <text x="732" y="296" font-size="14" text-anchor="middle" fill="#6b7280">▌ promoted to management</text>
+    </g>
+    <text x="732" y="318" font-size="14" text-anchor="middle" fill="#6b7280">promoted to management</text>
 
     <!-- the reports -->
     <g font-size="15">
