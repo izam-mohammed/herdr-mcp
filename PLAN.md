@@ -43,3 +43,7 @@ ticked here when all its boxes are.
 
 - [ ] `plans/11-docs.md` - an mdBook documentation site at `/docs/`, with
   the tool, resource and prompt reference generated from the server.
+
+### Phase 8: repository hygiene
+
+- [x] `plans/12-repo-hygiene.md` - a security policy and an MIT licence.
