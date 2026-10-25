@@ -113,3 +113,5 @@ read-only: no promotion without the paperwork.
 Writing and closing tools are marked as such, so your client asks before
 running them. Keep `herdr_agent_prompt`, `herdr_agent_send_keys` and the
 `herdr_pane_send_*` tools on "ask": anything that can type can run commands.
+
+MIT, see [LICENSE](LICENSE).
