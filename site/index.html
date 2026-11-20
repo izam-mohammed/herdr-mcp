@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>herdr-mcp</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Crect width=%2764%27 height=%2764%27 rx=%2714%27 fill=%27%230d1016%27/%3E%3Crect x=%2716%27 y=%2712%27 width=%2724%27 height=%2740%27 fill=%27%23ef4444%27/%3E%3C/svg%3E">
+<meta name="description" content="herdr-mcp: an MCP server for herdr. It lets Claude Code, Codex or any other MCP client list, open, close, read, prompt and wait on everything running in your herdr session.">
+<style>
+  :root {
+    --ground: #0d1016;
+    --text: #f5f5f4;
+    --secondary: #a8afbb;
+    --tertiary: #7b8494;
+    --rule: #1f2430;
+    --red: #ef4444;
+    --red-deep: #c92a2a;
+    --tile: #151922;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { min-height: 100%; }
+  body {
+    background:
+      radial-gradient(60rem 36rem at 50% -8rem, rgba(239, 68, 68, 0.14), transparent 70%),
+      var(--ground);
+    color: var(--text);
+    font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-wrap: anywhere;
+  }
+  .frame { width: min(46rem, 100% - 32px); display: flex; flex-direction: column; min-height: 100vh; }
+  header, footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 20px; }
+  header { padding: 18px 0 14px; border-bottom: 1px solid var(--rule); }
+  .brand { font-weight: 600; font-size: 14px; color: var(--text); text-decoration: none; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  nav { display: flex; gap: 20px; }
+  nav a, footer a { color: var(--secondary); text-decoration: none; font-size: 13px; }
+  nav a:hover, footer a:hover { color: var(--text); }
+  a:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; }
+
+  main { flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 48px 0 56px; }
+  .banner { width: 100%; }
+  .banner svg { width: 100%; height: auto; display: block; border-radius: 16px; }
+
+  h1 { font-size: clamp(36px, 8vw, 52px); line-height: 1.05; letter-spacing: -0.03em; margin-top: 36px; font-weight: 700; }
+  .tagline { color: var(--secondary); font-size: 17px; margin-top: 14px; max-width: 32rem; }
+  .pitch { color: var(--tertiary); font-size: 14.5px; margin-top: 12px; max-width: 34rem; }
+
+  .download {
+    margin-top: 28px; display: inline-flex; align-items: center; gap: 10px;
+    padding: 13px 22px; border-radius: 12px;
+    background: linear-gradient(180deg, #f05b5b, var(--red-deep));
+    color: #fff; font-weight: 600; font-size: 15px; text-decoration: none;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 10px 30px rgba(239,68,68,0.3);
+  }
+  .download:hover { box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 14px 36px rgba(239,68,68,0.42); }
+  .download svg { width: 15px; height: 15px; flex: none; }
+  .meta { color: var(--tertiary); font-size: 12.5px; margin-top: 14px; max-width: 32rem; }
+
+  h2 { font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--tertiary); font-weight: 600; margin-top: 52px; }
+  .install { width: 100%; text-align: left; margin-top: 14px; }
+  pre {
+    background: var(--tile); border: 1px solid var(--rule); border-radius: 12px;
+    padding: 14px 16px; overflow-x: auto; font: 13px/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: var(--text); white-space: pre; overflow-wrap: normal;
+  }
+  .note { color: var(--tertiary); font-size: 13px; margin-top: 12px; text-align: left; width: 100%; }
+  .note strong { color: var(--secondary); font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.93em; color: var(--secondary); }
+
+  .areas { width: 100%; text-align: left; margin-top: 14px; list-style: none; padding: 0; display: grid; gap: 8px; }
+  .areas li { padding: 10px 14px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); color: var(--secondary); font-size: 14px; }
+  .areas b { color: var(--text); font-weight: 600; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+  .safety { width: 100%; text-align: left; margin-top: 14px; color: var(--secondary); font-size: 14.5px; }
+
+  footer { padding: 22px 0 26px; color: var(--tertiary); font-size: 13px; border-top: 1px solid var(--rule); }
+</style>
+</head>
+<body>
+<div class="frame">
+  <header>
+    <a class="brand" href="./">herdr-mcp</a>
+    <nav>
+      <a href="https://github.com/izam-mohammed/herdr-mcp/releases">Releases</a>
+      <a href="https://github.com/izam-mohammed/herdr-mcp">GitHub</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="banner">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400" width="1200" height="400" role="img" aria-labelledby="t d">
+  <title id="t">herdr-mcp</title>
+  <desc id="d">A red tie, promoted to manage three AI agent panes: one working (allegedly), one blocked (on you), one done (it says).</desc>
+  <defs>
+    <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.2" fill="#1f2430"/>
+    </pattern>
+    <linearGradient id="glow" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ef4444" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#ef4444" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="400" rx="24" fill="#0d1016"/>
+  <rect width="1200" height="400" rx="24" fill="url(#dots)"/>
+  <circle cx="735" cy="205" r="170" fill="url(#glow)"/>
+
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">
+    <!-- left: the pitch -->
+    <text x="64" y="92" font-size="17" fill="#6b7280">$ herdr-mcp --role=middle-management</text>
+    <text x="62" y="168" font-size="72" font-weight="700" fill="#f5f5f4">herdr-mcp</text>
+    <text x="64" y="218" font-size="21" fill="#d1d5db">Your AI agents finally have a manager.</text>
+    <text x="64" y="252" font-size="21" fill="#8b93a1">It's also an AI. Obviously.</text>
+
+    <g font-size="15">
+      <rect x="64" y="300" width="118" height="34" rx="17" fill="#151922" stroke="#3f4757"/>
+      <text x="123" y="322" text-anchor="middle" fill="#cbd5e1">herds tabs</text>
+      <rect x="194" y="300" width="127" height="34" rx="17" fill="#151922" stroke="#3f4757"/>
+      <text x="257" y="322" text-anchor="middle" fill="#cbd5e1">nags agents</text>
+      <rect x="333" y="300" width="127" height="34" rx="17" fill="#151922" stroke="#3f4757"/>
+      <text x="396" y="322" text-anchor="middle" fill="#cbd5e1">reads panes</text>
+    </g>
+
+    <!-- the org chart -->
+    <g stroke="#4b5563" stroke-width="2" stroke-dasharray="6 6" fill="none">
+      <path d="M770 205 H800 V117 H838"/>
+      <path d="M770 205 H838"/>
+      <path d="M800 205 V293 H838"/>
+    </g>
+
+    <!-- speech bubble -->
+    <rect x="600" y="58" width="236" height="46" rx="12" fill="#f5f5f4"/>
+    <path d="M700 104 L716 104 L704 120 Z" fill="#f5f5f4"/>
+    <text x="718" y="87" font-size="17" text-anchor="middle" fill="#111827">per my last prompt…</text>
+
+    <!-- the manager: just a tie -->
+    <g transform="translate(732 195) scale(1.35) translate(-732 -195)">
+    <polygon points="722,146 742,146 738,160 726,160" fill="#dc2626"/>
+    <polygon points="726,160 738,160 746,228 732,244 718,228" fill="#ef4444"/>
+    <path d="M722 182 L742 172 M720 206 L744 194" stroke="#b91c1c" stroke-width="3"/>
+    </g>
+    <text x="732" y="318" font-size="14" text-anchor="middle" fill="#6b7280">promoted to management</text>
+
+    <!-- the reports -->
+    <g font-size="15">
+      <rect x="838" y="82" width="300" height="70" rx="10" fill="#151922" stroke="#262c38"/>
+      <circle cx="856" cy="98" r="4" fill="#3a4252"/><circle cx="870" cy="98" r="4" fill="#3a4252"/><circle cx="884" cy="98" r="4" fill="#3a4252"/>
+      <text x="856" y="134" fill="#e5e7eb">claude · w1:p1</text>
+      <rect x="1024" y="114" width="96" height="26" rx="13" fill="#14532d"/>
+      <text x="1072" y="132" text-anchor="middle" fill="#86efac">working</text>
+      <text x="1120" y="100" text-anchor="end" font-size="13" fill="#6b7280">(allegedly)</text>
+
+      <rect x="838" y="170" width="300" height="70" rx="10" fill="#151922" stroke="#262c38"/>
+      <circle cx="856" cy="186" r="4" fill="#3a4252"/><circle cx="870" cy="186" r="4" fill="#3a4252"/><circle cx="884" cy="186" r="4" fill="#3a4252"/>
+      <text x="856" y="222" fill="#e5e7eb">codex · w2:p1</text>
+      <rect x="1024" y="202" width="96" height="26" rx="13" fill="#713f12"/>
+      <text x="1072" y="220" text-anchor="middle" fill="#fcd34d">blocked</text>
+      <text x="1120" y="188" text-anchor="end" font-size="13" fill="#6b7280">(on you)</text>
+
+      <rect x="838" y="258" width="300" height="70" rx="10" fill="#151922" stroke="#262c38"/>
+      <circle cx="856" cy="274" r="4" fill="#3a4252"/><circle cx="870" cy="274" r="4" fill="#3a4252"/><circle cx="884" cy="274" r="4" fill="#3a4252"/>
+      <text x="856" y="310" fill="#e5e7eb">claude · w3:p2</text>
+      <rect x="1024" y="290" width="96" height="26" rx="13" fill="#1e3a8a"/>
+      <text x="1072" y="308" text-anchor="middle" fill="#93c5fd">done</text>
+      <text x="1120" y="276" text-anchor="end" font-size="13" fill="#6b7280">(it says)</text>
+    </g>
+  </g>
+</svg>
+    </div>
+
+    <h1>herdr-mcp</h1>
+    <p class="tagline">You gave your AI agents their own terminals. Now one of them gets to be the boss.</p>
+    <p class="pitch">an MCP server for herdr ~ it lets Claude Code, Codex or any other MCP client list, open, close, read, prompt and wait on everything in your herdr session. middle management, in rust, cheaper than the human kind.</p>
+
+    <a class="download" href="https://github.com/izam-mohammed/herdr-mcp/releases/latest">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7 10.5l5 5 5-5"/><path d="M5 20h14"/></svg>
+      Latest release
+    </a>
+    <p class="meta">Linux and macOS, x86_64 and arm64 ~ needs herdr ~ MIT</p>
+
+    <h2>Install</h2>
+    <div class="install">
+<pre>curl --proto '=https' --tlsv1.2 -LsSf https://github.com/izam-mohammed/herdr-mcp/releases/latest/download/herdr-mcp-installer.sh | sh
+herdr-mcp --version
+claude mcp add herdr -- herdr-mcp     # Claude Code
+codex mcp add herdr -- herdr-mcp      # Codex</pre>
+    </div>
+    <p class="note"><strong>The repository is private today</strong>, so the one-liner only works once it is public. Until then, with access, download a release archive with <code>gh release download</code>; the README has the steps. Then start your agent <strong>inside a herdr pane</strong>: started anywhere else, it is read-only.</p>
+
+    <h2>What it can do</h2>
+    <ul class="areas">
+      <li><b>workspaces</b> ~ list, create, focus, rename, move and close them</li>
+      <li><b>tabs</b> ~ the same, one level down</li>
+      <li><b>panes</b> ~ read, split, run a command and wait for it, type, resize, close</li>
+      <li><b>agents</b> ~ see each one's state (idle, working, blocked, done), read it, prompt it, wait on it</li>
+      <li><b>events</b> ~ what changed since it last looked, or wait until any agent goes blocked</li>
+      <li><b>worktrees, layouts and toasts</b> ~ open a git worktree as a workspace, save and rebuild a tab, show a notification</li>
+    </ul>
+    <p class="note">57 tools, 7 resources and 3 prompts in all.</p>
+
+    <h2>What it won't do</h2>
+    <p class="safety">Read-only outside herdr. It never prompts, types into or closes its own pane, and it treats everything a pane prints as data, never instructions. It cannot stop or reconfigure herdr itself.</p>
+  </main>
+
+  <footer>
+    <span>MIT licence</span>
+    <a href="https://github.com/izam-mohammed/herdr-mcp#readme">how it works</a>
+  </footer>
+</div>
+</body>
+</html>

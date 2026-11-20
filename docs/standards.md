@@ -79,6 +79,12 @@ reusable workflow (`workflow_call`), which the release calls.
 commit SHA, `ecosystem: rust`) on every PR and weekly: gitleaks blocks;
 osv-scanner, semgrep and zizmor report to the PR.
 
+`.github/workflows/pages.yml` publishes `site/` to GitHub Pages on a push to `main`
+and by hand (`plans/10-site.md`): `permissions: {}` at the top, `contents: read`
+on the build job, `pages: write` and `id-token: write` on the deploy job only,
+every action pinned by SHA, no pull request trigger. Pages is switched on by a
+person (Settings, Pages, source GitHub Actions) once the repository is public.
+
 `.github/workflows/release.yml` (made by `dist`, config in
 `dist-workspace.toml`, see `docs/releases.md`) starts on a pushed version tag.
 Its `check` job runs the same `scripts/check.sh` first; nothing builds if it
