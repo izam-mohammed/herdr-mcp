@@ -4,8 +4,13 @@ use serde_json::{Value, json};
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::Duration;
-use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
+use tokio::io::{AsyncBufReadExt, AsyncReadExt, AsyncWriteExt, BufReader};
 use tokio::net::UnixStream;
+
+/// Past a wait's own bound before the local timeout gives up on herdr.
+const WAIT_GUARD: Duration = Duration::from_secs(2);
+/// The longest reply line read; herdr states no limit of its own.
+const MAX_REPLY: u64 = 16 * 1024 * 1024;
 
 pub struct HerdrClient {
     socket: PathBuf,
@@ -32,6 +37,27 @@ impl HerdrClient {
 
     /// Send `method` and return herdr's `result`, or the contract's failure.
     pub async fn call(&self, method: &str, params: Value) -> Result<Value, Failure> {
+        self.call_within(method, params, self.timeout).await
+    }
+
+    /// A call herdr may hold open for `wait` (its own `timeout_ms`): the local guard is
+    /// `GUARD` longer, so herdr's clean timeout wins and a hung herdr is still bounded.
+    /// Dropping the future (the MCP client cancelled) drops the connection.
+    pub async fn call_wait(
+        &self,
+        method: &str,
+        params: Value,
+        wait: Duration,
+    ) -> Result<Value, Failure> {
+        self.call_within(method, params, wait + WAIT_GUARD).await
+    }
+
+    async fn call_within(
+        &self,
+        method: &str,
+        params: Value,
+        timeout: Duration,
+    ) -> Result<Value, Failure> {
         let id = format!("m{}", self.next.fetch_add(1, Ordering::Relaxed));
         // Method and id only; payloads are pane text and cwds, kept out of logs.
         eprintln!("herdr-mcp: call {id} {method}");
@@ -39,14 +65,14 @@ impl HerdrClient {
         if self.debug {
             eprintln!("herdr-mcp: request {request}");
         }
-        let reply = tokio::time::timeout(self.timeout, self.exchange(&request))
+        let reply = tokio::time::timeout(timeout, self.exchange(&request))
             .await
             .map_err(|_| {
                 Failure::new(
                     error::TIMEOUT,
                     format!(
                         "herdr did not answer {method} within {} ms",
-                        self.timeout.as_millis()
+                        timeout.as_millis()
                     ),
                 )
             })??;
@@ -80,10 +106,16 @@ impl HerdrClient {
             .await
             .map_err(unreachable)?;
         let mut reply = String::new();
-        let n = BufReader::new(stream)
+        let n = BufReader::new(stream.take(MAX_REPLY))
             .read_line(&mut reply)
             .await
             .map_err(unreachable)?;
+        if n as u64 >= MAX_REPLY && !reply.ends_with('\n') {
+            return Err(Failure::new(
+                "reply_too_large",
+                format!("herdr reply is over {MAX_REPLY} bytes; ask for fewer lines"),
+            ));
+        }
         if n == 0 {
             return Err(Failure::new(
                 error::HERDR_UNREACHABLE,

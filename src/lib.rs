@@ -2,6 +2,7 @@
 pub mod config;
 pub mod error;
 pub mod herdr;
+pub mod limits;
 pub mod safety;
 pub mod server;
 pub mod snapshot;

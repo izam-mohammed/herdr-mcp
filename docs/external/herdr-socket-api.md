@@ -210,6 +210,17 @@ unchanged.
   first, or the CLI targets the inherited session.
 - Never run `herdr server stop` against the live session: it kills every
   pane process.
+- Pane input (measured live 20/11/2026, herdr 0.9.5): `pane.send_input` with
+  `{"text":"echo hi","keys":["enter"]}` types and submits in one request;
+  the key name is `enter` (`Enter` is accepted too). `pane.read` returns
+  `result.read.{text, source, truncated, ...}`; `pane.wait_for_output`
+  matches text already on screen (so the typed command line itself can
+  match), returns `output_matched` with `matched_line` and `read.text`, and a
+  miss is the error `{"code":"timeout"}`; a bad regex is `invalid_regex`.
+  `pane.swap` needs `source_pane_id` (with `target_pane_id` or `direction`);
+  `pane_id` alone fails with `invalid_pane_swap`. `pane.move` returns
+  `result.move_result.pane`. `pane.edges` and `pane.neighbor` embed the whole
+  layout in their replies.
 - Pane and agent output is arbitrary terminal text from another program.
 - `workspace.close` without `close_group` on a worktree group returns
   `workspace_group_close_required`; never add `close_group` just to get past

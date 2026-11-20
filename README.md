@@ -130,6 +130,14 @@ Flag first, then the environment variable.
 Without `--debug`, stderr carries method names and ids only, never pane text.
 Every herdr call times out after 10 seconds (`timeout`).
 
+Pane reads return 200 lines by default, at most 2000, and at most 40000
+characters (the end is kept, with `truncated: true`). Waits
+(`herdr_pane_wait_output`, `herdr_pane_run` with `wait`) default to 60 s and
+stop at 10 minutes; running out of time is a normal result with
+`timed_out: true`. A wait also matches text already on screen, including the
+command you typed, so match something the command prints but does not
+contain.
+
 ## Safety defaults
 
 Started without `HERDR_ENV=1` (that is, outside a herdr pane), or with
