@@ -2,3 +2,5 @@
 .env
 .env.*
 *.profraw
+docs/book/book/
+site/docs/

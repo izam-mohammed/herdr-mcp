@@ -22,6 +22,7 @@ locally and in CI. Chosen in `plans/01-first-version.md` (decision 6);
 | Unit and fake-socket tests, with coverage | `cargo test` under cargo-llvm-cov 0.9.1 | `llvm-tools-preview` in `rust-toolchain.toml` | `cargo llvm-cov --locked --fail-under-lines 90` | all pass, 90 % of lines or more (target 95 %); the per-file table is printed |
 | Live tests | `cargo test` | | `HERDR_MCP_LIVE=1 cargo test --locked --test <file> -- --test-threads=1`, for `live`, `lane02_live`, `lane03_live`, `lane04_live`, `lane05_live`, `lane06_live`, `lane07_live` | all pass, each file against its own isolated session (`herdr-mcp-test`, `-02` to `-07`; the bench has `-bench`) |
 | Performance budget | `scripts/bench.sh` | the budget in the script | `sh scripts/bench.sh` | inside the budget (from plan 01 Phase 3) |
+| Docs | mdBook 0.5.2 and lychee 0.24.2 (`cargo install --locked`, pinned) | `docs/book/book.toml` | `sh scripts/docs.sh` | the book builds with no warning and every local link and anchor resolves; the reference pages match the server (`cargo test --locked --test docs`, part of the test step) |
 | Dependency audit | cargo-deny | `deny.toml` | `cargo deny check advisories bans sources licenses` | no advisory, no banned or unknown source |
 | Secret scan | gitleaks | `.gitleaks.toml` (defaults) | `gitleaks git --no-banner` | no findings |
 | Shell scripts | ShellCheck | | `shellcheck scripts/*.sh scripts/prove/*.sh` | no findings |
@@ -79,7 +80,7 @@ reusable workflow (`workflow_call`), which the release calls.
 commit SHA, `ecosystem: rust`) on every PR and weekly: gitleaks blocks;
 osv-scanner, semgrep and zizmor report to the PR.
 
-`.github/workflows/pages.yml` publishes `site/` to GitHub Pages on a push to `main`
+`.github/workflows/pages.yml` builds the book (`docs/book/`) into `site/docs/` and publishes `site/` to GitHub Pages on a push to `main`
 and by hand (`plans/10-site.md`): `permissions: {}` at the top, `contents: read`
 on the build job, `pages: write` and `id-token: write` on the deploy job only,
 every action pinned by SHA, no pull request trigger. Pages is switched on by a
@@ -106,5 +107,8 @@ blindly: read `docs/releases.md` before running `dist generate`.
   ratchet, and the shared gate with `ecosystem: rust` over CodeQL: plan 09.
   The test harness forwards `LLVM_PROFILE_FILE` to the spawned binary and
   lets it exit on drop, so its lines count.
+- mdBook over MkDocs Material, Starlight, Sphinx and others, GitHub Pages over Read the Docs,
+  reference pages written by a cargo test over hand-written ones, and lychee `--offline` over
+  `mdbook-linkcheck`: plan 11.
 - gitleaks over TruffleHog, and `scripts/check.sh` over a Makefile or
   justfile: plan 01, decision 6.

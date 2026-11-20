@@ -6,7 +6,7 @@
   </picture>
 </p>
 
-<p align="center"><a href="https://izam-mohammed.github.io/herdr-mcp/">the one-page site</a> (live once the repository is public)</p>
+<p align="center"><a href="https://izam-mohammed.github.io/herdr-mcp/">the one-page site</a> and <a href="https://izam-mohammed.github.io/herdr-mcp/docs/">the docs</a> (live once the repository is public)</p>
 
 <p align="center"><em>You gave your AI agents their own terminals. Now one of them gets to be the boss.</em></p>
 
@@ -153,6 +153,9 @@ read-only: no promotion without the paperwork.
 | `herdr_layout_apply` | Rebuilds a tab from a saved layout |
 | `herdr_layout_set_split_ratio` | Adjusts a split |
 | `herdr_notify` | Shows a toast in herdr. Management loves an announcement |
+
+The reference for every tool, resource and prompt is in the docs (`docs/book/`,
+generated from the server; build it with `sh scripts/docs.sh`).
 
 ## Build it yourself
 

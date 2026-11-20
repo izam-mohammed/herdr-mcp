@@ -1,0 +1,15 @@
+[book]
+title = "herdr-mcp"
+description = "An MCP server that lets Claude Code and other MCP clients see and control a herdr session."
+language = "en"
+src = "src"
+
+[build]
+build-dir = "book"
+create-missing = false
+
+[output.html]
+git-repository-url = "https://github.com/izam-mohammed/herdr-mcp"
+site-url = "/herdr-mcp/docs/"
+default-theme = "navy"
+preferred-dark-theme = "navy"

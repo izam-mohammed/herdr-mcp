@@ -12,3 +12,7 @@ Standards: docs/standards.md
   Gotchas). Never run `herdr server stop` on the default session.
 
 Releases: docs/releases.md
+- A tool, resource or prompt added, renamed or changed also means
+  `HERDR_MCP_UPDATE_DOCS=1 cargo test --locked --test docs` (it rewrites
+  `docs/book/src/reference/`; the plain test fails when they are stale).
+  `sh scripts/docs.sh` builds the book (`docs/book/`) and checks its links.

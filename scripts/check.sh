@@ -32,6 +32,7 @@ fi
 step audit;   cargo deny check advisories bans sources licenses
 step secrets; gitleaks git --no-banner
 step shell;   shellcheck scripts/*.sh scripts/prove/*.sh
+step docs;    sh scripts/docs.sh   # book + offline links (plan 11)
 step build;   cargo build --release --locked
 if [ "${HERDR_MCP_LIVE:-}" = 1 ] && [ -f scripts/bench.sh ]; then
   step bench; sh scripts/bench.sh
