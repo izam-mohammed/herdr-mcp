@@ -157,8 +157,8 @@ listing (Phase 2). `docs/research/08-release-v0.1.0.md` holds the review so far.
 
 ### Phase 3: open the PR
 
-- [ ] The branch pushed and its PR opened against the branch it was cut
+- [x] The branch pushed and its PR opened against the branch it was cut
   from (or, if one is already open for this branch, its body brought up to
   date) with a Conventional Commit title for the whole change, a body
   naming this plan, what changed and why, and the checks run with their
-  result. The PR's URL printed as the evidence. Opened, never merged.
+  result. The PR's URL printed as the evidence. Opened, never merged. PR: https://github.com/izam-mohammed/herdr-mcp/pull/15
