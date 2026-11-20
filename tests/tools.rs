@@ -1,0 +1,332 @@
+//! Tool behaviour against a fake herdr: methods and params sent, results
+//! passed through, the contract's errors, and every `## Security` row.
+mod support;
+use serde_json::{Value, json};
+use support::{FakeHerdr, Mcp, Opts};
+
+const INSIDE: &[(&str, &str)] = &[("HERDR_ENV", "1"), ("HERDR_PANE_ID", "wA:p1")];
+
+fn fixture(method: &str) -> Value {
+    include_str!("fixtures/herdr.jsonl")
+        .lines()
+        .map(|l| serde_json::from_str::<Value>(l).expect("fixture"))
+        .find(|f| f["method"] == method && f.get("params").is_none())
+        .expect("fixture for method")["result"]
+        .clone()
+}
+
+async fn inside(fake: &FakeHerdr) -> Mcp {
+    Mcp::start(
+        &fake.socket,
+        &Opts {
+            args: &[],
+            env: INSIDE,
+        },
+    )
+    .await
+}
+
+const ALL: &[&str] = &[
+    "herdr_agent_list",
+    "herdr_snapshot",
+    "herdr_status",
+    "herdr_tab_create",
+    "herdr_tab_focus",
+    "herdr_tab_get",
+    "herdr_tab_list",
+    "herdr_tab_rename",
+    "herdr_whoami",
+    "herdr_workspace_list",
+];
+const READS: &[&str] = &[
+    "herdr_agent_list",
+    "herdr_snapshot",
+    "herdr_status",
+    "herdr_tab_get",
+    "herdr_tab_list",
+    "herdr_whoami",
+    "herdr_workspace_list",
+];
+
+#[tokio::test]
+async fn inside_herdr_lists_every_tool_with_annotations() {
+    let fake = FakeHerdr::start("list", false);
+    let mut mcp = inside(&fake).await;
+    assert_eq!(mcp.tool_names().await, ALL);
+    let r = mcp.request("tools/list", json!({})).await;
+    for t in r["result"]["tools"].as_array().unwrap() {
+        let a = &t["annotations"];
+        for hint in [
+            "readOnlyHint",
+            "destructiveHint",
+            "idempotentHint",
+            "openWorldHint",
+        ] {
+            assert!(a[hint].is_boolean(), "{} lacks {hint}", t["name"]);
+        }
+        assert_eq!(a["openWorldHint"], false);
+    }
+}
+
+#[tokio::test]
+async fn instructions_say_output_is_untrusted() {
+    let fake = FakeHerdr::start("instr", false);
+    let mut mcp = inside(&fake).await;
+    let init = mcp
+        .request(
+            "initialize",
+            json!({"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"t","version":"0"}}),
+        )
+        .await;
+    let text = init["result"]["instructions"].as_str().unwrap();
+    assert!(text.contains("untrusted"), "{text}");
+}
+
+#[tokio::test]
+async fn outside_herdr_registers_no_write_tool() {
+    let fake = FakeHerdr::start("outside", false);
+    let mut mcp = Mcp::start(
+        &fake.socket,
+        &Opts {
+            args: &[],
+            env: &[],
+        },
+    )
+    .await;
+    assert_eq!(mcp.tool_names().await, READS);
+}
+
+#[tokio::test]
+async fn allow_outside_herdr_registers_writes() {
+    let fake = FakeHerdr::start("allow", false);
+    let mut mcp = Mcp::start(
+        &fake.socket,
+        &Opts {
+            args: &["--allow-outside-herdr"],
+            env: &[],
+        },
+    )
+    .await;
+    assert_eq!(mcp.tool_names().await, ALL);
+}
+
+#[tokio::test]
+async fn read_only_flag_lists_reads_only() {
+    let fake = FakeHerdr::start("ro", false);
+    let mut mcp = Mcp::start(
+        &fake.socket,
+        &Opts {
+            args: &["--read-only"],
+            env: INSIDE,
+        },
+    )
+    .await;
+    assert_eq!(mcp.tool_names().await, READS);
+    let r = mcp.call("herdr_tab_create", json!({})).await;
+    assert!(
+        r["error"].is_object(),
+        "an unregistered tool is refused: {r}"
+    );
+    assert!(fake.requests().is_empty());
+}
+
+#[tokio::test]
+async fn tools_flag_registers_only_the_groups_named() {
+    let fake = FakeHerdr::start("groups", false);
+    let mut mcp = Mcp::start(
+        &fake.socket,
+        &Opts {
+            args: &["--tools", "agents,session"],
+            env: INSIDE,
+        },
+    )
+    .await;
+    assert_eq!(
+        mcp.tool_names().await,
+        [
+            "herdr_agent_list",
+            "herdr_snapshot",
+            "herdr_status",
+            "herdr_whoami"
+        ]
+    );
+}
+
+#[tokio::test]
+async fn each_tool_sends_its_method_and_returns_the_result_unchanged() {
+    let cases: &[(&str, Value, &str, Value)] = &[
+        ("herdr_status", json!({}), "ping", json!({})),
+        ("herdr_snapshot", json!({}), "session.snapshot", json!({})),
+        (
+            "herdr_workspace_list",
+            json!({}),
+            "workspace.list",
+            json!({}),
+        ),
+        ("herdr_tab_list", json!({}), "tab.list", json!({})),
+        (
+            "herdr_tab_list",
+            json!({"workspace_id":"wA"}),
+            "tab.list",
+            json!({"workspace_id":"wA"}),
+        ),
+        (
+            "herdr_tab_get",
+            json!({"tab_id":"wA:t1"}),
+            "tab.get",
+            json!({"tab_id":"wA:t1"}),
+        ),
+        (
+            "herdr_tab_focus",
+            json!({"tab_id":"wA:t1"}),
+            "tab.focus",
+            json!({"tab_id":"wA:t1"}),
+        ),
+        (
+            "herdr_tab_create",
+            json!({"workspace_id":"wA","label":"scratch","focus":true}),
+            "tab.create",
+            json!({"workspace_id":"wA","label":"scratch","focus":true}),
+        ),
+        ("herdr_tab_create", json!({}), "tab.create", json!({})),
+        (
+            "herdr_tab_rename",
+            json!({"tab_id":"wA:t1","label":"renamed"}),
+            "tab.rename",
+            json!({"tab_id":"wA:t1","label":"renamed"}),
+        ),
+        ("herdr_agent_list", json!({}), "agent.list", json!({})),
+    ];
+    for (i, (tool, args, method, params)) in cases.iter().enumerate() {
+        let fake = FakeHerdr::start(&format!("each{i}"), false);
+        let mut mcp = inside(&fake).await;
+        let r = mcp.call(tool, args.clone()).await;
+        assert_eq!(r["result"]["isError"], false, "{tool}: {r}");
+        assert_eq!(r["result"]["structuredContent"], fixture(method), "{tool}");
+        assert!(r["result"]["content"][0]["text"].as_str().unwrap().len() < 80);
+        let seen = fake.requests();
+        assert_eq!(seen.len(), 1, "{tool}");
+        assert_eq!(seen[0]["method"], *method, "{tool}");
+        assert_eq!(seen[0]["params"], *params, "{tool}");
+    }
+}
+
+#[tokio::test]
+async fn whoami_reports_env_and_the_current_pane() {
+    let fake = FakeHerdr::start("who", false);
+    let mut mcp = inside(&fake).await;
+    let r = mcp.call("herdr_whoami", json!({})).await;
+    let s = &r["result"]["structuredContent"];
+    assert_eq!(s["pane_id"], "wA:p1");
+    assert_eq!(s["read_only"], false);
+    assert_eq!(s["pane"], fixture("pane.current"));
+    assert_eq!(
+        fake.requests()[0]["params"],
+        json!({"caller_pane_id":"wA:p1"})
+    );
+}
+
+#[tokio::test]
+async fn a_herdr_error_becomes_the_contract_shape() {
+    let fake = FakeHerdr::start("err", false);
+    let mut mcp = inside(&fake).await;
+    let r = mcp.call("herdr_tab_get", json!({"tab_id":"wZ:t9"})).await;
+    assert_eq!(r["result"]["isError"], true, "{r}");
+    assert_eq!(
+        r["result"]["structuredContent"],
+        json!({"code":"not_found","message":"tab wZ:t9 not found"})
+    );
+    assert_eq!(
+        r["result"]["content"][0]["text"],
+        "herdr not_found: tab wZ:t9 not found"
+    );
+}
+
+#[tokio::test]
+async fn a_wrong_typed_argument_is_refused_before_herdr_sees_it() {
+    let fake = FakeHerdr::start("typed", false);
+    let mut mcp = inside(&fake).await;
+    let r = mcp.call("herdr_tab_get", json!({"tab_id": 5})).await;
+    assert!(
+        r["error"].is_object() || r["result"]["isError"] == true,
+        "{r}"
+    );
+    let r = mcp
+        .call("herdr_tab_rename", json!({"tab_id":"wA:t1"}))
+        .await;
+    assert!(
+        r["error"].is_object() || r["result"]["isError"] == true,
+        "{r}"
+    );
+    assert!(
+        fake.requests().is_empty(),
+        "herdr saw {:?}",
+        fake.requests()
+    );
+}
+
+#[tokio::test]
+async fn stderr_has_no_reply_body_without_debug() {
+    let fake = FakeHerdr::start("quiet", false);
+    let mut mcp = inside(&fake).await;
+    mcp.call("herdr_tab_list", json!({})).await;
+    let err = mcp.finish().await;
+    assert!(err.contains("tab.list"), "method is logged: {err}");
+    assert!(!err.contains("pane_count"), "reply body leaked: {err}");
+    assert!(!err.contains("agent_status"), "reply body leaked: {err}");
+
+    let fake = FakeHerdr::start("loud", false);
+    let mut mcp = Mcp::start(
+        &fake.socket,
+        &Opts {
+            args: &["--debug"],
+            env: INSIDE,
+        },
+    )
+    .await;
+    mcp.call("herdr_tab_list", json!({})).await;
+    let err = mcp.finish().await;
+    assert!(err.contains("pane_count"), "--debug logs payloads: {err}");
+}
+
+#[tokio::test]
+async fn a_hung_socket_gives_timeout() {
+    let fake = FakeHerdr::start("hang", true);
+    let mut mcp = Mcp::start(
+        &fake.socket,
+        &Opts {
+            args: &[],
+            env: &[("HERDR_ENV", "1"), ("HERDR_MCP_TIMEOUT_MS", "300")],
+        },
+    )
+    .await;
+    let r = mcp.call("herdr_tab_list", json!({})).await;
+    assert_eq!(r["result"]["isError"], true, "{r}");
+    assert_eq!(r["result"]["structuredContent"]["code"], "timeout");
+    assert!(
+        r["result"]["content"][0]["text"]
+            .as_str()
+            .unwrap()
+            .starts_with("herdr timeout: ")
+    );
+}
+
+#[tokio::test]
+async fn an_absent_socket_gives_herdr_unreachable() {
+    let socket = support::socket_path("absent");
+    let _ = std::fs::remove_file(&socket);
+    let mut mcp = Mcp::start(
+        &socket,
+        &Opts {
+            args: &[],
+            env: INSIDE,
+        },
+    )
+    .await;
+    let r = mcp.call("herdr_status", json!({})).await;
+    assert_eq!(r["result"]["isError"], true);
+    assert_eq!(
+        r["result"]["structuredContent"]["code"],
+        "herdr_unreachable"
+    );
+}
