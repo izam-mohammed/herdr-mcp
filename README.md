@@ -107,11 +107,7 @@ cargo build --release
 claude mcp add herdr -- $PWD/target/release/herdr-mcp
 ```
 
-Start Claude Code in a herdr pane and ask it to list your tabs. The first
-version ships `herdr_whoami`, `herdr_status`, `herdr_snapshot`,
-`herdr_workspace_list`, `herdr_tab_list`, `herdr_tab_get`, `herdr_tab_focus`,
-`herdr_tab_create`, `herdr_tab_rename` and `herdr_agent_list`; the rest of
-the table below arrives plan by plan.
+Start Claude Code in a herdr pane and ask it to list your tabs.
 
 ## Events
 
@@ -144,9 +140,9 @@ Without `--debug`, stderr carries method names and ids only, never pane text.
 Every herdr call times out after 10 seconds (`timeout`).
 
 Pane reads return 200 lines by default, at most 2000, and at most 40000
-characters (the end is kept, with `truncated: true`). Waits
-(`herdr_pane_wait_output`, `herdr_pane_run` with `wait`) default to 60 s and
-stop at 10 minutes; running out of time is a normal result with
+characters (the end is kept, with `truncated: true`). Agent reads default to 100 lines, at most 1000. Waits
+(`herdr_pane_wait_output`, `herdr_pane_run` with `wait`, `herdr_agent_wait`,
+`herdr_agent_prompt` with `wait`) default to 60 s and stop at 10 minutes; running out of time is a normal result with
 `timed_out: true`. A wait also matches text already on screen, including the
 command you typed, so match something the command prints but does not
 contain.
@@ -159,27 +155,27 @@ sees them, so there is nothing to ask about. Failures come back as
 `isError` with the text `herdr <code>: <message>`; the server's own codes
 are `read_only`, `self_target`, `own_agent`, `herdr_unreachable` and `timeout`.
 
-Agent waits (`herdr_agent_wait`, and `herdr_agent_prompt` with `wait`) end at
-`timeout_ms` (default 60 s, at most 10 min) with `timed_out: true`. herdr's
-`agent_blocked` and `agent_prompt_stalled` come back as they are.
+herdr's `agent_blocked` and `agent_prompt_stalled` come back as they are.
 
 ## Things it refuses to do
 
 - **Prompt or send keys to its own agent**, by pane id or by name (code
   `own_agent`).
-- **Prompt, type into or close its own pane**, or close the tab or workspace
-  it lives in. Self-awareness, at last.
+- **Prompt, type into, clear or close its own pane**, or close the tab or
+  workspace it lives in (code `self_target`). Self-awareness, at last.
 - **Steer your session from outside herdr.** There it's read-only.
 - **Stop, restart or reconfigure herdr itself.** Those methods aren't
   exposed at all.
 - **Trust pane output.** Whatever another program prints is treated as
   data, never as instructions.
 
-A close checks first: it finds the server's own pane by `terminal_id` (which
-follows the pane if it moves to another workspace) and refuses with
-`self_target` when the tab or workspace holds it, unless the call sets
-`allow_self: true`. If herdr cannot say where the pane is, the close is
-refused. `herdr_workspace_close` passes `close_group` only when asked; never
+One check backs all of these. A call aimed at the own pane id is refused
+without asking herdr; any other pane, agent (resolved by name or pane id),
+tab or workspace is checked against the server's own pane, found by
+`terminal_id` (which follows the pane if it moves), and refused when it is
+that pane or holds it. A close of a tab or workspace can pass
+`allow_self: true`; input to a pane or agent cannot. If herdr cannot say
+where the own pane is, the call is refused. `herdr_workspace_close` passes `close_group` only when asked; never
 set it just to get past `workspace_group_close_required`.
 
 Writing and closing tools are marked as such, so your client asks before

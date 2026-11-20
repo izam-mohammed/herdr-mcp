@@ -157,3 +157,12 @@ repository instructions for recording useful development findings.
   naming this plan, what changed and why, and the checks run with their
   result. The PR's URL printed as the evidence. Opened, never merged.
   PR: https://github.com/izam-mohammed/herdr-mcp/pull/7
+
+Landed 2026-11-20 (join): `refuse_self_agent` stays (it returns the resolved pane
+id) but its comparison is `safety::Target::Agent`, the shared own-pane check
+(own terminal from `pane.current` and `pane.list`, no longer `pane.get`); the
+code stays `own_agent`. The private wait client is replaced by
+`HerdrClient::call_wait` (local guard 2 s past the wait, was 5 s) and the wait
+constants by `limits::wait_ms` (60 s default, 10 min max, as before). Agent reads
+keep 100 default and 1000 max lines, through `limits::lines_within`.
+`scripts/check.sh` now runs `lane04_live`.

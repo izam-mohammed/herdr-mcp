@@ -206,3 +206,10 @@ repository instructions for recording useful development findings.
   date) with a Conventional Commit title for the whole change, a body
   naming this plan, what changed and why, and the checks run with their
   result. The PR's URL printed as the evidence. Opened, never merged.
+
+Landed 2026-11-20 (join): the private `refuse_own_pane` is gone. Input to a pane
+now goes through `safety::Target::Pane`: the own pane id is refused without a
+call, any other pane costs a `pane.list` (and one `pane.current`, cached) to catch
+the own pane after a move. `DEFAULT_WAIT_MS` and `MAX_WAIT_MS` moved to
+`src/limits.rs`. `tests/lane03_tools.rs` names its group (`panes`) and ignores
+the check's lookups.

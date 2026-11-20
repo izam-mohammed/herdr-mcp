@@ -178,3 +178,7 @@ repository instructions for recording useful development findings.
   naming this plan, what changed and why, and the checks run with their
   result. The PR's URL printed as the evidence. Opened, never merged.
   Landed 2026-11-20: https://github.com/izam-mohammed/herdr-mcp/pull/8
+
+Landed 2026-11-20 (join): `src/safety.rs` `refuse_self` and `OwnPane` are the one
+own-pane check for every lane; `Target` gained `Pane` and `Agent` variants for
+lanes 03 and 04. `tests/lane02_tools.rs` names its groups (`session,workspaces,tabs`).

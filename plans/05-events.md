@@ -219,3 +219,8 @@ repository instructions for recording useful development findings.
   date) with a Conventional Commit title for the whole change, a body
   naming this plan, what changed and why, and the checks run with their
   result. The PR's URL printed as the evidence. Opened, never merged. Landed 2026-11-20: https://github.com/izam-mohammed/herdr-mcp/pull/10
+
+Landed 2026-11-20 (join): `tests/support/mod.rs` no longer sets a default
+`HERDR_MCP_TOOLS`; with every group on, the hub sends its own requests, so each
+test file that counts requests names its groups. `scripts/check.sh` now runs
+`lane05_live`.
