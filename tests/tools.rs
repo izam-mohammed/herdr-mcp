@@ -30,13 +30,22 @@ const ALL: &[&str] = &[
     "herdr_agent_list",
     "herdr_snapshot",
     "herdr_status",
+    "herdr_tab_close",
     "herdr_tab_create",
     "herdr_tab_focus",
     "herdr_tab_get",
     "herdr_tab_list",
+    "herdr_tab_move",
     "herdr_tab_rename",
     "herdr_whoami",
+    "herdr_workspace_close",
+    "herdr_workspace_create",
+    "herdr_workspace_focus",
+    "herdr_workspace_get",
     "herdr_workspace_list",
+    "herdr_workspace_move",
+    "herdr_workspace_rename",
+    "herdr_workspace_report_metadata",
 ];
 const READS: &[&str] = &[
     "herdr_agent_list",
@@ -45,6 +54,7 @@ const READS: &[&str] = &[
     "herdr_tab_get",
     "herdr_tab_list",
     "herdr_whoami",
+    "herdr_workspace_get",
     "herdr_workspace_list",
 ];
 

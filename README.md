@@ -124,6 +124,7 @@ Flag first, then the environment variable.
 | `--read-only` | `HERDR_MCP_READ_ONLY=1` | Register read tools only |
 | `--allow-outside-herdr` | `HERDR_MCP_ALLOW_OUTSIDE=1` | Allow writes when not started inside herdr |
 | `--tools <a,b>` | `HERDR_MCP_TOOLS` | Register only these groups: `session`, `workspaces`, `tabs`, `panes`, `agents`, `events`, `worktrees`, `layout`, `notify` (default all) |
+| `--confirm-destructive` | `HERDR_MCP_CONFIRM_DESTRUCTIVE=1` | Closes also ask you every time, even in auto mode (`requiresUserInteraction`) |
 | `--debug` | | Log request and reply payloads to stderr |
 
 Without `--debug`, stderr carries method names and ids only, never pane text.
@@ -146,6 +147,13 @@ are `read_only`, `self_target`, `herdr_unreachable` and `timeout`.
   exposed at all.
 - **Trust pane output.** Whatever another program prints is treated as
   data, never as instructions.
+
+A close checks first: it finds the server's own pane by `terminal_id` (which
+follows the pane if it moves to another workspace) and refuses with
+`self_target` when the tab or workspace holds it, unless the call sets
+`allow_self: true`. If herdr cannot say where the pane is, the close is
+refused. `herdr_workspace_close` passes `close_group` only when asked; never
+set it just to get past `workspace_group_close_required`.
 
 Writing and closing tools are marked as such, so your client asks before
 running them. Keep `herdr_agent_prompt`, `herdr_agent_send_keys` and the

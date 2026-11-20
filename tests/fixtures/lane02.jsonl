@@ -1,0 +1,12 @@
+{"method":"pane.current","params":{"caller_pane_id":"wA:p1"},"result":{"type":"pane_current","pane":{"pane_id":"wA:p1","terminal_id":"term_me","workspace_id":"wA","tab_id":"wA:t1"}}}
+{"method":"pane.list","result":{"type":"pane_list","panes":[{"pane_id":"wA:p1","terminal_id":"term_me","workspace_id":"wA","tab_id":"wA:t1"},{"pane_id":"wA:p2","terminal_id":"term_2","workspace_id":"wA","tab_id":"wA:t2"},{"pane_id":"wB:p1","terminal_id":"term_3","workspace_id":"wB","tab_id":"wB:t1"}]}}
+{"method":"workspace.get","result":{"type":"workspace_info","workspace":{"workspace_id":"wA","label":"main"}}}
+{"method":"workspace.focus","result":{"type":"workspace_info","workspace":{"workspace_id":"wA","focused":true}}}
+{"method":"workspace.create","result":{"type":"workspace_created","workspace":{"workspace_id":"wC","label":"sandbox"},"future_field":1}}
+{"method":"workspace.rename","result":{"type":"workspace_info","workspace":{"workspace_id":"wA","label":"x"}}}
+{"method":"workspace.move","result":{"type":"workspace_list","workspaces":[{"workspace_id":"wB"},{"workspace_id":"wA"}]}}
+{"method":"workspace.report_metadata","result":{"type":"ok"}}
+{"method":"workspace.close","params":{"workspace_id":"wW"},"error":{"code":"workspace_group_close_required","message":"workspace wW is in a worktree group"}}
+{"method":"workspace.close","result":{"type":"ok"}}
+{"method":"tab.move","result":{"type":"tab_list","tabs":[{"tab_id":"wA:t2"},{"tab_id":"wA:t1"}]}}
+{"method":"tab.close","result":{"type":"ok"}}
