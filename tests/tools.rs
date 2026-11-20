@@ -48,6 +48,10 @@ const ALL: &[&str] = &[
     "herdr_events_recent",
     "herdr_events_status",
     "herdr_events_wait",
+    "herdr_layout_apply",
+    "herdr_layout_export",
+    "herdr_layout_set_split_ratio",
+    "herdr_notify",
     "herdr_pane_clear",
     "herdr_pane_close",
     "herdr_pane_focus",
@@ -84,6 +88,10 @@ const ALL: &[&str] = &[
     "herdr_workspace_move",
     "herdr_workspace_rename",
     "herdr_workspace_report_metadata",
+    "herdr_worktree_create",
+    "herdr_worktree_list",
+    "herdr_worktree_open",
+    "herdr_worktree_remove",
 ];
 const READS: &[&str] = &[
     "herdr_agent_explain",
@@ -94,6 +102,7 @@ const READS: &[&str] = &[
     "herdr_events_recent",
     "herdr_events_status",
     "herdr_events_wait",
+    "herdr_layout_export",
     "herdr_pane_get",
     "herdr_pane_layout",
     "herdr_pane_list",
@@ -107,6 +116,7 @@ const READS: &[&str] = &[
     "herdr_whoami",
     "herdr_workspace_get",
     "herdr_workspace_list",
+    "herdr_worktree_list",
 ];
 
 #[tokio::test]

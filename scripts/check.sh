@@ -23,6 +23,7 @@ if [ "${HERDR_MCP_LIVE:-}" = 1 ]; then
     lane03_live \
     lane04_live \
     lane05_live \
+    lane06_live \
   ; do
     step "live $f"; cargo test --locked --test "$f" -- --test-threads=1
   done

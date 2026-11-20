@@ -5,10 +5,13 @@ use rmcp::handler::server::router::tool::ToolRouter;
 
 mod agents;
 mod events;
+mod layout;
+mod notify;
 mod panes;
 mod session;
 mod tabs;
 mod workspaces;
+mod worktrees;
 
 /// Group name (as in `--tools`) and the function that builds its router.
 type Build = fn() -> ToolRouter<Server>;
@@ -20,6 +23,9 @@ const GROUPS: &[(&str, Build)] = &[
     ("panes", panes::router),
     ("agents", agents::router),
     ("events", events::router),
+    ("worktrees", worktrees::router),
+    ("layout", layout::router),
+    ("notify", notify::router),
 ];
 
 /// The routers of the groups asked for.
