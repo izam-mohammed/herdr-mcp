@@ -330,3 +330,57 @@ async fn an_absent_socket_gives_herdr_unreachable() {
         "herdr_unreachable"
     );
 }
+
+#[tokio::test]
+async fn snapshot_filters_and_summarises() {
+    let fake = FakeHerdr::start("snap", false);
+    let mut mcp = inside(&fake).await;
+
+    let r = mcp
+        .call("herdr_snapshot", json!({"workspace_id":"wA"}))
+        .await;
+    let s = &r["result"]["structuredContent"]["snapshot"];
+    assert_eq!(
+        s["workspaces"],
+        json!([{"workspace_id":"wA","label":"main"}])
+    );
+    assert_eq!(s["panes"].as_array().unwrap().len(), 1);
+    assert_eq!(s["agents"], json!([]));
+
+    let r = mcp.call("herdr_snapshot", json!({"tab_id":"wB:t1"})).await;
+    let s = &r["result"]["structuredContent"]["snapshot"];
+    assert_eq!(s["agents"], json!([{"pane_id":"wB:p1","agent":"claude"}]));
+
+    let r = mcp.call("herdr_snapshot", json!({"summary":true})).await;
+    let s = &r["result"]["structuredContent"];
+    assert_eq!(s["type"], "session_snapshot_summary");
+    assert_eq!(s["snapshot"]["counts"]["panes"], 2);
+    assert_eq!(s["snapshot"]["panes"], json!(["wA:p1", "wB:p1"]));
+}
+
+#[tokio::test]
+async fn a_big_snapshot_is_summarised_by_default_and_says_so() {
+    let tabs: Vec<Value> = (0..600)
+        .map(|i| json!({"tab_id":format!("wA:t{i}"),"workspace_id":"wA","label":"x".repeat(30)}))
+        .collect();
+    let big = json!({"method":"session.snapshot","result":{"type":"session_snapshot",
+        "snapshot":{"protocol":22,"workspaces":[{"workspace_id":"wA"}],"tabs":tabs,
+        "panes":[],"layouts":[],"agents":[]}}});
+    let fake = FakeHerdr::start_with("big", false, &big.to_string());
+    let mut mcp = inside(&fake).await;
+
+    let r = mcp.call("herdr_snapshot", json!({})).await;
+    let s = &r["result"]["structuredContent"];
+    assert_eq!(s["type"], "session_snapshot_summary", "{r}");
+    assert!(s["note"].as_str().unwrap().contains("20000"));
+    assert_eq!(s["snapshot"]["counts"]["tabs"], 600);
+    assert!(
+        r["result"]["content"][0]["text"]
+            .as_str()
+            .unwrap()
+            .contains("summary")
+    );
+
+    let r = mcp.call("herdr_snapshot", json!({"summary":false})).await;
+    assert_eq!(r["result"]["structuredContent"]["type"], "session_snapshot");
+}

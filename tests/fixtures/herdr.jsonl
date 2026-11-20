@@ -1,7 +1,7 @@
 {"method":"tab.get","params":{"tab_id":"wZ:t9"},"error":{"code":"not_found","message":"tab wZ:t9 not found"}}
 {"method":"ping","result":{"type":"pong","version":"0.9.5","protocol":22,"capabilities":{}}}
 {"method":"pane.current","result":{"type":"pane_current","pane":{"pane_id":"wA:p1","workspace_id":"wA","tab_id":"wA:t1","focused":true,"cwd":"/x","agent":null,"agent_status":"idle"}}}
-{"method":"session.snapshot","result":{"type":"session_snapshot","snapshot":{"version":"0.9.5","protocol":22,"focused_workspace_id":"wA","focused_tab_id":"wA:t1","focused_pane_id":"wA:p1","workspaces":[{"workspace_id":"wA"}],"tabs":[{"tab_id":"wA:t1"}],"panes":[],"layouts":[],"agents":[]}}}
+{"method":"session.snapshot","result":{"type":"session_snapshot","snapshot":{"version":"0.9.5","protocol":22,"focused_workspace_id":"wA","focused_tab_id":"wA:t1","focused_pane_id":"wA:p1","workspaces":[{"workspace_id":"wA","label":"main"},{"workspace_id":"wB","label":"other"}],"tabs":[{"tab_id":"wA:t1","workspace_id":"wA"},{"tab_id":"wB:t1","workspace_id":"wB"}],"panes":[{"pane_id":"wA:p1","workspace_id":"wA","tab_id":"wA:t1"},{"pane_id":"wB:p1","workspace_id":"wB","tab_id":"wB:t1"}],"layouts":[{"workspace_id":"wA","tab_id":"wA:t1"},{"workspace_id":"wB","tab_id":"wB:t1"}],"agents":[{"pane_id":"wB:p1","agent":"claude"}]}}}
 {"method":"workspace.list","result":{"type":"workspace_list","workspaces":[{"workspace_id":"wA","label":"main"}]}}
 {"method":"tab.list","result":{"type":"tab_list","tabs":[{"tab_id":"wA:t1","workspace_id":"wA","number":1,"label":"1","focused":true,"pane_count":1,"agent_status":"idle"}]}}
 {"method":"tab.get","result":{"type":"tab_info","tab":{"tab_id":"wA:t1","label":"1"}}}

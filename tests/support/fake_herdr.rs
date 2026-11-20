@@ -13,11 +13,17 @@ pub struct FakeHerdr {
 impl FakeHerdr {
     /// Answer from the fixtures; `hang` accepts and never replies.
     pub fn start(tag: &str, hang: bool) -> FakeHerdr {
+        Self::start_with(tag, hang, "")
+    }
+
+    /// As `start`, with `extra` fixture lines checked before the file's.
+    pub fn start_with(tag: &str, hang: bool, extra: &str) -> FakeHerdr {
         let socket = super::socket_path(tag);
         let listener = bind(&socket);
         let seen: Seen = Seen::default();
-        let fixtures: Vec<Value> = include_str!("../fixtures/herdr.jsonl")
+        let fixtures: Vec<Value> = extra
             .lines()
+            .chain(include_str!("../fixtures/herdr.jsonl").lines())
             .map(|l| serde_json::from_str(l).expect("fixture line"))
             .collect();
         let log = seen.clone();

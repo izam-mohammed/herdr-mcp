@@ -4,4 +4,5 @@ pub mod error;
 pub mod herdr;
 pub mod safety;
 pub mod server;
+pub mod snapshot;
 mod tools;
