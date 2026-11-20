@@ -19,6 +19,7 @@ pub struct Shared {
     pub config: Config,
     pub client: HerdrClient,
     pub own: safety::OwnPane,
+    pub hub: Option<Arc<crate::events::EventHub>>,
 }
 
 #[derive(Clone)]
@@ -38,11 +39,16 @@ impl Server {
         if config.confirm_destructive {
             safety::require_confirmation(&mut router);
         }
+        // The subscription needs a runtime; a Server built outside one has no hub.
+        let hub = (config.groups.iter().any(|g| g == "events")
+            && tokio::runtime::Handle::try_current().is_ok())
+        .then(|| crate::events::EventHub::start(config.socket.clone(), config.event_buffer));
         Self {
             shared: Arc::new(Shared {
                 config,
                 client,
                 own: safety::OwnPane::default(),
+                hub,
             }),
             tool_router: router,
         }

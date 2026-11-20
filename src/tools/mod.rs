@@ -5,6 +5,7 @@ use rmcp::handler::server::router::tool::ToolRouter;
 
 mod agents;
 mod panes;
+mod events;
 mod session;
 mod tabs;
 mod workspaces;
@@ -18,6 +19,7 @@ const GROUPS: &[(&str, Build)] = &[
     ("tabs", tabs::router),
     ("panes", panes::router),
     ("agents", agents::router),
+    ("events", events::router),
 ];
 
 /// The routers of the groups asked for.

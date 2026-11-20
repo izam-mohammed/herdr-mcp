@@ -23,6 +23,7 @@ const USAGE: &str = "herdr-mcp: an MCP server for herdr, over stdio
   --tools <a,b,...>       tool groups to register, default all (HERDR_MCP_TOOLS)
   --confirm-destructive   ask the user on every close, even in auto mode
                           (HERDR_MCP_CONFIRM_DESTRUCTIVE=1)
+  --event-buffer <n>      events kept for herdr_events_* (HERDR_MCP_EVENT_BUFFER, default 1000)
   --debug                 log payloads to stderr
   --version, --help";
 
@@ -33,6 +34,7 @@ pub struct Config {
     pub groups: Vec<String>,
     pub debug: bool,
     pub confirm_destructive: bool,
+    pub event_buffer: usize,
     pub timeout: Duration,
     pub pane_id: Option<String>,
     pub tab_id: Option<String>,
@@ -81,6 +83,7 @@ pub fn parse(args: &[String], env: &Env) -> Result<Parsed, String> {
     let mut tools = env.get("HERDR_MCP_TOOLS").map(str::to_owned);
     let mut debug = false;
     let mut confirm = env.flag("HERDR_MCP_CONFIRM_DESTRUCTIVE");
+    let mut event_buffer = env.get("HERDR_MCP_EVENT_BUFFER").map(str::to_owned);
 
     let mut it = args.iter();
     while let Some(arg) = it.next() {
@@ -98,6 +101,7 @@ pub fn parse(args: &[String], env: &Env) -> Result<Parsed, String> {
             "--session" => session = Some(value(&mut it)?),
             "--socket" => socket = Some(value(&mut it)?),
             "--tools" => tools = Some(value(&mut it)?),
+            "--event-buffer" => event_buffer = Some(value(&mut it)?),
             "--read-only" => read_only = true,
             "--allow-outside-herdr" => allow_outside = true,
             "--confirm-destructive" => confirm = true,
@@ -130,6 +134,14 @@ pub fn parse(args: &[String], env: &Env) -> Result<Parsed, String> {
         }
     };
 
+    let event_buffer = match event_buffer {
+        None => 1000,
+        Some(v) => v
+            .parse::<usize>()
+            .ok()
+            .filter(|n| (1..=1_000_000).contains(n))
+            .ok_or_else(|| format!("--event-buffer must be 1 to 1000000, got {v}"))?,
+    };
     let inside = env.flag("HERDR_ENV");
     Ok(Parsed::Run(Box::new(Config {
         socket: resolve_socket(session, socket, env),
@@ -137,6 +149,7 @@ pub fn parse(args: &[String], env: &Env) -> Result<Parsed, String> {
         groups,
         debug,
         confirm_destructive: confirm,
+        event_buffer,
         timeout: Duration::from_millis(
             env.get("HERDR_MCP_TIMEOUT_MS")
                 .and_then(|v| v.parse().ok())
