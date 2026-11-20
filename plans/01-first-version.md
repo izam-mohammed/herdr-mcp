@@ -190,7 +190,9 @@ Feature context. A Rust 2024 binary, `herdr-mcp` (decision 1), built on
 a timeout; replies pass through as `structuredContent` (decision 3). Tools
 are narrow and grouped (decision 4); this plan lands the `session` group
 and the read and non-destructive half of `workspaces`, `tabs` and `agents`.
-Usable first: Phase 2 is the rough cut you try in Claude Code.
+Usable first: Phase 2 is the rough cut you try in Claude Code; Phase 1 only
+proves the two integrations and lands the check, since nothing else can be
+trusted before they pass.
 
 Dependencies: `rmcp` (features `server`, `transport-io`), `tokio`
 (`rt`, `macros`, `net`, `io-util`, `io-std`, `time`), `serde`,
@@ -244,12 +246,13 @@ Binding for every later plan:
 | `src/safety.rs`, `src/error.rs` | new | 2 | read-only gate, error mapping | expected |
 | `tests/support/fake_herdr.rs`, `tests/fixtures/`, `tests/tools.rs` | new | 2 | fake socket and tool tests | expected |
 | `tests/live.rs` | new | 2 | isolated-session tests | expected |
-| `scripts/check.sh`, `rustfmt.toml`, `deny.toml`, `.gitignore` | new | 2 | the standard check | fixed |
-| `.github/workflows/check.yml` | new | 2 | CI | expected |
-| `README.md` | new | 2 | install, register, flags, safety | expected |
+| `scripts/check.sh`, `rustfmt.toml`, `deny.toml`, `.gitignore` | new | 1 | the standard check | fixed |
+| `.github/workflows/check.yml` | new | 1 | CI | expected |
+| `README.md` | edit | 2 | register, flags, safety, added to the existing banner page | reuse |
 | `examples/bench.rs`, `scripts/bench.sh` | new | 3 | the budget | expected |
 
-*Reused, not rewritten:* the repository holds only `features.md` and docs.
+*Reused, not rewritten:* the repository holds only `features.md`, docs and
+the README banner page (extended, not rebuilt).
 Searched crates.io for a herdr client library: `herdr` 0.1.0 on docs.rs is
 an old release of herdr itself, not a client. The bench servers in
 `docs/research/01-first-version-bench/` are the starting point for
@@ -309,8 +312,13 @@ repository instructions for recording useful development findings.
 
 ## Phases
 
-### Phase 1: prove herdr and rmcp (needs you: install Rust with rustup)
+### Phase 1: prove herdr and rmcp, and the check (needs you: install Rust with rustup)
 
+- [ ] The research is re-checked, since it is dated 22/10/2026: `herdr
+  --version` and `ping` protocol, `rustc --version`, and the newest `rmcp`
+  on crates.io, each compared with `docs/standards.md` and
+  `docs/external/`; any that moved is updated there with the new date
+  before anything is built.
 - [ ] `scripts/prove/herdr-socket.sh` sends `ping` to the resolved socket
   with `nc -U` per `docs/external/herdr-socket-api.md` § Wire format and
   prints `PASS` when the reply is `pong` at protocol 22.
@@ -318,14 +326,17 @@ repository instructions for recording useful development findings.
   with `Cargo.toml` and `rust-toolchain.toml`, and
   `scripts/prove/rmcp-stdio.sh` that builds it, pipes `initialize`,
   `notifications/initialized` and `tools/call`, and prints `PASS` when the
-  call returns herdr's `pong`.
-- [ ] Check: both scripts exit 0 and print `PASS`.
-
-### Phase 2: the rough cut: tabs from Claude Code (needs you: try it)
-
+  call returns herdr's `pong`; the MCP `protocolVersion` rmcp negotiates is
+  recorded in `docs/external/rmcp.md`, settling decision 1's open spec
+  question.
 - [ ] The standard check lands: `scripts/check.sh`, `rustfmt.toml`,
   `deny.toml`, Clippy lints in `Cargo.toml`, `.gitignore`, and
   `.github/workflows/check.yml`, as `docs/standards.md` says.
+- [ ] Check: both scripts exit 0 and print `PASS`, and `sh scripts/check.sh`
+  passes on the proof crate.
+
+### Phase 2: the rough cut: tabs from Claude Code (needs you: try it)
+
 - [ ] `HerdrClient::call` (expected in `src/herdr.rs`) resolves the socket
   in herdr's order, opens one connection per call, applies the timeout and
   maps errors per `## Contract` (`src/error.rs`); `src/config.rs` reads the
@@ -341,7 +352,7 @@ repository instructions for recording useful development findings.
 - [ ] `tests/live.rs` runs the binary against an isolated
   `herdr-mcp-test` session: create, rename, focus and list a tab, then
   stop and delete the session.
-- [ ] `README.md` says how to build, register with `claude mcp add herdr
+- [ ] `README.md` gains how to build, register with `claude mcp add herdr
   -- <path>/herdr-mcp`, the flags, and the safety defaults.
 - [ ] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes.
 - [ ] You try it: run `cargo build --release`, then `claude mcp add herdr

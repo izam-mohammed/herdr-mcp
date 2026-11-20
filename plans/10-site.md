@@ -10,7 +10,7 @@ Built so far: `docs/built/BUILT-2026-10-22-1826.md`.
 
 What it means here: there is nothing to install yet, and the repository is
 private. A page that says "install with one command" is only true after
-`plans/08-release.md` ships binaries, so this plan is chained after it.
+`plans/08-release-v0.1.0.md` ships binaries, so this plan is chained after it.
 The reference page is one self-contained HTML file (inline CSS, no
 scripts, no fetched fonts): a header, one pitch, one button to the latest
 release, a footer. How mac-notch's page is published is not recorded in
@@ -77,7 +77,7 @@ one-page project site"; the reference `mac-notch/site/index.html`
 header with the name and links to Releases and GitHub, the README's
 tagline ("You gave your AI agents their own terminals. Now one of them gets
 to be the boss."), the dark banner from `assets/banner-dark.svg` inlined,
-the one-command install from `plans/08-release.md` and the `claude mcp add`
+the one-command install from `plans/08-release-v0.1.0.md` and the `claude mcp add`
 and `codex mcp add` lines, the tool areas in one line each (workspaces,
 tabs, panes, agents, events), the safety defaults in one line (read-only
 outside herdr, never its own pane), a "latest release" link, and a footer
@@ -116,7 +116,7 @@ command it shows.
 | --- | --- | --- | --- |
 | Elevation of privilege: a PR deploys the site | `pages.yml` with `pages: write` | triggers are `push` to `main` and `workflow_dispatch`; write permissions on the deploy job, `permissions: {}` at the top | the PR shows no Pages run |
 | Tampering: an action replaced under its tag | four actions | pinned by full SHA | the shared gate's zizmor stage (`plans/09-quality-gates.md`) |
-| Spoofing: the page's install command differs from the release's | hand-copied | copied from `README.md` after `plans/08-release.md`, both in the PR diff | read side by side in the try |
+| Spoofing: the page's install command differs from the release's | hand-copied | copied from `README.md` after `plans/08-release-v0.1.0.md`, both in the PR diff | read side by side in the try |
 | Information disclosure: a third-party request from the page | fonts or scripts | none fetched; inline CSS only | the browser's network panel shows one request |
 
 No data collected, no cookies.
