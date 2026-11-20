@@ -144,10 +144,16 @@ Started without `HERDR_ENV=1` (that is, outside a herdr pane), or with
 `--read-only`, the write tools are not registered at all: the client never
 sees them, so there is nothing to ask about. Failures come back as
 `isError` with the text `herdr <code>: <message>`; the server's own codes
-are `read_only`, `self_target`, `herdr_unreachable` and `timeout`.
+are `read_only`, `self_target`, `own_agent`, `herdr_unreachable` and `timeout`.
+
+Agent waits (`herdr_agent_wait`, and `herdr_agent_prompt` with `wait`) end at
+`timeout_ms` (default 60 s, at most 10 min) with `timed_out: true`. herdr's
+`agent_blocked` and `agent_prompt_stalled` come back as they are.
 
 ## Things it refuses to do
 
+- **Prompt or send keys to its own agent**, by pane id or by name (code
+  `own_agent`).
 - **Prompt, type into or close its own pane**, or close the tab or workspace
   it lives in. Self-awareness, at last.
 - **Steer your session from outside herdr.** There it's read-only.

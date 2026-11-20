@@ -27,7 +27,16 @@ async fn inside(fake: &FakeHerdr) -> Mcp {
 }
 
 const ALL: &[&str] = &[
+    "herdr_agent_explain",
+    "herdr_agent_focus",
+    "herdr_agent_get",
     "herdr_agent_list",
+    "herdr_agent_prompt",
+    "herdr_agent_read",
+    "herdr_agent_rename",
+    "herdr_agent_send_keys",
+    "herdr_agent_start",
+    "herdr_agent_wait",
     "herdr_pane_clear",
     "herdr_pane_close",
     "herdr_pane_focus",
@@ -66,7 +75,11 @@ const ALL: &[&str] = &[
     "herdr_workspace_report_metadata",
 ];
 const READS: &[&str] = &[
+    "herdr_agent_explain",
+    "herdr_agent_get",
     "herdr_agent_list",
+    "herdr_agent_read",
+    "herdr_agent_wait",
     "herdr_pane_get",
     "herdr_pane_layout",
     "herdr_pane_list",
@@ -180,7 +193,16 @@ async fn tools_flag_registers_only_the_groups_named() {
     assert_eq!(
         mcp.tool_names().await,
         [
+            "herdr_agent_explain",
+            "herdr_agent_focus",
+            "herdr_agent_get",
             "herdr_agent_list",
+            "herdr_agent_prompt",
+            "herdr_agent_read",
+            "herdr_agent_rename",
+            "herdr_agent_send_keys",
+            "herdr_agent_start",
+            "herdr_agent_wait",
             "herdr_snapshot",
             "herdr_status",
             "herdr_whoami"
