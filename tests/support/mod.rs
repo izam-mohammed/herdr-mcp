@@ -37,6 +37,11 @@ impl Mcp {
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .kill_on_drop(true);
+        // Under `cargo llvm-cov` the binary is instrumented; keep its profile
+        // path so the child's coverage counts (unset in a plain run).
+        if let Ok(p) = std::env::var("LLVM_PROFILE_FILE") {
+            cmd.env("LLVM_PROFILE_FILE", p);
+        }
         for (k, v) in opts.env {
             cmd.env(k, v);
         }
@@ -137,4 +142,22 @@ pub type Seen = Arc<Mutex<Vec<Value>>>;
 pub(crate) fn bind(path: &std::path::Path) -> UnixListener {
     let _ = std::fs::remove_file(path);
     UnixListener::bind(path).expect("bind fake herdr")
+}
+
+/// Under `cargo llvm-cov` a killed child loses its coverage counters: close its
+/// stdin and let it exit on its own, so the profile is written. A plain run
+/// keeps the quick `kill_on_drop`.
+impl Drop for Mcp {
+    fn drop(&mut self) {
+        if std::env::var_os("LLVM_PROFILE_FILE").is_none() {
+            return;
+        }
+        drop(self.stdin.take());
+        for _ in 0..100 {
+            if matches!(self.child.try_wait(), Ok(Some(_))) {
+                return;
+            }
+            std::thread::sleep(std::time::Duration::from_millis(20));
+        }
+    }
 }

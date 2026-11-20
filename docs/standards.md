@@ -19,7 +19,7 @@ locally and in CI. Chosen in `plans/01-first-version.md` (decision 6);
 | Format | rustfmt | `rustfmt.toml` | `cargo fmt --all -- --check` | no diff |
 | Lint | Clippy | `Cargo.toml` `[lints]` | `cargo clippy --all-targets --locked -- -D warnings` | no errors, no warnings |
 | Types | rustc | | (part of clippy and test) | compiles |
-| Unit and fake-socket tests | `cargo test` | | `cargo test --locked` | all pass |
+| Unit and fake-socket tests, with coverage | `cargo test` under cargo-llvm-cov 0.9.1 | `llvm-tools-preview` in `rust-toolchain.toml` | `cargo llvm-cov --locked --fail-under-lines 90` | all pass, 90 % of lines or more (target 95 %); the per-file table is printed |
 | Live tests | `cargo test` | | `HERDR_MCP_LIVE=1 cargo test --locked --test <file> -- --test-threads=1`, for `live`, `lane02_live`, `lane03_live`, `lane04_live`, `lane05_live` | all pass, each file against its own isolated session (`herdr-mcp-test`, `-02` to `-05`) |
 | Performance budget | `scripts/bench.sh` | the budget in the script | `sh scripts/bench.sh` | inside the budget (from plan 01 Phase 3) |
 | Dependency audit | cargo-deny | `deny.toml` | `cargo deny check advisories bans sources licenses` | no advisory, no banned or unknown source |
@@ -27,7 +27,7 @@ locally and in CI. Chosen in `plans/01-first-version.md` (decision 6);
 | Shell scripts | ShellCheck | | `shellcheck scripts/*.sh scripts/prove/*.sh` | no findings |
 | Build | cargo | `[profile.release]` | `cargo build --release --locked` | builds |
 
-`scripts/check.sh` runs format, lint, tests, audit, secret scan, shell
+`scripts/check.sh` runs format, lint, tests with coverage, audit, secret scan, shell
 check and build, in that order, stopping at the first failure. The live
 tests and the budget run only when `HERDR_MCP_LIVE=1`, since CI has no
 herdr; locally every phase's check sets it.
@@ -70,8 +70,12 @@ changed and why, and the checks run with their result. Tool names are
 ## CI
 
 `.github/workflows/check.yml` runs `sh scripts/check.sh` on every PR and
-on pushes to `main` (no live tests: no herdr in CI). A red check blocks
-merge.
+on pushes to `main` (no live tests: no herdr in CI); every action is pinned by
+SHA, `permissions: {}` at the top. A red check blocks merge.
+`.github/workflows/security.yml` calls the shared gate
+`izam-mohammed/.github/.github/workflows/security-scan.yml` (pinned to its
+commit SHA, `ecosystem: rust`) on every PR and weekly: gitleaks blocks;
+osv-scanner, semgrep and zizmor report to the PR.
 
 ## Decided
 
@@ -81,5 +85,9 @@ merge.
   licences (plan 01, decision 6).
 - `cargo test` over cargo-nextest: no extra binary; revisit if the suite
   passes 30 s (plan 01, decision 6).
+- cargo-llvm-cov over tarpaulin and grcov, a fixed 90 % line floor over a
+  ratchet, and the shared gate with `ecosystem: rust` over CodeQL: plan 09.
+  The test harness forwards `LLVM_PROFILE_FILE` to the spawned binary and
+  lets it exit on drop, so its lines count.
 - gitleaks over TruffleHog, and `scripts/check.sh` over a Makefile or
   justfile: plan 01, decision 6.
