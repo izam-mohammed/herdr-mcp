@@ -114,29 +114,39 @@ repository instructions for recording useful development findings.
 
 ### Phase 1: the rough cut: prompt another agent and wait (needs you: try it)
 
-- [ ] `herdr_agent_get`, `_read`, `_prompt` (with `wait`), `_wait` and
+- [x] `herdr_agent_get`, `_read`, `_prompt` (with `wait`), `_wait` and
   `_send_keys` (expected in `src/tools/agents.rs`), with
   `refuse_self_agent` in `src/safety.rs`; pinned by `tests/tools.rs` for
   each tool and every `## Security` row; `README.md` updated.
-- [ ] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes.
+  Landed 2026-11-20: tests are in `tests/lane04_tools.rs` with
+  `tests/fixtures/lane04.jsonl` (lane file, `tests/tools.rs` only has its
+  tool-name lists extended). `refuse_self_agent` returns the resolved pane
+  id and input goes there, so a rename cannot dodge the check. Waits use a
+  private client and local caps in `agents.rs` until plan 03's `call_wait`
+  and `limits` are joined.
+- [x] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes.
 - [ ] You try it: with a second Claude Code running in another herdr pane,
   ask the first to give it a small task and tell you when it is done; then
   ask it to prompt itself, and say whether both behave as you expect.
 
 ### Phase 2: the rest of the agents
 
-- [ ] `herdr_agent_explain`, `_start`, `_focus` and `_rename` (expected in
+- [x] `herdr_agent_explain`, `_start`, `_focus` and `_rename` (expected in
   `src/tools/agents.rs`), `_start` checking herdr's 3 001 to 300 000 ms
   timeout range before the call; pinned by `tests/tools.rs`, and by
   `tests/live.rs` starting an agent when the isolated session can run one.
-- [ ] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes.
+  Landed 2026-11-20: the live test is `tests/lane04_live.rs` (session
+  `herdr-mcp-test-04`, a stub `claude` script on PATH; herdr detects it).
+  `HERDR_MCP_LIVE=1 cargo test --test lane04_live -- --test-threads=1`;
+  `scripts/check.sh` only runs `--test live`, so the join adds it.
+- [x] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes.
 
 ### Phase 3: review
 
-- [ ] Post-implementation review of phases 1 and 2 with the security pass
+- [x] Post-implementation review of phases 1 and 2 with the security pass
   over `## Security`, recorded in `docs/research/04-agents.md`: scope,
   findings or none, fixes and re-run checks.
-- [ ] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes, and
+- [x] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes, and
   `sh scripts/bench.sh` stays inside the budget.
 
 ### Phase 4: open the PR
