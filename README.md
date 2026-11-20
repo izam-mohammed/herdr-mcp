@@ -100,6 +100,43 @@ read-only: no promotion without the paperwork.
 | `herdr_layout_set_split_ratio` | Adjusts a split |
 | `herdr_notify` | Shows a toast in herdr. Management loves an announcement |
 
+## Build it yourself
+
+```sh
+cargo build --release
+claude mcp add herdr -- $PWD/target/release/herdr-mcp
+```
+
+Start Claude Code in a herdr pane and ask it to list your tabs. The first
+version ships `herdr_whoami`, `herdr_status`, `herdr_snapshot`,
+`herdr_workspace_list`, `herdr_tab_list`, `herdr_tab_get`, `herdr_tab_focus`,
+`herdr_tab_create`, `herdr_tab_rename` and `herdr_agent_list`; the rest of
+the table below arrives plan by plan.
+
+## Flags
+
+Flag first, then the environment variable.
+
+| Flag | Env | What it does |
+| --- | --- | --- |
+| `--session <name>` | `HERDR_SESSION` | Talk to that herdr session |
+| `--socket <path>` | `HERDR_SOCKET_PATH` | Talk to that socket (wins over `--session`) |
+| `--read-only` | `HERDR_MCP_READ_ONLY=1` | Register read tools only |
+| `--allow-outside-herdr` | `HERDR_MCP_ALLOW_OUTSIDE=1` | Allow writes when not started inside herdr |
+| `--tools <a,b>` | `HERDR_MCP_TOOLS` | Register only these groups: `session`, `workspaces`, `tabs`, `panes`, `agents`, `events`, `worktrees`, `layout`, `notify` (default all) |
+| `--debug` | | Log request and reply payloads to stderr |
+
+Without `--debug`, stderr carries method names and ids only, never pane text.
+Every herdr call times out after 10 seconds (`timeout`).
+
+## Safety defaults
+
+Started without `HERDR_ENV=1` (that is, outside a herdr pane), or with
+`--read-only`, the write tools are not registered at all: the client never
+sees them, so there is nothing to ask about. Failures come back as
+`isError` with the text `herdr <code>: <message>`; the server's own codes
+are `read_only`, `self_target`, `herdr_unreachable` and `timeout`.
+
 ## Things it refuses to do
 
 - **Prompt, type into or close its own pane**, or close the tab or workspace

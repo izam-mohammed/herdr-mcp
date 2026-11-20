@@ -341,24 +341,27 @@ repository instructions for recording useful development findings.
 
 ### Phase 2: the rough cut: tabs from Claude Code (needs you: try it)
 
-- [ ] `HerdrClient::call` (expected in `src/herdr.rs`) resolves the socket
+- [x] `HerdrClient::call` (expected in `src/herdr.rs`) resolves the socket
   in herdr's order, opens one connection per call, applies the timeout and
   maps errors per `## Contract` (`src/error.rs`); `src/config.rs` reads the
   flags and env, with read-only the default outside herdr
   (`src/safety.rs`).
-- [ ] Tools `herdr_whoami`, `herdr_status`, `herdr_snapshot`,
+  Landed 2026-11-20: `src/lib.rs` added so tests and the binary share the crate; socket order is `--socket`, `--session`, `HERDR_SOCKET_PATH`, `HERDR_SESSION`, default. `HERDR_MCP_TIMEOUT_MS` (default 10000) is an extra env var used by the timeout test.
+- [x] Tools `herdr_whoami`, `herdr_status`, `herdr_snapshot`,
   `herdr_workspace_list`, `herdr_tab_list`, `herdr_tab_get`,
   `herdr_tab_focus`, `herdr_tab_create`, `herdr_tab_rename` and
   `herdr_agent_list` (expected in `src/tools/`), with annotations and
   server instructions saying output is untrusted; pinned by
   `tests/tools.rs` on `tests/support/fake_herdr.rs`, including every
   `## Security` row's test.
-- [ ] `tests/live.rs` runs the binary against an isolated
+  Landed 2026-11-20: registry is `src/tools/mod.rs`: one `mod` line and one `GROUPS` line per group, each group in `src/tools/<group>.rs` exposing `router()`; the read-only gate removes every tool whose `readOnlyHint` is not true, so a new group needs no gate edit. `herdr_whoami` is the one composite result (env plus herdr's `pane.current` under `pane`). Server `self_target` refusals have no tool to guard yet (no pane tool in this plan).
+- [x] `tests/live.rs` runs the binary against an isolated
   `herdr-mcp-test` session: create, rename, focus and list a tab, then
   stop and delete the session.
-- [ ] `README.md` gains how to build, register with `claude mcp add herdr
+  Landed 2026-11-20: needs `HERDR_MCP_LIVE=1`, else it skips; a workspace is created over the raw socket first because a fresh session has none; the session is stopped and deleted in a drop guard.
+- [x] `README.md` gains how to build, register with `claude mcp add herdr
   -- <path>/herdr-mcp`, the flags, and the safety defaults.
-- [ ] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes.
+- [x] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes.
 - [ ] You try it: run `cargo build --release`, then `claude mcp add herdr
   -- $PWD/target/release/herdr-mcp`, start Claude Code in a herdr pane, ask
   it to list your tabs, open a new tab called `scratch` and focus it; say
