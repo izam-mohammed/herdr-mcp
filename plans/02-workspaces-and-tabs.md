@@ -140,13 +140,20 @@ repository instructions for recording useful development findings.
 
 ### Phase 1: the rough cut: the rest of workspaces and tabs (needs you: try it)
 
-- [ ] The nine tools (expected in `src/tools/workspaces.rs` and
+- [x] The nine tools (expected in `src/tools/workspaces.rs` and
   `src/tools/tabs.rs`), `own_pane()` and `refuse_self` in
   `src/safety.rs`, and `--confirm-destructive` in `src/config.rs`; pinned
   by `tests/tools.rs` for every tool and the `## Security` rows, and by
   `tests/live.rs` creating and closing a workspace and a tab in the
   isolated session; `README.md` updated.
-- [ ] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes.
+  Landed 2026-11-20: the new tests live in `tests/lane02_tools.rs`,
+  `tests/lane02_live.rs` (isolated session `herdr-mcp-test-02`) and
+  `tests/fixtures/lane02.jsonl`, not in `tests/tools.rs` and
+  `tests/live.rs` (parallel lanes), apart from the tool-name lists in
+  `tests/tools.rs`. The own pane's `terminal_id` is captured at the first
+  close, not at start, so a start sends no call (plan 01's tests count
+  requests); a stale id fails closed.
+- [x] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes.
 - [ ] You try it: in Claude Code in a herdr pane, ask it to make a
   workspace called `sandbox` with two tabs, move the second tab first,
   then close `sandbox`; then ask it to close its own tab, and say whether
@@ -154,13 +161,13 @@ repository instructions for recording useful development findings.
 
 ### Phase 2: edge cases and the moved pane
 
-- [ ] The edge cases above hold: a moved own pane is still protected
+- [x] The edge cases above hold: a moved own pane is still protected
   (`tests/live.rs`), a failed `pane.list` refuses the close, and a group
   close error passes through (`tests/tools.rs`).
-- [ ] Post-implementation review of phases 1 and 2 with the security pass
+- [x] Post-implementation review of phases 1 and 2 with the security pass
   over `## Security`, recorded in `docs/research/02-workspaces-and-tabs.md`:
   scope, findings or none, fixes and re-run checks.
-- [ ] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes, and
+- [x] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes, and
   `sh scripts/bench.sh` stays inside the budget.
 
 ### Phase 3: open the PR

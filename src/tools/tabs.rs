@@ -1,5 +1,6 @@
-//! Group `tabs`: list, get, focus, create and rename. Close and move are
-//! destructive or later (plan 02).
+//! Group `tabs`: list, get, focus, create, rename, move and close. A close
+//! never takes the tab holding this server's own pane unless `allow_self`.
+use crate::safety::Target;
 use crate::server::Server;
 use rmcp::handler::server::router::tool::ToolRouter;
 use rmcp::handler::server::wrapper::Parameters;
@@ -7,6 +8,7 @@ use rmcp::model::CallToolResult;
 use rmcp::{tool, tool_router};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 
 pub fn router() -> ToolRouter<Server> {
     Server::tabs_router()
@@ -47,6 +49,23 @@ struct TabRename {
     tab_id: String,
     /// The new label.
     label: String,
+}
+
+#[derive(Serialize, Deserialize, JsonSchema)]
+struct TabMove {
+    /// Tab id, e.g. `wA:t2`.
+    tab_id: String,
+    /// Zero-based position to move it to within its workspace.
+    insert_index: u32,
+}
+
+#[derive(Deserialize, JsonSchema)]
+struct TabClose {
+    /// Tab id, e.g. `wA:t2`.
+    tab_id: String,
+    /// Allow closing the tab this server itself runs in. Default false.
+    /// Set only when the user asked for exactly that.
+    allow_self: Option<bool>,
 }
 
 #[tool_router(router = tabs_router)]
@@ -114,5 +133,38 @@ impl Server {
     )]
     async fn herdr_tab_rename(&self, Parameters(p): Parameters<TabRename>) -> CallToolResult {
         self.herdr("tab.rename", p).await
+    }
+
+    #[tool(
+        description = "Move a tab to a position in its workspace.",
+        annotations(
+            read_only_hint = false,
+            destructive_hint = false,
+            idempotent_hint = true,
+            open_world_hint = false
+        )
+    )]
+    async fn herdr_tab_move(&self, Parameters(p): Parameters<TabMove>) -> CallToolResult {
+        self.herdr("tab.move", p).await
+    }
+
+    #[tool(
+        description = "Close a tab and every pane in it. Refused with self_target when it holds \
+this server's own pane, unless allow_self is true.",
+        annotations(
+            read_only_hint = false,
+            destructive_hint = true,
+            idempotent_hint = false,
+            open_world_hint = false
+        )
+    )]
+    async fn herdr_tab_close(&self, Parameters(p): Parameters<TabClose>) -> CallToolResult {
+        if let Some(refusal) = self
+            .refuse_self(&Target::Tab(&p.tab_id), p.allow_self == Some(true))
+            .await
+        {
+            return refusal;
+        }
+        self.herdr("tab.close", json!({"tab_id": p.tab_id})).await
     }
 }

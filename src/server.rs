@@ -18,6 +18,7 @@ Call herdr_whoami first to learn which pane is your own.";
 pub struct Shared {
     pub config: Config,
     pub client: HerdrClient,
+    pub own: safety::OwnPane,
 }
 
 #[derive(Clone)]
@@ -34,8 +35,15 @@ impl Server {
         if config.read_only {
             safety::keep_reads_only(&mut router);
         }
+        if config.confirm_destructive {
+            safety::require_confirmation(&mut router);
+        }
         Self {
-            shared: Arc::new(Shared { config, client }),
+            shared: Arc::new(Shared {
+                config,
+                client,
+                own: safety::OwnPane::default(),
+            }),
             tool_router: router,
         }
     }

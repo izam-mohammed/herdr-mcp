@@ -21,6 +21,8 @@ const USAGE: &str = "herdr-mcp: an MCP server for herdr, over stdio
   --read-only             register read tools only (HERDR_MCP_READ_ONLY=1)
   --allow-outside-herdr   allow writes when HERDR_ENV is not 1 (HERDR_MCP_ALLOW_OUTSIDE=1)
   --tools <a,b,...>       tool groups to register, default all (HERDR_MCP_TOOLS)
+  --confirm-destructive   ask the user on every close, even in auto mode
+                          (HERDR_MCP_CONFIRM_DESTRUCTIVE=1)
   --debug                 log payloads to stderr
   --version, --help";
 
@@ -30,6 +32,7 @@ pub struct Config {
     pub read_only: bool,
     pub groups: Vec<String>,
     pub debug: bool,
+    pub confirm_destructive: bool,
     pub timeout: Duration,
     pub pane_id: Option<String>,
     pub tab_id: Option<String>,
@@ -77,6 +80,7 @@ pub fn parse(args: &[String], env: &Env) -> Result<Parsed, String> {
     let mut allow_outside = env.flag("HERDR_MCP_ALLOW_OUTSIDE");
     let mut tools = env.get("HERDR_MCP_TOOLS").map(str::to_owned);
     let mut debug = false;
+    let mut confirm = env.flag("HERDR_MCP_CONFIRM_DESTRUCTIVE");
 
     let mut it = args.iter();
     while let Some(arg) = it.next() {
@@ -96,6 +100,7 @@ pub fn parse(args: &[String], env: &Env) -> Result<Parsed, String> {
             "--tools" => tools = Some(value(&mut it)?),
             "--read-only" => read_only = true,
             "--allow-outside-herdr" => allow_outside = true,
+            "--confirm-destructive" => confirm = true,
             "--debug" => debug = true,
             "--help" | "-h" => return Ok(Parsed::Exit(USAGE.to_owned())),
             "--version" | "-V" => {
@@ -131,6 +136,7 @@ pub fn parse(args: &[String], env: &Env) -> Result<Parsed, String> {
         read_only: read_only || (!inside && !allow_outside),
         groups,
         debug,
+        confirm_destructive: confirm,
         timeout: Duration::from_millis(
             env.get("HERDR_MCP_TIMEOUT_MS")
                 .and_then(|v| v.parse().ok())
@@ -220,6 +226,13 @@ mod tests {
             )
             .read_only
         );
+    }
+
+    #[test]
+    fn confirm_destructive_is_off_unless_asked() {
+        assert!(!run(&[], &env(&[])).confirm_destructive);
+        assert!(run(&["--confirm-destructive"], &env(&[])).confirm_destructive);
+        assert!(run(&[], &env(&[("HERDR_MCP_CONFIRM_DESTRUCTIVE", "1")])).confirm_destructive);
     }
 
     #[test]
