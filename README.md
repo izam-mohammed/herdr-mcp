@@ -121,6 +121,17 @@ may be missing (evicted, or herdr dropped the connection);
 `herdr_events_status` shows `connected` and `lost`. History starts when the
 server starts: herdr replays nothing.
 
+## Worktrees, layouts and toasts
+
+`herdr_worktree_create` opens a git worktree as a workspace; `force` and
+`trust_repository` are sent to herdr only when you pass them, and
+`herdr_worktree_remove` with `force` deletes uncommitted work. `herdr_layout_export`
+returns a tab's layout and `herdr_layout_apply` takes it back as `root`: with a
+`tab_id` it replaces that tab (and ends its panes), without one it opens a new
+tab. Remove and apply refuse the workspace or tab holding the server's own pane
+(`allow_self` overrides). `herdr_notify` shows the title and body as given, so a
+toast can say anything: treat it as a message from the model, not from herdr.
+
 ## Flags
 
 Flag first, then the environment variable.

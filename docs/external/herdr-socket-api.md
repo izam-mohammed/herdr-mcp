@@ -225,3 +225,13 @@ unchanged.
 - `workspace.close` without `close_group` on a worktree group returns
   `workspace_group_close_required`; never add `close_group` just to get past
   it.
+- Worktrees, layout, notifications (measured live 20/11/2026, herdr 0.9.5):
+  `worktree.create` and `worktree.remove` succeed without `trust_repository`
+  on a repository with no setup scripts; the docs do not say what it unlocks,
+  so herdr-mcp sends it only when asked. Without `path` the checkout lands in
+  `~/.herdr/worktrees/<repo>/<branch>`. `layout.apply` without `tab_id` opens a
+  new tab; with `tab_id` it replaces that tab and the result has a new tab id.
+  `layout.export` gives `layout.root`, which is valid as `root` for apply.
+  `layout.set_split_ratio` takes `path` (booleans, `[]` is the root split) and
+  `ratio`. `notification.show` with no attached client returns
+  `shown: false, reason: no_foreground_client`, not an error.

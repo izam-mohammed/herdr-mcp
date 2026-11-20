@@ -110,26 +110,32 @@ repository instructions for recording useful development findings.
 
 ## Phases
 
+Landed 2026-11-20: `herdr_layout_apply` refuses only a `tab_id` holding the
+own pane (herdr replaces panes only then; with no `tab_id` it opens a new
+tab), and `allow_self` overrides, as for closes. Live tests take an optional
+`HERDR_MCP_SCRATCH` dir for the throwaway repository. The bench stayed inside
+its budget in `scripts/check.sh`.
+
 ### Phase 1: the rough cut: toasts and worktrees (needs you: try it)
 
-- [ ] `herdr_notify` (expected in `src/tools/notify.rs`) and the four
+- [x] `herdr_notify` (expected in `src/tools/notify.rs`) and the four
   worktree tools (`src/tools/worktrees.rs`); pinned by `tests/tools.rs`
   and by `tests/live.rs` creating and removing a worktree of a scratch git
   repository; what herdr does without `trust_repository` recorded in
   `docs/external/herdr-socket-api.md`; `README.md` updated.
-- [ ] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes.
+- [x] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes.
 - [ ] You try it: ask Claude Code to open a worktree of this repository on
   a new branch as a workspace and show a toast when it is ready; say
   whether the toast and the workspace are what you expect.
 
 ### Phase 2: layouts
 
-- [ ] `herdr_layout_export`, `_apply` and `_set_split_ratio` (expected in
+- [x] `herdr_layout_export`, `_apply` and `_set_split_ratio` (expected in
   `src/tools/layout.rs`); pinned by `tests/tools.rs` and by
   `tests/live.rs` exporting a two-pane tab and applying it to a new tab.
-- [ ] Post-implementation review of phases 1 and 2 with the security pass,
+- [x] Post-implementation review of phases 1 and 2 with the security pass,
   recorded in `docs/research/06-worktrees-layout-notify.md`.
-- [ ] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes, and
+- [x] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes, and
   `sh scripts/bench.sh` stays inside the budget.
 
 ### Phase 3: open the PR
