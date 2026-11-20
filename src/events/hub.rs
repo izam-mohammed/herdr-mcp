@@ -3,6 +3,7 @@
 //! `events.subscribe`, which keeps streaming (docs/external/herdr-socket-api.md).
 use super::ring::{Filter, Ring};
 use crate::error::Failure;
+use crate::herdr::HerdrClient;
 use serde_json::{Value, json};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
@@ -73,7 +74,8 @@ impl EventHub {
     #[must_use]
     pub fn start(socket: PathBuf, capacity: usize) -> Arc<Self> {
         let hub = Self::new(capacity);
-        tokio::spawn(run(hub.clone(), socket));
+        let client = HerdrClient::new(socket.clone(), std::time::Duration::from_secs(10), false);
+        tokio::spawn(run(hub.clone(), client, socket));
         hub
     }
 
@@ -171,30 +173,178 @@ async fn subscribe(socket: &Path, subscriptions: &[Value]) -> Result<Conn, Failu
     })
 }
 
-fn lifecycle() -> Vec<Value> {
-    LIFECYCLE.iter().map(|t| json!({"type": t})).collect()
+/// Lifecycle types plus one `pane.agent_status_changed` per pane: herdr
+/// requires a `pane_id` on that type (docs/external/herdr-socket-api.md).
+fn subscriptions(panes: &[String]) -> Vec<Value> {
+    LIFECYCLE
+        .iter()
+        .map(|t| json!({"type": t}))
+        .chain(
+            panes
+                .iter()
+                .map(|p| json!({"type": "pane.agent_status_changed", "pane_id": p})),
+        )
+        .collect()
+}
+
+/// Pane ids now, sorted. Also what validates the set: herdr rejects a
+/// whole request that names a missing pane.
+async fn list_panes(client: &HerdrClient) -> Result<Vec<String>, Failure> {
+    let result = client.call("pane.list", json!({})).await?;
+    let mut panes: Vec<String> = result["panes"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter_map(|p| p["pane_id"].as_str().map(str::to_owned))
+        .collect();
+    panes.sort();
+    Ok(panes)
+}
+
+/// List the panes and subscribe to them; a pane closed in between is
+/// rejected by herdr, so retry once with a fresh list.
+async fn open(client: &HerdrClient, socket: &Path) -> Result<(Conn, Vec<String>), Failure> {
+    let mut last = None;
+    for _ in 0..2 {
+        let panes = list_panes(client).await?;
+        match subscribe(socket, &subscriptions(&panes)).await {
+            Ok(conn) => return Ok((conn, panes)),
+            Err(e) => last = Some(e),
+        }
+    }
+    Err(last.unwrap_or_else(|| bad("invalid_reply", "no subscription attempt")))
 }
 
 const BACKOFF_MIN: std::time::Duration = std::time::Duration::from_millis(100);
 const BACKOFF_MAX: std::time::Duration = std::time::Duration::from_secs(5);
+/// Wait this long after a pane event for more, so a burst is one rebuild.
+const REBUILD_DELAY: std::time::Duration = std::time::Duration::from_millis(50);
+/// How long the old subscription is read after the new one has started.
+const DRAIN_IDLE: std::time::Duration = std::time::Duration::from_millis(150);
+/// How long a line seen on the old subscription suppresses its twin on the new.
+const DUP_WINDOW: std::time::Duration = std::time::Duration::from_secs(1);
 
-async fn run(hub: Arc<EventHub>, socket: PathBuf) {
+/// Lines read from the old subscription during a rebuild, so their copies on
+/// the new one are dropped.
+#[derive(Default)]
+struct Dups(Vec<(tokio::time::Instant, String)>);
+
+impl Dups {
+    fn take(&mut self, line: &str) -> bool {
+        let now = tokio::time::Instant::now();
+        self.0.retain(|(t, _)| now.duration_since(*t) < DUP_WINDOW);
+        self.0.iter().position(|(_, l)| l == line).is_some_and(|i| {
+            self.0.remove(i);
+            true
+        })
+    }
+}
+
+enum Line {
+    Event,
+    /// herdr says this subscriber fell behind and closed the subscription.
+    Lost,
+    /// A pane appeared or went: the set to watch changed.
+    PaneSetChanged,
+}
+
+fn handle(hub: &EventHub, line: &str) -> Option<Line> {
+    let v: Value = serde_json::from_str(line).ok()?;
+    let name = v.get("event").and_then(Value::as_str)?;
+    if name == "events_lost" {
+        return Some(Line::Lost);
+    }
+    hub.push(name, v.get("data").cloned().unwrap_or(Value::Null));
+    Some(match name {
+        "pane_created" | "pane.created" | "pane_closed" | "pane.closed" => Line::PaneSetChanged,
+        _ => Line::Event,
+    })
+}
+
+async fn run(hub: Arc<EventHub>, client: HerdrClient, socket: PathBuf) {
     let mut backoff = BACKOFF_MIN;
     loop {
-        if let Ok(mut conn) = subscribe(&socket, &lifecycle()).await {
+        if let Ok((conn, panes)) = open(&client, &socket).await {
             backoff = BACKOFF_MIN;
+            hub.panes_watched.store(panes.len(), Ordering::Relaxed);
             hub.connected.store(true, Ordering::Relaxed);
-            while let Ok(Some(line)) = conn.lines.next_line().await {
-                if let Ok(v) = serde_json::from_str::<Value>(&line)
-                    && let Some(name) = v.get("event").and_then(Value::as_str)
-                {
-                    hub.push(name, v.get("data").cloned().unwrap_or(Value::Null));
-                }
-            }
+            stream(&hub, &client, &socket, conn, panes).await;
             hub.connected.store(false, Ordering::Relaxed);
+            tokio::time::sleep(BACKOFF_MIN).await;
         } else {
             tokio::time::sleep(backoff).await;
             backoff = (backoff * 2).min(BACKOFF_MAX);
         }
     }
+}
+
+/// Read the stream until it ends. A pane created or closed rebuilds it.
+async fn stream(
+    hub: &EventHub,
+    client: &HerdrClient,
+    socket: &Path,
+    mut conn: Conn,
+    mut panes: Vec<String>,
+) {
+    let mut dups = Dups::default();
+    let mut rebuild_at: Option<tokio::time::Instant> = None;
+    loop {
+        let next = match rebuild_at {
+            Some(at) => tokio::time::timeout_at(at, conn.lines.next_line()).await,
+            None => Ok(conn.lines.next_line().await),
+        };
+        match next {
+            Err(_) => {
+                rebuild_at = None;
+                match rebuild(hub, client, socket, &mut conn, &mut panes, &mut dups).await {
+                    // A pane came or went while the old stream drained: go again.
+                    Ok(true) => rebuild_at = Some(tokio::time::Instant::now()),
+                    Ok(false) => {}
+                    Err(_) => return,
+                }
+            }
+            Ok(Ok(Some(line))) => {
+                if dups.take(&line) {
+                    continue;
+                }
+                match handle(hub, &line) {
+                    Some(Line::Lost) => return,
+                    Some(Line::PaneSetChanged) => {
+                        rebuild_at.get_or_insert(tokio::time::Instant::now() + REBUILD_DELAY);
+                    }
+                    Some(Line::Event) | None => {}
+                }
+            }
+            Ok(Ok(None) | Err(_)) => return,
+        }
+    }
+}
+
+/// Subscribe to the new pane set, then close the old subscription, reading
+/// what it still holds first so nothing is lost and nothing doubled.
+async fn rebuild(
+    hub: &EventHub,
+    client: &HerdrClient,
+    socket: &Path,
+    conn: &mut Conn,
+    panes: &mut Vec<String>,
+    dups: &mut Dups,
+) -> Result<bool, Failure> {
+    let (new, now) = open(client, socket).await?;
+    if now == *panes {
+        // Nothing changed after all; keep the old one (the new drops here).
+        return Ok(false);
+    }
+    let mut old = std::mem::replace(conn, new);
+    *panes = now;
+    hub.panes_watched.store(panes.len(), Ordering::Relaxed);
+    let mut again = false;
+    while let Ok(Ok(Some(line))) = tokio::time::timeout(DRAIN_IDLE, old.lines.next_line()).await {
+        let seen = handle(hub, &line);
+        again |= matches!(seen, Some(Line::PaneSetChanged));
+        if seen.is_some() {
+            dups.0.push((tokio::time::Instant::now(), line));
+        }
+    }
+    Ok(again)
 }

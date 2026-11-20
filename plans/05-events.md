@@ -186,12 +186,15 @@ repository instructions for recording useful development findings.
 
 ### Phase 2: every agent's status
 
-- [ ] The hub adds `pane.agent_status_changed` per pane and rebuilds on
+- [x] The hub adds `pane.agent_status_changed` per pane and rebuilds on
   `pane.created` and `pane.closed` as decision 3 says, and
   `herdr_events_wait` takes `agent_status`; pinned by `tests/events.rs`
   (rebuild without loss or duplicates) and `tests/live.rs` (an agent's
-  status change seen).
-- [ ] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes.
+  status change seen). Landed 2026-11-20: in `tests/lane05_tools.rs` and
+  `tests/lane05_live.rs`; the live test drives status with
+  `pane.report_agent`. The old subscription is read for 150 ms after the
+  new one starts and its lines suppress their twins for 1 s.
+- [x] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes.
 
 ### Phase 3: lost events and restarts
 

@@ -10,6 +10,9 @@ use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 
 const SESSION: &str = "herdr-mcp-test-05";
 
+/// One session, so one live test at a time, even under `cargo test` threads.
+static ONE_AT_A_TIME: tokio::sync::Mutex<()> = tokio::sync::Mutex::const_new(());
+
 fn herdr() -> Command {
     let mut cmd = Command::new("herdr");
     for (k, _) in std::env::vars() {
@@ -159,6 +162,7 @@ async fn a_tab_created_in_the_session_shows_up_in_recent_and_wait() {
         eprintln!("skipped: set HERDR_MCP_LIVE=1");
         return;
     }
+    let _one = ONE_AT_A_TIME.lock().await;
     let session = TestSession::start().await;
     raw(
         &session.socket,
@@ -200,4 +204,96 @@ async fn a_tab_created_in_the_session_shows_up_in_recent_and_wait() {
     let st = status(&mut mcp).await;
     assert_eq!(st["connected"], true);
     assert!(st["last_event_at"].is_u64());
+}
+
+async fn panes_watched(mcp: &mut Mcp, want: u64) {
+    for _ in 0..200 {
+        if status(mcp).await["panes_watched"] == want {
+            return;
+        }
+        tokio::time::sleep(Duration::from_millis(50)).await;
+    }
+    panic!("panes_watched never reached {want}");
+}
+
+/// Report an agent state for a pane, the way an integration hook does.
+async fn report(session: &TestSession, pane: &str, state: &str) {
+    raw(
+        &session.socket,
+        "pane.report_agent",
+        json!({"pane_id": pane, "source": "herdr-mcp-test", "agent": "claude", "state": state}),
+    )
+    .await
+    .expect("pane.report_agent");
+}
+
+#[tokio::test]
+async fn agent_status_changes_are_seen_for_old_and_new_panes() {
+    if !live() {
+        eprintln!("skipped: set HERDR_MCP_LIVE=1");
+        return;
+    }
+    let _one = ONE_AT_A_TIME.lock().await;
+    let session = TestSession::start().await;
+    let ws = raw(
+        &session.socket,
+        "workspace.create",
+        json!({"label":"live","focus":true}),
+    )
+    .await
+    .expect("workspace.create");
+    let first = ws["root_pane"]["pane_id"]
+        .as_str()
+        .expect("pane")
+        .to_owned();
+    let mut mcp = mcp(&session).await;
+    wait_connected(&mut mcp).await;
+    panes_watched(&mut mcp, 1).await;
+
+    // A pane created after the server started is watched too (the rebuild).
+    let tab = raw(&session.socket, "tab.create", json!({"label":"second"}))
+        .await
+        .expect("tab.create");
+    let second = tab["root_pane"]["pane_id"]
+        .as_str()
+        .expect("pane")
+        .to_owned();
+    panes_watched(&mut mcp, 2).await;
+
+    for (pane, state) in [(&first, "blocked"), (&second, "working")] {
+        let reporter = {
+            let (socket, pane, state) = (session.socket.clone(), pane.clone(), state.to_owned());
+            tokio::spawn(async move {
+                tokio::time::sleep(Duration::from_millis(300)).await;
+                raw(
+                    &socket,
+                    "pane.report_agent",
+                    json!({"pane_id": pane, "source": "herdr-mcp-test", "agent": "claude", "state": state}),
+                )
+                .await
+                .expect("pane.report_agent");
+            })
+        };
+        let r = mcp
+            .call(
+                "herdr_events_wait",
+                json!({"pane_id": pane, "agent_status": state, "timeout_ms": 10000}),
+            )
+            .await;
+        let got = ok(&r);
+        assert_eq!(got["timed_out"], false, "{pane} {state}: {got}");
+        assert_eq!(got["event"]["data"]["agent_status"], state);
+        reporter.await.expect("reporter");
+    }
+
+    // Closing a pane shrinks the watched set.
+    raw(&session.socket, "pane.close", json!({"pane_id": second}))
+        .await
+        .expect("pane.close");
+    panes_watched(&mut mcp, 1).await;
+    report(&session, &first, "idle").await;
+    find_event(&mut mcp, 0, |e| {
+        e["data"]["agent_status"] == "idle" && e["data"]["pane_id"] == first.as_str()
+    })
+    .await;
 }

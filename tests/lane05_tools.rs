@@ -236,3 +236,139 @@ async fn wait_returns_the_next_matching_event_and_times_out_otherwise() {
     assert_eq!(ok(&r)["timed_out"], true);
     assert!(started.elapsed() >= Duration::from_millis(250));
 }
+
+fn status_changed(pane: &str, state: &str) -> Value {
+    json!({"pane_id": pane, "workspace_id": "w1", "agent": "claude", "agent_status": state})
+}
+
+fn pane_event(pane: &str) -> Value {
+    json!({"type":"pane_created","pane":{"pane_id":pane,"workspace_id":"w1","tab_id":"w1:t1"}})
+}
+
+/// The `pane_id`s of the `pane.agent_status_changed` entries of a subscribe.
+fn watched(sub: &Value) -> Vec<String> {
+    let mut panes: Vec<String> = sub
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|e| e["type"] == "pane.agent_status_changed")
+        .map(|e| {
+            e["pane_id"]
+                .as_str()
+                .expect("pane_id on every entry")
+                .to_owned()
+        })
+        .collect();
+    panes.sort();
+    panes
+}
+
+async fn until(what: &str, mut ok: impl FnMut() -> bool) {
+    for _ in 0..300 {
+        if ok() {
+            return;
+        }
+        tokio::time::sleep(Duration::from_millis(10)).await;
+    }
+    panic!("never: {what}");
+}
+
+#[tokio::test]
+async fn every_pane_gets_a_status_entry_and_a_wait_can_name_the_state() {
+    let fake = FakeEvents::start("a1", &["w1:p1", "w1:p2"]);
+    let mut mcp = start(&fake, &[]).await;
+    fake.wait_subscribed(1).await;
+    assert_eq!(watched(&fake.subscribes()[0]), ["w1:p1", "w1:p2"]);
+    assert_eq!(
+        ok(&mcp.call("herdr_events_status", json!({})).await)["panes_watched"],
+        2
+    );
+
+    let emitter = fake.clone();
+    tokio::spawn(async move {
+        tokio::time::sleep(Duration::from_millis(200)).await;
+        emitter.emit(
+            "pane.agent_status_changed",
+            "pane.agent_status_changed",
+            &status_changed("w1:p2", "working"),
+        );
+        emitter.emit(
+            "pane.agent_status_changed",
+            "pane.agent_status_changed",
+            &status_changed("w1:p1", "blocked"),
+        );
+    });
+    let r = mcp
+        .call(
+            "herdr_events_wait",
+            json!({"agent_status": "blocked", "timeout_ms": 5000}),
+        )
+        .await;
+    let got = ok(&r);
+    assert_eq!(got["timed_out"], false);
+    assert_eq!(got["event"]["data"]["pane_id"], "w1:p1");
+    // Dotted or snake, the type filter finds it.
+    let r = mcp
+        .call(
+            "herdr_events_recent",
+            json!({"since": 0, "types": ["pane_agent_status_changed"], "pane_id": "w1:p2"}),
+        )
+        .await;
+    assert_eq!(ok(&r)["events"][0]["data"]["agent_status"], "working");
+}
+
+#[tokio::test]
+async fn a_new_pane_is_watched_without_losing_or_doubling_events() {
+    let fake = FakeEvents::start("a2", &["w1:p1"]);
+    let mut mcp = start(&fake, &[]).await;
+    fake.wait_subscribed(1).await;
+
+    fake.set_panes(&["w1:p1", "w1:p2"]);
+    fake.emit("pane.created", "pane_created", &pane_event("w1:p2"));
+    until("the rebuilt subscription", || fake.subscribes().len() == 2).await;
+    assert_eq!(watched(&fake.subscribes()[1]), ["w1:p1", "w1:p2"]);
+    // The overlap: both subscriptions are live; an event now reaches both.
+    until("two live subscriptions", || fake.live_subscriptions() == 2).await;
+    fake.emit(
+        "tab.focused",
+        "tab_focused",
+        &json!({"type":"tab_focused","tab_id":"w1:t1","workspace_id":"w1"}),
+    );
+    // ...and then the old one is closed.
+    until("the old one closed", || fake.live_subscriptions() == 1).await;
+    assert_eq!(
+        ok(&mcp.call("herdr_events_status", json!({})).await)["panes_watched"],
+        2
+    );
+
+    // The new pane's status changes arrive; nothing doubled, nothing lost.
+    fake.emit(
+        "pane.agent_status_changed",
+        "pane.agent_status_changed",
+        &status_changed("w1:p2", "blocked"),
+    );
+    poll_status(&mut mcp, 3).await;
+    tokio::time::sleep(Duration::from_millis(100)).await;
+    let r = mcp.call("herdr_events_recent", json!({"since": 0})).await;
+    let names: Vec<&str> = ok(&r)["events"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|e| e["event"].as_str().unwrap())
+        .collect();
+    assert_eq!(
+        names,
+        ["pane_created", "tab_focused", "pane.agent_status_changed"]
+    );
+    assert_eq!(ok(&r)["gaps"], json!([]));
+
+    // A pane that goes is dropped from the set.
+    fake.set_panes(&["w1:p1"]);
+    fake.emit(
+        "pane.closed",
+        "pane_closed",
+        &json!({"type":"pane_closed","pane_id":"w1:p2","workspace_id":"w1"}),
+    );
+    until("the third subscription", || fake.subscribes().len() == 3).await;
+    assert_eq!(watched(&fake.subscribes()[2]), ["w1:p1"]);
+}

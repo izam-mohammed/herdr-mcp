@@ -205,14 +205,21 @@ async fn serve(stream: tokio::net::UnixStream, st: Arc<Mutex<State>>) {
         return;
     }
     if let Some(mut rx) = rx {
-        while let Some(Some(line)) = rx.recv().await {
-            if stream
-                .get_mut()
-                .write_all(format!("{line}\n").as_bytes())
-                .await
-                .is_err()
-            {
-                return;
+        let mut ignored = String::new();
+        loop {
+            tokio::select! {
+                msg = rx.recv() => {
+                    let Some(Some(line)) = msg else { return };
+                    if stream.get_mut().write_all(format!("{line}\n").as_bytes()).await.is_err() {
+                        return;
+                    }
+                }
+                // The client hung up: the subscription ends with it.
+                n = stream.read_line(&mut ignored) => {
+                    if n.unwrap_or(0) == 0 {
+                        return;
+                    }
+                }
             }
         }
     }
