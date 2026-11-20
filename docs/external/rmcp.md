@@ -4,7 +4,17 @@ Fetched: 22/10/2026 from https://github.com/modelcontextprotocol/rust-sdk
 (README), https://docs.rs/rmcp/latest/rmcp/, crates.io
 (`max_stable_version` 3.6.0, published 20/10/2026), and the crate source
 `rmcp-3.6.0` / `rmcp-macros-3.6.0` downloaded by cargo.
-Version: rmcp 3.6.0.
+Version: rmcp 3.11.0 (re-checked 20/11/2026: crates.io newest is 3.11.0, rust-version 1.88;
+the notes above were taken on 3.6.0 and the `#[tool_router(server_handler)]`
+server below built and ran unchanged on 3.11.0).
+
+**Negotiated MCP protocol, measured 20/11/2026 on rmcp 3.11.0 over stdio:**
+a client offering `2025-06-18` gets `2025-06-18`; offering `2026-07-28` or a
+later unknown version gets `2025-11-25`. The crate defines
+`ProtocolVersion::V_2026_07_28` and `LATEST`, but the `initialize` handshake
+answers at most `2025-11-25`. Claude Code works at that version, so the open
+spec question in plan 01 decision 1 is settled: no gap that blocks this
+project.
 
 ## Authentication
 
@@ -13,7 +23,7 @@ None for stdio. The OAuth and Streamable HTTP features are not used here.
 ## Cargo features this project uses
 
 ```toml
-rmcp = { version = "3.6", features = ["server", "transport-io"] }
+rmcp = { version = "3.11", features = ["server", "transport-io"] }
 ```
 
 `server` (default): server and tool system. `macros` (default): `#[tool]`,
@@ -28,7 +38,7 @@ From the README, built and run 22/10/2026 (it answered `initialize` and
 `tools/call`):
 
 ```rust
-use rmcp::{tool, tool_router, ServiceExt, transport::stdio};
+use rmcp::{ServiceExt, tool, tool_router, transport::stdio};
 
 #[derive(Clone)]
 struct Bench;

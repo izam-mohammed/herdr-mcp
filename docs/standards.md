@@ -8,9 +8,9 @@ locally and in CI. Chosen in `plans/01-first-version.md` (decision 6);
 
 | What | Version | Pinned in |
 | --- | --- | --- |
-| Rust | stable 1.99 (current on 22/10/2026), edition 2024 | `rust-toolchain.toml` |
+| Rust | stable 1.100.0 (current on 20/11/2026; was 1.99 on 22/10/2026), edition 2024 | `rust-toolchain.toml` |
 | cargo | with the toolchain | `Cargo.lock`, committed (a binary) |
-| herdr, for live tests | 0.9.5, protocol 22 | the live tests check `ping` |
+| herdr, for live tests | 0.9.5, protocol 22 (re-checked 20/11/2026) | the live tests check `ping` |
 
 ## Checks
 

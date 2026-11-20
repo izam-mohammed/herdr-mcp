@@ -5,7 +5,8 @@ the binary), `herdr --skill`, the socket API page
 (https://raw.githubusercontent.com/herdrdev/herdr/v0.9.5/docs/next/website/src/content/docs/socket-api.mdx),
 and read-only calls against the live socket on this machine. The full schema is 272 KB; regenerate it with
 `herdr api schema --json` rather than copying it here.
-Version: herdr 0.9.5, protocol 22, API schema version 1.
+Version: herdr 0.9.5, protocol 22, API schema version 1. Re-checked 20/11/2026: `herdr --version` is still 0.9.5 and `ping` on an isolated session answers protocol 22.
+`nc -U -w 2 <socket>` works for a one-shot request on this machine (OpenBSD netcat); `-q` is also accepted.
 
 ## Authentication
 
