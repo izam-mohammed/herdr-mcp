@@ -5,7 +5,11 @@ use serde_json::{Value, json};
 use support::{FakeHerdr, Mcp, Opts};
 
 const FIXTURES: &str = include_str!("fixtures/lane03.jsonl");
-const INSIDE: &[(&str, &str)] = &[("HERDR_ENV", "1"), ("HERDR_PANE_ID", "wA:p1")];
+const INSIDE: &[(&str, &str)] = &[
+    ("HERDR_ENV", "1"),
+    ("HERDR_PANE_ID", "wA:p1"),
+    ("HERDR_MCP_TOOLS", "panes"),
+];
 
 fn fake(tag: &str, extra: &str) -> FakeHerdr {
     let all = if extra.is_empty() {
@@ -25,6 +29,16 @@ async fn inside(fake: &FakeHerdr) -> Mcp {
         },
     )
     .await
+}
+
+/// Requests minus the own-pane check's lookups (`pane.current`, and the
+/// `pane.list` that follows the own terminal), which `src/safety.rs` makes
+/// before input to a pane that is not the own pane by id.
+fn calls(f: &FakeHerdr) -> Vec<Value> {
+    f.requests()
+        .into_iter()
+        .filter(|r| r["method"] != "pane.current" && r["method"] != "pane.list")
+        .collect()
 }
 
 fn sc(r: &Value) -> &Value {
@@ -161,7 +175,11 @@ async fn each_pane_tool_sends_its_method_and_params() {
         let mut mcp = inside(&fake).await;
         let r = mcp.call(tool, args.clone()).await;
         assert_ok(&r);
-        let seen = fake.requests();
+        let seen = if *tool == "herdr_pane_list" {
+            fake.requests()
+        } else {
+            calls(&fake)
+        };
         assert_eq!(seen.len(), expect.len(), "{tool}: {seen:?}");
         for (req, (method, params)) in seen.iter().zip(*expect) {
             assert_eq!(req["method"], *method, "{tool}");
@@ -238,7 +256,7 @@ async fn run_in_a_given_pane_does_not_split() {
         .call("herdr_pane_run", json!({"command":"ls","pane_id":"wA:p2"}))
         .await;
     assert_ok(&r);
-    let seen = fake.requests();
+    let seen = calls(&fake);
     assert_eq!(seen.len(), 1);
     assert_eq!(seen[0]["method"], "pane.send_input");
 }
@@ -485,4 +503,21 @@ async fn stderr_never_carries_pane_text() {
         !err.contains("SECRET-TOKEN-123") && !err.contains("hello"),
         "{err}"
     );
+}
+
+#[tokio::test]
+async fn input_to_the_own_pane_after_it_moved_is_refused_by_terminal() {
+    // The env still says wA:p1, but herdr now lists that terminal as wB:p9.
+    let moved = r#"{"method":"pane.list","result":{"type":"pane_list","panes":[{"pane_id":"wB:p9","terminal_id":"term_me","workspace_id":"wB","tab_id":"wB:t1"}]}}"#;
+    let fake = fake("moved", moved);
+    let mut mcp = inside(&fake).await;
+    let r = mcp
+        .call(
+            "herdr_pane_send_text",
+            json!({"pane_id":"wB:p9","text":"x"}),
+        )
+        .await;
+    assert_eq!(r["result"]["isError"], true, "{r}");
+    assert_eq!(sc(&r)["code"], "self_target");
+    assert!(calls(&fake).is_empty(), "{:?}", fake.requests());
 }

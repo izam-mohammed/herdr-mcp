@@ -30,10 +30,17 @@ pub struct OwnPane {
     terminal: std::sync::Mutex<Option<String>>,
 }
 
-/// What a close would remove.
+/// Refusal code for steering the server's own agent.
+pub const OWN_AGENT: &str = "own_agent";
+
+/// What an action would hit: a close of a tab or workspace holding the own
+/// pane, or input to a pane or agent that is the own pane. `Agent` carries the
+/// pane id `agent.get` resolved, so a name or a pane move cannot get past.
 pub enum Target<'a> {
     Tab(&'a str),
     Workspace(&'a str),
+    Pane(&'a str),
+    Agent { pane: &'a str, name: &'a str },
 }
 
 impl Server {
@@ -67,29 +74,31 @@ impl Server {
         target: &Target<'_>,
         allow_self: bool,
     ) -> Option<CallToolResult> {
-        if allow_self || self.shared.config.pane_id.is_none() {
-            return None;
+        self.self_refusal(target, allow_self)
+            .await
+            .err()
+            .map(Failure::into_result)
+    }
+
+    /// `refuse_self` as a `Failure`, for the tools that already return one.
+    pub(crate) async fn self_refusal(
+        &self,
+        target: &Target<'_>,
+        allow_self: bool,
+    ) -> Result<(), Failure> {
+        let Some(own) = self.shared.config.pane_id.as_deref() else {
+            return Ok(());
+        };
+        if allow_self {
+            return Ok(());
         }
-        match self.holds_me(target).await {
-            Ok(false) => None,
-            Ok(true) => {
-                let (what, id) = match target {
-                    Target::Tab(id) => ("tab", id),
-                    Target::Workspace(id) => ("workspace", id),
-                };
-                Some(
-                    Failure::new(
-                        SELF_TARGET,
-                        format!(
-                            "{what} {id} holds the pane this server runs in; closing it would \
-end this session. Pass allow_self: true only if the user asked for exactly that."
-                        ),
-                    )
-                    .into_result(),
-                )
-            }
-            Err(f) => Some(f.into_result()),
+        // The cheap case needs no call: the target is the pane id given at start.
+        let direct =
+            matches!(target, Target::Pane(id) | Target::Agent { pane: id, .. } if *id == own);
+        if direct || self.holds_me(target).await? {
+            return Err(refusal(target));
         }
+        Ok(())
     }
 
     async fn holds_me(&self, target: &Target<'_>) -> Result<bool, Failure> {
@@ -104,8 +113,60 @@ end this session. Pass allow_self: true only if the user asked for exactly that.
             (None, _) => false,
             (Some(p), Target::Tab(id)) => p["tab_id"] == *id,
             (Some(p), Target::Workspace(id)) => p["workspace_id"] == *id,
+            (Some(p), Target::Pane(id) | Target::Agent { pane: id, .. }) => p["pane_id"] == *id,
         })
     }
+}
+
+fn refusal(target: &Target<'_>) -> Failure {
+    match target {
+        Target::Tab(id) | Target::Workspace(id) => {
+            let what = if matches!(target, Target::Tab(_)) {
+                "tab"
+            } else {
+                "workspace"
+            };
+            Failure::new(
+                SELF_TARGET,
+                format!(
+                    "{what} {id} holds the pane this server runs in; closing it would \
+end this session. Pass allow_self: true only if the user asked for exactly that."
+                ),
+            )
+        }
+        Target::Pane(id) => Failure::new(
+            SELF_TARGET,
+            format!("{id} is your own pane; act on another pane"),
+        ),
+        Target::Agent { name, .. } => Failure::new(
+            OWN_AGENT,
+            format!("{name} is the agent running this server; refusing to steer itself"),
+        ),
+    }
+}
+
+/// Resolve an agent by name or pane id with `agent.get`, refuse when it is the
+/// server's own, and return the resolved pane id to send to, so a rename
+/// between check and send cannot redirect the input to another agent.
+///
+/// # Errors
+/// The refusal (`own_agent`) or herdr's failure, as a tool result.
+pub async fn refuse_self_agent(server: &Server, target: &str) -> Result<String, CallToolResult> {
+    if server.shared.config.pane_id.is_none() {
+        return Ok(target.to_owned());
+    }
+    let agent = server
+        .shared
+        .client
+        .call("agent.get", json!({"target": target}))
+        .await
+        .map_err(Failure::into_result)?;
+    let pane = agent["agent"]["pane_id"].as_str().unwrap_or(target);
+    server
+        .self_refusal(&Target::Agent { pane, name: target }, false)
+        .await
+        .map_err(Failure::into_result)?;
+    Ok(pane.to_owned())
 }
 
 /// `--confirm-destructive`: every `destructiveHint` tool also asks the user
@@ -125,60 +186,4 @@ pub fn require_confirmation<S: Send + Sync + 'static>(router: &mut ToolRouter<S>
             route.attr.meta = Some(meta);
         }
     }
-}
-
-/// Code of the refusal to steer the server's own agent.
-pub const OWN_AGENT: &str = "own_agent";
-
-/// Check that `target` is not the server's own agent, by pane id, by name or
-/// after a pane move (plan 04, decision 1). Resolves it with `agent.get`,
-/// then compares its pane id and `terminal_id` with the own pane. Fails
-/// closed: if herdr cannot resolve the target or the own pane, that failure
-/// is the `Err` and nothing is sent. `Ok` is the target to send to: the
-/// resolved pane id, so a rename between check and send cannot redirect the
-/// input to another agent.
-///
-/// # Errors
-/// The refusal (`own_agent`) or herdr's failure, as a tool result.
-pub async fn refuse_self_agent(
-    server: &crate::server::Server,
-    target: &str,
-) -> Result<String, rmcp::model::CallToolResult> {
-    use crate::error::Failure;
-    use serde_json::{Value, json};
-    let Some(own) = server.shared.config.pane_id.as_deref() else {
-        return Ok(target.to_owned());
-    };
-    let client = &server.shared.client;
-    let agent = client
-        .call("agent.get", json!({"target": target}))
-        .await
-        .map_err(Failure::into_result)?;
-    let field = |k: &str| {
-        agent
-            .pointer(&format!("/agent/{k}"))
-            .and_then(Value::as_str)
-            .map(str::to_owned)
-    };
-    let refuse = || {
-        Failure::new(
-            OWN_AGENT,
-            format!("{target} is the agent running this server; refusing to steer itself"),
-        )
-        .into_result()
-    };
-    let pane = field("pane_id");
-    if pane.as_deref() == Some(own) {
-        return Err(refuse());
-    }
-    if let Some(theirs) = field("terminal_id") {
-        let mine = client
-            .call("pane.get", json!({"pane_id": own}))
-            .await
-            .map_err(Failure::into_result)?;
-        if mine.pointer("/pane/terminal_id").and_then(Value::as_str) == Some(theirs.as_str()) {
-            return Err(refuse());
-        }
-    }
-    Ok(pane.unwrap_or_else(|| target.to_owned()))
 }

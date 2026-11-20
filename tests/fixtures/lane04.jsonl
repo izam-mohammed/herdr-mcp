@@ -6,7 +6,8 @@
 {"method":"agent.get","params":{"target":"stall"},"result":{"type":"agent_info","agent":{"pane_id":"wA:p4","terminal_id":"term_stall","name":"stall","agent_status":"idle"}}}
 {"method":"agent.get","params":{"target":"slow"},"result":{"type":"agent_info","agent":{"pane_id":"wA:p5","terminal_id":"term_slow","name":"slow","agent_status":"idle"}}}
 {"method":"agent.get","result":{"type":"agent_info","agent":{"pane_id":"wA:p2","terminal_id":"term_b","name":"reviewer","agent_status":"idle"}}}
-{"method":"pane.get","params":{"pane_id":"wA:p1"},"result":{"type":"pane_info","pane":{"pane_id":"wA:p1","terminal_id":"term_a"}}}
+{"method":"pane.current","params":{"caller_pane_id":"wA:p1"},"result":{"type":"pane_current","pane":{"pane_id":"wA:p1","terminal_id":"term_a"}}}
+{"method":"pane.list","result":{"type":"pane_list","panes":[{"pane_id":"wA:p9","terminal_id":"term_a","workspace_id":"wA","tab_id":"wA:t1"},{"pane_id":"wA:p2","terminal_id":"term_b","workspace_id":"wA","tab_id":"wA:t1"},{"pane_id":"wA:p3","terminal_id":"term_blocker","workspace_id":"wA","tab_id":"wA:t1"},{"pane_id":"wA:p4","terminal_id":"term_stall","workspace_id":"wA","tab_id":"wA:t1"},{"pane_id":"wA:p5","terminal_id":"term_slow","workspace_id":"wA","tab_id":"wA:t1"}]}}
 {"method":"agent.prompt","params":{"target":"wA:p3","text":"go","wait":{"until":["idle","done","blocked"],"timeout_ms":60000}},"error":{"code":"agent_blocked","message":"agent is blocked"}}
 {"method":"agent.prompt","params":{"target":"wA:p4","text":"go","wait":{"until":["idle","done","blocked"],"timeout_ms":60000}},"error":{"code":"agent_prompt_stalled","message":"no work started"}}
 {"method":"agent.prompt","params":{"target":"wA:p5","text":"go","wait":{"until":["idle"],"timeout_ms":1500}},"error":{"code":"timeout","message":"wait timed out"}}

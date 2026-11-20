@@ -6,10 +6,27 @@ pub const DEFAULT_LINES: u32 = 200;
 pub const MAX_LINES: u32 = 2000;
 pub const MAX_CHARS: usize = 40_000;
 
+/// Waits end at the default unless the caller asks for less, and never pass the
+/// maximum (milliseconds). Shared by pane and agent waits.
+pub const WAIT_DEFAULT_MS: u64 = 60_000;
+pub const WAIT_MAX_MS: u64 = 600_000;
+
 /// The `lines` to ask herdr for: the default when unset, never over the maximum.
 #[must_use]
 pub fn lines(requested: Option<u32>) -> u32 {
-    requested.unwrap_or(DEFAULT_LINES).clamp(1, MAX_LINES)
+    lines_within(requested, DEFAULT_LINES, MAX_LINES)
+}
+
+/// `lines` with another default and maximum (agent reads: 100 and 1000).
+#[must_use]
+pub fn lines_within(requested: Option<u32>, default: u32, max: u32) -> u32 {
+    requested.unwrap_or(default).clamp(1, max)
+}
+
+/// The wait to ask herdr for, in milliseconds.
+#[must_use]
+pub fn wait_ms(requested: Option<u64>) -> u64 {
+    requested.unwrap_or(WAIT_DEFAULT_MS).clamp(1, WAIT_MAX_MS)
 }
 
 /// The last `MAX_CHARS` characters of `text`, or `None` when it already fits.

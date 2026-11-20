@@ -1,4 +1,5 @@
-{"method":"pane.list","result":{"type":"pane_list","panes":[{"pane_id":"wA:p1","workspace_id":"wA","tab_id":"wA:t1"},{"pane_id":"wA:p2","workspace_id":"wA","tab_id":"wA:t2"}]}}
+{"method":"pane.current","params":{"caller_pane_id":"wA:p1"},"result":{"type":"pane_current","pane":{"pane_id":"wA:p1","terminal_id":"term_me","workspace_id":"wA","tab_id":"wA:t1"}}}
+{"method":"pane.list","result":{"type":"pane_list","panes":[{"pane_id":"wA:p1","terminal_id":"term_me","workspace_id":"wA","tab_id":"wA:t1"},{"pane_id":"wA:p2","terminal_id":"term_2","workspace_id":"wA","tab_id":"wA:t2"}]}}
 {"method":"pane.get","result":{"type":"pane_info","pane":{"pane_id":"wA:p2","workspace_id":"wA","tab_id":"wA:t1","cwd":"/x"}}}
 {"method":"pane.read","result":{"type":"pane_read","read":{"pane_id":"wA:p2","source":"recent_unwrapped","format":"text","text":"hello\nworld","revision":0,"truncated":false}}}
 {"method":"pane.split","result":{"type":"pane_info","pane":{"pane_id":"wA:p3","workspace_id":"wA","tab_id":"wA:t1"}}}

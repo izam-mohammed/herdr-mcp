@@ -3,7 +3,11 @@ mod support;
 use serde_json::{Value, json};
 use support::{FakeHerdr, Mcp, Opts};
 
-const INSIDE: &[(&str, &str)] = &[("HERDR_ENV", "1"), ("HERDR_PANE_ID", "wA:p1")];
+const INSIDE: &[(&str, &str)] = &[
+    ("HERDR_ENV", "1"),
+    ("HERDR_PANE_ID", "wA:p1"),
+    ("HERDR_MCP_TOOLS", "agents"),
+];
 const FIXTURES: &str = include_str!("fixtures/lane04.jsonl");
 const WRITES: &[&str] = &[
     "herdr_agent_prompt",

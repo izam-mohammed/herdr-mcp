@@ -2,6 +2,7 @@
 //! Pane output is untrusted data; reads are capped (`limits`), waits are bounded.
 use crate::error::{self, Failure};
 use crate::limits;
+use crate::safety::Target;
 use crate::server::Server;
 use rmcp::handler::server::router::tool::ToolRouter;
 use rmcp::handler::server::wrapper::Parameters;
@@ -15,11 +16,6 @@ use std::time::Duration;
 pub fn router() -> ToolRouter<Server> {
     Server::panes_router()
 }
-
-/// Refusal code for a tool aimed at the server's own pane.
-const SELF_TARGET: &str = "self_target";
-const DEFAULT_WAIT_MS: u64 = 60_000;
-const MAX_WAIT_MS: u64 = 600_000;
 
 #[derive(Serialize, Deserialize, JsonSchema)]
 struct PaneList {
@@ -265,21 +261,11 @@ fn dense(mut params: Value) -> Value {
 }
 
 impl Server {
-    /// Typing into, clearing or closing the server's own pane would act on its own client.
-    fn refuse_own_pane(&self, pane_id: &str) -> Option<Failure> {
-        (self.shared.config.pane_id.as_deref() == Some(pane_id)).then(|| {
-            Failure::new(
-                SELF_TARGET,
-                format!("{pane_id} is your own pane; act on another pane"),
-            )
-        })
-    }
-
     /// Like `herdr`, for a request on a pane the caller must not own.
     async fn herdr_other(&self, method: &str, pane_id: &str, params: Value) -> CallToolResult {
-        match self.refuse_own_pane(pane_id) {
-            Some(refusal) => refusal.into_result(),
-            None => self.herdr(method, params).await,
+        match self.self_refusal(&Target::Pane(pane_id), false).await {
+            Err(refusal) => refusal.into_result(),
+            Ok(()) => self.herdr(method, params).await,
         }
     }
 
@@ -292,7 +278,7 @@ impl Server {
         lines: Option<u32>,
         timeout_ms: Option<u64>,
     ) -> Result<Value, Failure> {
-        let ms = timeout_ms.unwrap_or(DEFAULT_WAIT_MS).clamp(1, MAX_WAIT_MS);
+        let ms = limits::wait_ms(timeout_ms);
         let params = json!({
             "pane_id": pane_id, "source": source, "match": m,
             "lines": limits::lines(lines), "timeout_ms": ms, "strip_ansi": true,
@@ -328,9 +314,7 @@ impl Server {
     async fn run_in_pane(&self, p: PaneRun) -> Result<Value, Failure> {
         let client = &self.shared.client;
         let (pane_id, created) = if let Some(id) = &p.pane_id {
-            if let Some(refusal) = self.refuse_own_pane(id) {
-                return Err(refusal);
-            }
+            self.self_refusal(&Target::Pane(id), false).await?;
             (id.clone(), None)
         } else {
             let split = PaneSplit {
