@@ -372,3 +372,121 @@ async fn a_new_pane_is_watched_without_losing_or_doubling_events() {
     until("the third subscription", || fake.subscribes().len() == 3).await;
     assert_eq!(watched(&fake.subscribes()[2]), ["w1:p1"]);
 }
+
+async fn gap_after(mcp: &mut Mcp, since: u64) -> Value {
+    for _ in 0..200 {
+        let r = mcp
+            .call("herdr_events_recent", json!({"since": since}))
+            .await;
+        if let Some(g) = ok(&r)["gaps"].as_array().and_then(|g| g.first()) {
+            return g.clone();
+        }
+        tokio::time::sleep(Duration::from_millis(25)).await;
+    }
+    panic!("no gap marker");
+}
+
+#[tokio::test]
+async fn events_lost_leaves_a_gap_refreshes_and_resubscribes() {
+    let fake = FakeEvents::start("g1", &["w1:p1"]);
+    let mut mcp = start(&fake, &[]).await;
+    fake.wait_subscribed(1).await;
+    fake.emit("tab.created", "tab_created", &tab_created("w1", "w1:t2"));
+    poll_status(&mut mcp, 1).await;
+
+    fake.lose();
+    let gap = gap_after(&mut mcp, 0).await;
+    assert!(
+        gap["reason"].as_str().unwrap().starts_with("events_lost"),
+        "{gap}"
+    );
+    assert_eq!(gap["detail"]["snapshot"]["focused_pane_id"], "w1:p1");
+    assert_eq!(gap["from_seq"], 2);
+    assert!(fake.snapshots() >= 1);
+
+    // Resubscribed: new events flow and the loss is counted.
+    until("a second subscribe", || fake.subscribes().len() == 2).await;
+    fake.wait_subscribed(1).await;
+    fake.emit(
+        "tab.closed",
+        "tab_closed",
+        &json!({"type":"tab_closed","tab_id":"w1:t2","workspace_id":"w1"}),
+    );
+    poll_status(&mut mcp, 3).await;
+    let st = ok(&mcp.call("herdr_events_status", json!({})).await).clone();
+    assert_eq!(
+        (st["connected"].clone(), st["lost"].clone()),
+        (json!(true), json!(1))
+    );
+    // A wait ignores the marker; the cursor reads it in order.
+    let r = mcp.call("herdr_events_recent", json!({"since": 1})).await;
+    let names: Vec<&str> = ok(&r)["events"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|e| e["event"].as_str().unwrap())
+        .collect();
+    assert_eq!(names, ["gap", "tab_closed"]);
+}
+
+#[tokio::test]
+async fn a_dropped_connection_reconnects_and_marks_the_gap() {
+    let fake = FakeEvents::start("g2", &[]);
+    let mut mcp = start(&fake, &[]).await;
+    fake.wait_subscribed(1).await;
+    fake.drop_subscribers();
+    let gap = gap_after(&mut mcp, 0).await;
+    assert_eq!(gap["reason"], "connection closed");
+    fake.wait_subscribed(1).await;
+    let st = ok(&mcp.call("herdr_events_status", json!({})).await).clone();
+    assert_eq!(st["lost"], 1);
+}
+
+#[tokio::test]
+async fn a_rejected_pane_set_resubscribes_with_a_fresh_list() {
+    let fake = FakeEvents::start("g3", &["w1:p1"]);
+    let mut mcp = start(&fake, &[]).await;
+    fake.wait_subscribed(1).await;
+
+    // The rebuild's subscribe is refused twice (a pane closed in between), so
+    // the hub falls back to a full resubscribe, which herdr accepts.
+    fake.reject_next_subscribes(2);
+    fake.set_panes(&["w1:p1", "w1:p2"]);
+    fake.emit("pane.created", "pane_created", &pane_event("w1:p2"));
+    let gap = gap_after(&mut mcp, 0).await;
+    assert!(
+        gap["reason"].as_str().unwrap().contains("rejected"),
+        "{gap}"
+    );
+    until("a live subscription again", || {
+        fake.live_subscriptions() == 1 && fake.subscribes().len() >= 4
+    })
+    .await;
+    let last = fake.subscribes().pop().unwrap();
+    assert_eq!(watched(&last), ["w1:p1", "w1:p2"]);
+}
+
+#[tokio::test]
+async fn herdr_down_at_start_is_retried_until_it_is_up() {
+    // The server starts first; herdr appears later at that socket.
+    let socket = support::socket_path("g4");
+    let _ = std::fs::remove_file(&socket);
+    let mut mcp = Mcp::start(
+        &socket,
+        &Opts {
+            args: &[],
+            env: INSIDE,
+        },
+    )
+    .await;
+    let st = ok(&mcp.call("herdr_events_status", json!({})).await).clone();
+    assert_eq!(st["connected"], false);
+    tokio::time::sleep(Duration::from_millis(400)).await;
+    let fake = FakeEvents::start("g4", &[]);
+    fake.wait_subscribed(1).await;
+    fake.emit("tab.created", "tab_created", &tab_created("w1", "w1:t1"));
+    poll_status(&mut mcp, 1).await;
+    // Never connected before, so nothing was lost and no gap is claimed.
+    let r = mcp.call("herdr_events_recent", json!({"since": 0})).await;
+    assert_eq!(ok(&r)["gaps"], json!([]));
+}

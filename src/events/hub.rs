@@ -261,15 +261,42 @@ fn handle(hub: &EventHub, line: &str) -> Option<Line> {
     })
 }
 
+/// What a resubscribe tells the reader about the world now, from
+/// `session.snapshot` on its own connection (herdr's advice after a loss).
+async fn snapshot_detail(client: &HerdrClient) -> Value {
+    let Ok(result) = client.call("session.snapshot", json!({})).await else {
+        return json!({"snapshot": null});
+    };
+    let snap = &result["snapshot"];
+    let count = |k: &str| snap[k].as_array().map_or(0, Vec::len);
+    json!({"snapshot": {
+        "focused_workspace_id": snap["focused_workspace_id"],
+        "focused_tab_id": snap["focused_tab_id"],
+        "focused_pane_id": snap["focused_pane_id"],
+        "workspaces": count("workspaces"),
+        "tabs": count("tabs"),
+        "panes": count("panes"),
+    }})
+}
+
 async fn run(hub: Arc<EventHub>, client: HerdrClient, socket: PathBuf) {
     let mut backoff = BACKOFF_MIN;
+    // Why the last stream ended, until the next one has started and left a gap marker.
+    let mut ended: Option<String> = None;
     loop {
         if let Ok((conn, panes)) = open(&client, &socket).await {
             backoff = BACKOFF_MIN;
+            if let Some(reason) = ended.take() {
+                let detail = snapshot_detail(&client).await;
+                hub.ring().push_gap(&reason, &detail);
+                hub.notify.notify_waiters();
+            }
             hub.panes_watched.store(panes.len(), Ordering::Relaxed);
             hub.connected.store(true, Ordering::Relaxed);
-            stream(&hub, &client, &socket, conn, panes).await;
+            let reason = stream(&hub, &client, &socket, conn, panes).await;
             hub.connected.store(false, Ordering::Relaxed);
+            hub.ring().lost += 1;
+            ended = Some(reason);
             tokio::time::sleep(BACKOFF_MIN).await;
         } else {
             tokio::time::sleep(backoff).await;
@@ -285,7 +312,7 @@ async fn stream(
     socket: &Path,
     mut conn: Conn,
     mut panes: Vec<String>,
-) {
+) -> String {
     let mut dups = Dups::default();
     let mut rebuild_at: Option<tokio::time::Instant> = None;
     loop {
@@ -300,7 +327,9 @@ async fn stream(
                     // A pane came or went while the old stream drained: go again.
                     Ok(true) => rebuild_at = Some(tokio::time::Instant::now()),
                     Ok(false) => {}
-                    Err(_) => return,
+                    Err(e) => {
+                        return format!("pane set rejected or herdr unreachable ({})", e.code);
+                    }
                 }
             }
             Ok(Ok(Some(line))) => {
@@ -308,14 +337,14 @@ async fn stream(
                     continue;
                 }
                 match handle(hub, &line) {
-                    Some(Line::Lost) => return,
+                    Some(Line::Lost) => return "events_lost: the subscriber fell behind".into(),
                     Some(Line::PaneSetChanged) => {
                         rebuild_at.get_or_insert(tokio::time::Instant::now() + REBUILD_DELAY);
                     }
                     Some(Line::Event) | None => {}
                 }
             }
-            Ok(Ok(None) | Err(_)) => return,
+            Ok(Ok(None) | Err(_)) => return "connection closed".into(),
         }
     }
 }

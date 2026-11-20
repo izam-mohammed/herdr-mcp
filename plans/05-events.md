@@ -198,15 +198,18 @@ repository instructions for recording useful development findings.
 
 ### Phase 3: lost events and restarts
 
-- [ ] `events_lost`, a rejected pane set and a dropped connection each
+- [x] `events_lost`, a rejected pane set and a dropped connection each
   lead to a gap marker, a snapshot refresh and a resubscribe with backoff
   (expected in `src/events/hub.rs`); pinned by `tests/events.rs` on the
   fake socket and by `tests/live.rs` stopping and restarting the isolated
-  server.
-- [ ] Post-implementation review of phases 1 to 3, recorded in
+  server. Landed 2026-11-20: a rejected rebuild falls back to a full
+  resubscribe; the gap marker carries the reason and a
+  `session.snapshot` summary, written once the new stream has started; the
+  tests are in `tests/lane05_tools.rs` and `tests/lane05_live.rs`.
+- [x] Post-implementation review of phases 1 to 3, recorded in
   `docs/research/05-events.md`: scope, findings or none, fixes and re-run
   checks, and the RSS measured with a full 1000-event buffer.
-- [ ] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes, and
+- [x] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes, and
   `sh scripts/bench.sh` stays inside the budget with the hub running.
 
 ### Phase 4: open the PR

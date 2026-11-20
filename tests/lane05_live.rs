@@ -297,3 +297,55 @@ async fn agent_status_changes_are_seen_for_old_and_new_panes() {
     })
     .await;
 }
+
+#[tokio::test]
+async fn the_hub_survives_the_servers_restart_and_marks_the_gap() {
+    if !live() {
+        eprintln!("skipped: set HERDR_MCP_LIVE=1");
+        return;
+    }
+    let _one = ONE_AT_A_TIME.lock().await;
+    let mut session = TestSession::start().await;
+    raw(
+        &session.socket,
+        "workspace.create",
+        json!({"label":"live","focus":true}),
+    )
+    .await
+    .expect("workspace.create");
+    let mut mcp = mcp(&session).await;
+    wait_connected(&mut mcp).await;
+
+    session.stop_server();
+    for _ in 0..100 {
+        if status(&mut mcp).await["connected"] == false {
+            break;
+        }
+        tokio::time::sleep(Duration::from_millis(50)).await;
+    }
+    assert_eq!(status(&mut mcp).await["connected"], false);
+
+    session.boot().await;
+    wait_connected(&mut mcp).await;
+    let gap = find_event(&mut mcp, 0, |e| e["event"] == "gap").await;
+    assert_eq!(gap["data"]["reason"], "connection closed");
+    assert!(gap["data"]["detail"]["snapshot"].is_object(), "{gap}");
+    assert!(status(&mut mcp).await["lost"].as_u64() >= Some(1));
+
+    // Events flow again on the new connection.
+    raw(
+        &session.socket,
+        "workspace.create",
+        json!({"label":"after"}),
+    )
+    .await
+    .expect("workspace.create");
+    find_event(&mut mcp, gap_seq(&gap), |e| {
+        e["event"] == "workspace_created"
+    })
+    .await;
+}
+
+fn gap_seq(gap: &Value) -> u64 {
+    gap["seq"].as_u64().expect("seq")
+}
