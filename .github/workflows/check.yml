@@ -3,21 +3,24 @@ on:
   pull_request:
   push:
     branches: [main]
-permissions:
-  contents: read
+permissions: {}
 jobs:
   check:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+          persist-credentials: false
       - name: toolchain
         run: rustup show
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@98c8021b550208e191a6a3145459bfc9fb29c4c0 # v2.8.0
       - name: tools
         run: |
           cargo install --locked cargo-deny
+          cargo install --locked cargo-llvm-cov --version 0.9.1
           sudo apt-get update && sudo apt-get install -y shellcheck
           curl -sSfL https://github.com/gitleaks/gitleaks/releases/download/v8.28.0/gitleaks_8.28.0_linux_x64.tar.gz | sudo tar -xz -C /usr/local/bin gitleaks
       - name: check
