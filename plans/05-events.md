@@ -165,13 +165,21 @@ repository instructions for recording useful development findings.
 
 ### Phase 1: the rough cut: recent and wait on lifecycle events (needs you: try it)
 
-- [ ] `EventHub` subscribing to every lifecycle type (expected in
+- [x] `EventHub` subscribing to every lifecycle type (expected in
   `src/events/hub.rs`), the ring (`src/events/ring.rs`) and
   `herdr_events_recent`, `herdr_events_wait`, `herdr_events_status`
   (`src/tools/events.rs`); pinned by `tests/events.rs` (eviction, cursor,
   filters, wake-up) and `tests/live.rs` (a tab created in the isolated
-  session shows up); `README.md` updated.
-- [ ] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes.
+  session shows up); `README.md` updated. Landed 2026-11-20: the tests are
+  `tests/lane05_tools.rs` (fake socket, streaming fake in
+  `tests/support/fake_events.rs`), `tests/lane05_live.rs` (session
+  `herdr-mcp-test-05`) and unit tests in `src/events/ring.rs`; the
+  subscription is opened in `src/events/hub.rs` without touching
+  `src/herdr.rs`; `HERDR_MCP_TOOLS` defaults to the plan 01 groups in
+  `tests/support/mod.rs` so older tests do not see later groups.
+- [x] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes (and
+  `HERDR_MCP_LIVE=1 cargo test --locked --test lane05_live -- --test-threads=1`,
+  which `check.sh` does not name).
 - [ ] You try it: in Claude Code, ask what changed in herdr in the last
   minute after opening and closing a tab by hand; then ask it to wait until
   you focus another workspace, and say whether the answers are useful.
