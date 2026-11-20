@@ -71,11 +71,22 @@ changed and why, and the checks run with their result. Tool names are
 
 `.github/workflows/check.yml` runs `sh scripts/check.sh` on every PR and
 on pushes to `main` (no live tests: no herdr in CI); every action is pinned by
-SHA, `permissions: {}` at the top. A red check blocks merge.
+SHA, `permissions: {}` at the top. A red check blocks merge. It is also a
+reusable workflow (`workflow_call`), which the release calls.
+
 `.github/workflows/security.yml` calls the shared gate
 `izam-mohammed/.github/.github/workflows/security-scan.yml` (pinned to its
 commit SHA, `ecosystem: rust`) on every PR and weekly: gitleaks blocks;
 osv-scanner, semgrep and zizmor report to the PR.
+
+`.github/workflows/release.yml` (made by `dist`, config in
+`dist-workspace.toml`, see `docs/releases.md`) starts on a pushed version tag.
+Its `check` job runs the same `scripts/check.sh` first; nothing builds if it
+fails. The token is read-only except on the `host` job (`contents: write`),
+which creates the GitHub release. On pull requests it runs `dist plan` only.
+Locally: `dist plan`, and `dist build --artifacts=local --target <host>`.
+Two marked hand edits (`allow-dirty = ["ci"]`) keep it from being regenerated
+blindly: read `docs/releases.md` before running `dist generate`.
 
 ## Decided
 

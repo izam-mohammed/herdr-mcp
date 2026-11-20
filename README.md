@@ -13,26 +13,78 @@ any other MCP client list, open, close, read, prompt and wait on everything
 running in your herdr session. It's middle management, written in Rust,
 in 3.6 MB of RAM. Cheaper than the human kind, and it never schedules a sync.
 
-## Install: let your agent do it
+## Install
 
-You're going to delegate anyway, so paste this into Claude Code or Codex,
-running inside a herdr pane:
+Needs [herdr](https://herdr.dev). No Rust toolchain, on Linux and macOS
+(x86_64 and arm64). Windows is out: herdr doesn't run there, so neither do we.
+
+### The shell installer (recommended)
+
+```sh
+curl --proto '=https' --tlsv1.2 -LsSf https://github.com/izam-mohammed/herdr-mcp/releases/latest/download/herdr-mcp-installer.sh | sh
+herdr-mcp --version
+claude mcp add herdr -- herdr-mcp     # Claude Code
+codex mcp add herdr -- herdr-mcp      # Codex
+```
+
+It puts `herdr-mcp` in `~/.cargo/bin` (or `$CARGO_HOME/bin`) and adds that
+to your `PATH` if needed. Want to check the download yourself? Use the
+release download below, which has the checksums.
+Open a new shell if `herdr-mcp --version` says not found.
+
+**The repository is private today**, so the one-liner only works once it is
+public. Until then, with access, use the release download below (`gh` is
+logged in, so it can see private releases).
+
+### `cargo binstall`
+
+The crate is not on crates.io, so point binstall at this repository (for a
+private one, set `GITHUB_TOKEN` first):
+
+```sh
+cargo binstall --git https://github.com/izam-mohammed/herdr-mcp herdr-mcp
+herdr-mcp --version
+```
+
+### A release download
+
+Pick your target from the [releases page](https://github.com/izam-mohammed/herdr-mcp/releases)
+(`x86_64` or `aarch64`, `unknown-linux-gnu`, `unknown-linux-musl` or `apple-darwin`).
+Each archive has a `.sha256` next to it, and `sha256.sum` lists them all.
+
+```sh
+t=x86_64-unknown-linux-gnu            # your target
+gh release download --repo izam-mohammed/herdr-mcp --pattern "herdr-mcp-$t.tar.xz*"
+sha256sum -c "herdr-mcp-$t.tar.xz.sha256"      # macOS: shasum -a 256 -c
+tar -xf "herdr-mcp-$t.tar.xz"
+install "herdr-mcp-$t/herdr-mcp" ~/.local/bin/
+herdr-mcp --version
+```
+
+### Upgrade and remove
+
+Upgrade by running the same install again: the installer and `cargo
+binstall` fetch the latest release; for a download, fetch the newer archive.
+Check with `herdr-mcp --version`.
+
+Remove with `rm "$(command -v herdr-mcp)"` and
+`claude mcp remove herdr` (or `codex mcp remove herdr`).
+
+### From source, or let your agent do it
+
+Needs a Rust toolchain ([rustup](https://rustup.rs)):
+
+```sh
+cargo install --locked --git https://github.com/izam-mohammed/herdr-mcp
+```
+
+You're going to delegate anyway, so you can paste this into Claude Code or
+Codex, running inside a herdr pane:
 
 ```text
 Install the herdr MCP server: run `cargo install --locked --git https://github.com/izam-mohammed/herdr-mcp`,
 then register it with `claude mcp add herdr -- herdr-mcp` (if you are Claude Code)
 or `codex mcp add herdr -- herdr-mcp` (if you are Codex). Then list my herdr tabs.
-```
-
-## Install: by hand, like it's 2023
-
-Needs [herdr](https://herdr.dev) and a Rust toolchain ([rustup](https://rustup.rs)).
-
-```sh
-cargo install --locked --git https://github.com/izam-mohammed/herdr-mcp
-
-claude mcp add herdr -- herdr-mcp     # Claude Code
-codex mcp add herdr -- herdr-mcp      # Codex
 ```
 
 Then start your agent **inside a herdr pane**. Started anywhere else, it's
