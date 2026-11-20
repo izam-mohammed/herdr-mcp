@@ -71,7 +71,15 @@ changed and why, and the checks run with their result. Tool names are
 
 `.github/workflows/check.yml` runs `sh scripts/check.sh` on every PR and
 on pushes to `main` (no live tests: no herdr in CI). A red check blocks
-merge.
+merge. It is also a reusable workflow (`workflow_call`), which the release
+calls.
+
+`.github/workflows/release.yml` (made by `dist`, config in
+`dist-workspace.toml`, see `docs/releases.md`) starts on a pushed version tag.
+Its `check` job runs the same `scripts/check.sh` first; nothing builds if it
+fails. The token is read-only except on the `host` job (`contents: write`),
+which creates the GitHub release. On pull requests it runs `dist plan` only.
+Locally: `dist plan`, and `dist build --artifacts=local --target <host>`.
 
 ## Decided
 

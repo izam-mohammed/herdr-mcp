@@ -4,7 +4,16 @@ version = "0.1.0"
 edition = "2024"
 description = "An MCP server that lets Claude Code and other MCP clients see and control a herdr session"
 license = "MIT"
+repository = "https://github.com/izam-mohammed/herdr-mcp"
+readme = "README.md"
 publish = false
+
+# cargo binstall: the archives dist builds (docs/releases.md); no crates.io needed.
+[package.metadata.binstall]
+pkg-url = "{ repo }/releases/download/v{ version }/{ name }-{ target }.tar.xz"
+pkg-fmt = "txz"
+bin-dir = "{ name }-{ target }/{ bin }{ binary-ext }"
+disabled-strategies = ["quick-install", "compile"]
 
 [dependencies]
 rmcp = { version = "3.11", features = ["server", "transport-io"] }
@@ -34,3 +43,8 @@ lto = true
 codegen-units = 1
 strip = true
 panic = "abort"
+
+# The profile that 'dist' will build with
+[profile.dist]
+inherits = "release"
+lto = "thin"
