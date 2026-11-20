@@ -6,6 +6,8 @@
   </picture>
 </p>
 
+<p align="center"><a href="https://izam-mohammed.github.io/herdr-mcp/">the one-page site</a> (live once the repository is public)</p>
+
 <p align="center"><em>You gave your AI agents their own terminals. Now one of them gets to be the boss.</em></p>
 
 An MCP server for [herdr](https://herdr.dev). It lets Claude Code, Codex or
