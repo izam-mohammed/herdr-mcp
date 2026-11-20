@@ -113,6 +113,18 @@ version ships `herdr_whoami`, `herdr_status`, `herdr_snapshot`,
 `herdr_tab_create`, `herdr_tab_rename` and `herdr_agent_list`; the rest of
 the table below arrives plan by plan.
 
+## Events
+
+With the `events` group on, the server keeps one subscription to herdr and
+a ring of the latest events (`--event-buffer`). `herdr_events_recent` takes
+a cursor (`since`, the `next` of the last call) and filters (`types`,
+`workspace_id`, `tab_id`, `pane_id`); `herdr_events_wait` blocks until the
+next match, or `timed_out`, and takes `agent_status`. Both are reads and
+stay in read-only mode. A `gap` event and the `gaps` list mark where events
+may be missing (evicted, or herdr dropped the connection);
+`herdr_events_status` shows `connected` and `lost`. History starts when the
+server starts: herdr replays nothing.
+
 ## Flags
 
 Flag first, then the environment variable.
@@ -124,6 +136,7 @@ Flag first, then the environment variable.
 | `--read-only` | `HERDR_MCP_READ_ONLY=1` | Register read tools only |
 | `--allow-outside-herdr` | `HERDR_MCP_ALLOW_OUTSIDE=1` | Allow writes when not started inside herdr |
 | `--tools <a,b>` | `HERDR_MCP_TOOLS` | Register only these groups: `session`, `workspaces`, `tabs`, `panes`, `agents`, `events`, `worktrees`, `layout`, `notify` (default all) |
+| `--event-buffer <n>` | `HERDR_MCP_EVENT_BUFFER` | Events kept for `herdr_events_*` (default 1000, at most 1000000) |
 | `--debug` | | Log request and reply payloads to stderr |
 
 Without `--debug`, stderr carries method names and ids only, never pane text.

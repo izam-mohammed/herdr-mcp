@@ -4,6 +4,7 @@ use crate::server::Server;
 use rmcp::handler::server::router::tool::ToolRouter;
 
 mod agents;
+mod events;
 mod session;
 mod tabs;
 mod workspaces;
@@ -16,6 +17,7 @@ const GROUPS: &[(&str, Build)] = &[
     ("workspaces", workspaces::router),
     ("tabs", tabs::router),
     ("agents", agents::router),
+    ("events", events::router),
 ];
 
 /// The routers of the groups asked for.
