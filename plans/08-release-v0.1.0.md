@@ -97,7 +97,7 @@ here.
 - Making the repository public, which the installer one-liner needs for
   anyone without access: default, keep it private and document
   `gh release download` for people with access.
-- The licence: default, Apache-2.0, matching herdr.
+- The licence: settled, MIT (`plans/12-repo-hygiene.md`, `LICENSE`).
 
 ## Rollback
 
@@ -139,7 +139,7 @@ repository instructions for recording useful development findings.
 ### Phase 2: review and the first release
 
 - [ ] Post-implementation review of the workflow's permissions and the
-  installer, recorded in `docs/research/08-release.md`, then tag `v0.1.0`
+  installer, recorded in `docs/research/08-release-v0.1.0.md`, then tag `v0.1.0`
   once the try is good.
 - [ ] Check: `sh scripts/check.sh` passes, and the `v0.1.0` release lists
   every target with checksums.

@@ -11,7 +11,7 @@ on every pull request, reusing the shared security gate in
 Built so far: `docs/built/BUILT-2026-10-22-1826.md`.
 
 What it means here: there is no code yet, but `plans/01-first-version.md`
-Phase 2 already lands `scripts/check.sh` (rustfmt, Clippy `-D warnings`,
+Phase 1 already lands `scripts/check.sh` (rustfmt, Clippy `-D warnings`,
 `cargo test`, cargo-deny, gitleaks, ShellCheck, the build) and
 `.github/workflows/check.yml`, as `docs/standards.md` records. Two parts of
 the ask are in no plan: a coverage floor, and the shared gate (semgrep for

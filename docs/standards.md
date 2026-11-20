@@ -2,7 +2,7 @@
 
 Run everything: `sh scripts/check.sh`. A change is done when it passes,
 locally and in CI. Chosen in `plans/01-first-version.md` (decision 6);
-`scripts/check.sh` and its config land in that plan's Phase 2.
+`scripts/check.sh` and its config land in that plan's Phase 1.
 
 ## Toolchain
 

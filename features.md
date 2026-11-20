@@ -242,7 +242,7 @@ Short MCP prompts the user can pick from the client:
 
 - **Transport to the client:** stdio first (what Claude Code uses for a local server). Streamable HTTP
   is a later option.
-- **Install:** one command, no setup step (`plans/08-release.md`). Registered with
+- **Install:** one command, no setup step (`plans/08-release-v0.1.0.md`). Registered with
   `claude mcp add herdr -- <command>` in any of the claude profiles.
 - **Config:** CLI flags and env vars only (session, read-only, limits). No config file needed.
 - **Logging:** to stderr (stdout is the MCP channel), with a `--debug` flag that logs socket traffic.

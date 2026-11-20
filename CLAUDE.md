@@ -10,3 +10,5 @@ Standards: docs/standards.md
 - Never test against the live herdr session's destructive methods; use an
   isolated `herdr --session herdr-mcp-test server` (see the API doc's
   Gotchas). Never run `herdr server stop` on the default session.
+
+Releases: docs/releases.md
