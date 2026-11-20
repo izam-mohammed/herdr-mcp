@@ -370,18 +370,21 @@ repository instructions for recording useful development findings.
 
 ### Phase 3: within budget, and big sessions stay small
 
-- [ ] `examples/bench.rs` and `scripts/bench.sh` measure start, RSS after
+- [x] `examples/bench.rs` and `scripts/bench.sh` measure start, RSS after
   1000 calls and call p99 against the live socket, failing past the budget
   (start p50 under 10 ms, RSS under 8 MB, call p99 under 2 ms), and record
   the byte size of `tools/list`; run by `scripts/check.sh` when
   `HERDR_MCP_LIVE=1`.
-- [ ] `herdr_snapshot` takes `workspace_id`, `tab_id` and `summary`
+  Landed 2026-11-20: the bench spawns the release binary 30 times for start p50, warms up 100 calls, then times 1000 `herdr_tab_list` calls end to end over stdio; `scripts/bench.sh` retries a run past the budget twice because timings jitter right after a build. Measured: start p50 about 1 ms, RSS about 4.2 MB, call p99 0.4 to 0.9 ms, `tools/list` 4295 bytes (about 1070 tokens).
+- [x] `herdr_snapshot` takes `workspace_id`, `tab_id` and `summary`
   (counts and ids only) and returns the summary by default once the reply
   passes 20 000 characters, saying so; pinned by `tests/tools.rs`.
-- [ ] Post-implementation review of phases 1 to 3, with the security pass
+  Landed 2026-11-20: summary mode returns `session_snapshot_summary` (counts and ids) with a `note`; `src/snapshot.rs` holds the filter and summary.
+- [x] Post-implementation review of phases 1 to 3, with the security pass
   over `## Security`'s rows, recorded in `docs/research/01-first-version.md`:
   scope, findings or none, fixes and the re-run checks.
-- [ ] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes, and
+  Landed 2026-11-20: recorded as a section at the end of `docs/research/01-first-version.md`; no finding needed a fix here, plan 03 must carry a `lines` cap.
+- [x] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes, and
   `sh scripts/bench.sh` prints the numbers inside the budget.
 
 ### Phase 4: open the PR
