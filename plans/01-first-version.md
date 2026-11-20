@@ -314,25 +314,29 @@ repository instructions for recording useful development findings.
 
 ### Phase 1: prove herdr and rmcp, and the check (needs you: install Rust with rustup)
 
-- [ ] The research is re-checked, since it is dated 22/10/2026: `herdr
+- [x] The research is re-checked, since it is dated 22/10/2026: `herdr
   --version` and `ping` protocol, `rustc --version`, and the newest `rmcp`
   on crates.io, each compared with `docs/standards.md` and
   `docs/external/`; any that moved is updated there with the new date
   before anything is built.
-- [ ] `scripts/prove/herdr-socket.sh` sends `ping` to the resolved socket
+  Landed 2026-11-20: herdr 0.9.5 and protocol 22 unchanged; rustc is 1.100.0 (standards.md said 1.99, updated); newest rmcp is 3.11.0 (was 3.6.0), so `Cargo.toml` uses 3.11 and `docs/external/rmcp.md` records it.
+- [x] `scripts/prove/herdr-socket.sh` sends `ping` to the resolved socket
   with `nc -U` per `docs/external/herdr-socket-api.md` § Wire format and
   prints `PASS` when the reply is `pong` at protocol 22.
-- [ ] `examples/prove_rmcp.rs` (one `ping` tool, per `docs/external/rmcp.md`)
+  Landed 2026-11-20: `nc -U -w 2` works (OpenBSD netcat); proof run against the isolated `herdr-mcp-test` session because no default herdr server was running here.
+- [x] `examples/prove_rmcp.rs` (one `ping` tool, per `docs/external/rmcp.md`)
   with `Cargo.toml` and `rust-toolchain.toml`, and
   `scripts/prove/rmcp-stdio.sh` that builds it, pipes `initialize`,
   `notifications/initialized` and `tools/call`, and prints `PASS` when the
   call returns herdr's `pong`; the MCP `protocolVersion` rmcp negotiates is
   recorded in `docs/external/rmcp.md`, settling decision 1's open spec
   question.
-- [ ] The standard check lands: `scripts/check.sh`, `rustfmt.toml`,
+  Landed 2026-11-20: negotiated protocolVersion is 2025-11-25 at most (2025-06-18 if offered); recorded in `docs/external/rmcp.md`.
+- [x] The standard check lands: `scripts/check.sh`, `rustfmt.toml`,
   `deny.toml`, Clippy lints in `Cargo.toml`, `.gitignore`, and
   `.github/workflows/check.yml`, as `docs/standards.md` says.
-- [ ] Check: both scripts exit 0 and print `PASS`, and `sh scripts/check.sh`
+  Landed 2026-11-20: `deny.toml` ignores RUSTSEC-2026-0543 (chrono unmaintained, transitive via rmcp and schemars).
+- [x] Check: both scripts exit 0 and print `PASS`, and `sh scripts/check.sh`
   passes on the proof crate.
 
 ### Phase 2: the rough cut: tabs from Claude Code (needs you: try it)
