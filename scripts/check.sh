@@ -7,9 +7,15 @@ step() { printf '\n== %s\n' "$1"; }
 
 step format;  cargo fmt --all -- --check
 step lint;    cargo clippy --all-targets --locked -- -D warnings
-step test;    cargo test --locked
+# The live files skip themselves without HERDR_MCP_LIVE; unset here so the live
+# step below is the only place they run.
+step test;    env -u HERDR_MCP_LIVE cargo test --locked
 if [ "${HERDR_MCP_LIVE:-}" = 1 ]; then
-  step live;  cargo test --locked --test live -- --test-threads=1
+  # One file at a time, one thread each: every file owns its own session name
+  # (herdr-mcp-test, -02 to -05; tests/session_names.rs keeps them unique).
+  for f in live lane02_live lane03_live lane04_live lane05_live; do
+    step "live $f"; cargo test --locked --test "$f" -- --test-threads=1
+  done
 fi
 step audit;   cargo deny check advisories bans sources licenses
 step secrets; gitleaks git --no-banner

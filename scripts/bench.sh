@@ -4,7 +4,7 @@
 # session. Never touches the default session.
 set -eu
 cd "$(dirname "$0")/.."
-SESSION=herdr-mcp-test
+SESSION=herdr-mcp-test-bench
 for v in $(env | sed -n 's/^\(HERDR_[A-Z_]*\)=.*/\1/p'); do unset "$v"; done
 sock="$HOME/.config/herdr/sessions/$SESSION/herdr.sock"
 

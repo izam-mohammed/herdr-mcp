@@ -20,7 +20,7 @@ locally and in CI. Chosen in `plans/01-first-version.md` (decision 6);
 | Lint | Clippy | `Cargo.toml` `[lints]` | `cargo clippy --all-targets --locked -- -D warnings` | no errors, no warnings |
 | Types | rustc | | (part of clippy and test) | compiles |
 | Unit and fake-socket tests | `cargo test` | | `cargo test --locked` | all pass |
-| Live tests | `cargo test` | | `HERDR_MCP_LIVE=1 cargo test --locked --test live -- --test-threads=1` | all pass against an isolated `herdr-mcp-test` session |
+| Live tests | `cargo test` | | `HERDR_MCP_LIVE=1 cargo test --locked --test <file> -- --test-threads=1`, for `live`, `lane02_live`, `lane03_live`, `lane04_live`, `lane05_live` | all pass, each file against its own isolated session (`herdr-mcp-test`, `-02` to `-05`) |
 | Performance budget | `scripts/bench.sh` | the budget in the script | `sh scripts/bench.sh` | inside the budget (from plan 01 Phase 3) |
 | Dependency audit | cargo-deny | `deny.toml` | `cargo deny check advisories bans sources licenses` | no advisory, no banned or unknown source |
 | Secret scan | gitleaks | `.gitleaks.toml` (defaults) | `gitleaks git --no-banner` | no findings |
@@ -38,10 +38,16 @@ herdr; locally every phase's check sets it.
 - Fake-socket tests in `tests/`: a `tokio::net::UnixListener` that replays
   recorded herdr responses (`tests/fixtures/*.jsonl`), so tool behaviour,
   errors and safety refusals are tested without herdr.
-- Live tests in `tests/live.rs`: start `herdr --session herdr-mcp-test
-  server` with `HERDR_*` unset, run the real binary over stdio against it,
-  stop and delete the session at the end. They never touch the default
-  session.
+- Live tests in `tests/live.rs` and `tests/lane0N_live.rs`: start `herdr
+  --session herdr-mcp-test[-0N] server` with `HERDR_*` unset, run the real
+  binary over stdio against it, stop and delete the session at the end. They
+  never touch the default session. Each file owns one session name (the bench
+  has `herdr-mcp-test-bench`); `tests/session_names.rs` fails on a duplicate,
+  so two files can never stop each other's server, and `scripts/check.sh`
+  runs them one file at a time with `--test-threads=1`.
+- Test files that count requests or list tools name their groups with
+  `HERDR_MCP_TOOLS` (the harness sets no default): the events hub sends its
+  own requests when `events` is on.
 - One test: `cargo test --locked <name>`.
 
 ## Constraints

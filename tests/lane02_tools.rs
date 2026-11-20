@@ -5,7 +5,11 @@ use serde_json::{Value, json};
 use support::{FakeHerdr, Mcp, Opts};
 
 const FIXTURES: &str = include_str!("fixtures/lane02.jsonl");
-const INSIDE: &[(&str, &str)] = &[("HERDR_ENV", "1"), ("HERDR_PANE_ID", "wA:p1")];
+const INSIDE: &[(&str, &str)] = &[
+    ("HERDR_ENV", "1"),
+    ("HERDR_PANE_ID", "wA:p1"),
+    ("HERDR_MCP_TOOLS", "session,workspaces,tabs"),
+];
 
 fn fake(tag: &str, extra: &str) -> FakeHerdr {
     let all = format!("{extra}\n{FIXTURES}");
@@ -279,7 +283,7 @@ async fn outside_herdr_there_is_no_self() {
         &f.socket,
         &Opts {
             args: &["--allow-outside-herdr"],
-            env: &[],
+            env: &[("HERDR_MCP_TOOLS", "session,workspaces,tabs")],
         },
     )
     .await;

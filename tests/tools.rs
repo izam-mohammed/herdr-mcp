@@ -4,7 +4,15 @@ mod support;
 use serde_json::{Value, json};
 use support::{FakeHerdr, Mcp, Opts};
 
-const INSIDE: &[(&str, &str)] = &[("HERDR_ENV", "1"), ("HERDR_PANE_ID", "wA:p1")];
+/// Every group registered (the default). Used where a test lists tools.
+const INSIDE_ALL: &[(&str, &str)] = &[("HERDR_ENV", "1"), ("HERDR_PANE_ID", "wA:p1")];
+/// The plan 01 groups only, so the events hub sends no traffic of its own
+/// and request counts are exactly the tool's.
+const INSIDE: &[(&str, &str)] = &[
+    ("HERDR_ENV", "1"),
+    ("HERDR_PANE_ID", "wA:p1"),
+    ("HERDR_MCP_TOOLS", "session,workspaces,tabs,agents"),
+];
 
 fn fixture(method: &str) -> Value {
     include_str!("fixtures/herdr.jsonl")
@@ -37,6 +45,9 @@ const ALL: &[&str] = &[
     "herdr_agent_send_keys",
     "herdr_agent_start",
     "herdr_agent_wait",
+    "herdr_events_recent",
+    "herdr_events_status",
+    "herdr_events_wait",
     "herdr_pane_clear",
     "herdr_pane_close",
     "herdr_pane_focus",
@@ -80,6 +91,9 @@ const READS: &[&str] = &[
     "herdr_agent_list",
     "herdr_agent_read",
     "herdr_agent_wait",
+    "herdr_events_recent",
+    "herdr_events_status",
+    "herdr_events_wait",
     "herdr_pane_get",
     "herdr_pane_layout",
     "herdr_pane_list",
@@ -98,7 +112,14 @@ const READS: &[&str] = &[
 #[tokio::test]
 async fn inside_herdr_lists_every_tool_with_annotations() {
     let fake = FakeHerdr::start("list", false);
-    let mut mcp = inside(&fake).await;
+    let mut mcp = Mcp::start(
+        &fake.socket,
+        &Opts {
+            args: &[],
+            env: INSIDE_ALL,
+        },
+    )
+    .await;
     assert_eq!(mcp.tool_names().await, ALL);
     let r = mcp.request("tools/list", json!({})).await;
     for t in r["result"]["tools"].as_array().unwrap() {
@@ -166,7 +187,7 @@ async fn read_only_flag_lists_reads_only() {
         &fake.socket,
         &Opts {
             args: &["--read-only"],
-            env: INSIDE,
+            env: INSIDE_ALL,
         },
     )
     .await;
@@ -176,7 +197,8 @@ async fn read_only_flag_lists_reads_only() {
         r["error"].is_object(),
         "an unregistered tool is refused: {r}"
     );
-    assert!(fake.requests().is_empty());
+    // The events hub talks to herdr on its own; the refused write must not.
+    assert!(fake.requests().iter().all(|r| r["method"] != "tab.create"));
 }
 
 #[tokio::test]

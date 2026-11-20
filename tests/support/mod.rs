@@ -32,8 +32,6 @@ impl Mcp {
         cmd.env_clear()
             .env("HOME", "/nonexistent")
             .env("HERDR_SOCKET_PATH", socket)
-            // Plan 01 tests list tools and requests; groups added later opt in via `opts.env`.
-            .env("HERDR_MCP_TOOLS", "session,workspaces,tabs,agents")
             .args(opts.args)
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
