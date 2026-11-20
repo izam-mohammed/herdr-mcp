@@ -121,6 +121,20 @@ may be missing (evicted, or herdr dropped the connection);
 `herdr_events_status` shows `connected` and `lost`. History starts when the
 server starts: herdr replays nothing.
 
+## Resources and prompts
+
+Type `@herdr:` in Claude Code to attach herdr's state as read-only JSON:
+`herdr://session`, `herdr://workspaces`, `herdr://agents`,
+`herdr://workspace/{id}`, `herdr://tab/{id}`, `herdr://pane/{id}/output`
+(the last 200 lines, capped like `herdr_pane_read`) and, with the `events`
+group on, `herdr://events/recent`. Each read goes through to herdr; an
+unknown URI or id is `not_found`. Pane and agent text in them is untrusted
+data. Updates are not pushed: re-attach to refresh.
+
+Three prompts show as slash commands (`/mcp__herdr__dashboard` and so on):
+`dashboard`, `check-agents` and `run-and-watch` (takes `command`). Each
+is a short instruction that names the tools to use.
+
 ## Flags
 
 Flag first, then the environment variable.

@@ -12,8 +12,8 @@ step lint;    cargo clippy --all-targets --locked -- -D warnings
 step test;    env -u HERDR_MCP_LIVE cargo test --locked
 if [ "${HERDR_MCP_LIVE:-}" = 1 ]; then
   # One file at a time, one thread each: every file owns its own session name
-  # (herdr-mcp-test, -02 to -05; tests/session_names.rs keeps them unique).
-  for f in live lane02_live lane03_live lane04_live lane05_live; do
+  # (herdr-mcp-test, -02 to -05, -07; tests/session_names.rs keeps them unique).
+  for f in live lane02_live lane03_live lane04_live lane05_live lane07_live; do
     step "live $f"; cargo test --locked --test "$f" -- --test-threads=1
   done
 fi

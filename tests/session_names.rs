@@ -34,8 +34,8 @@ fn names() -> BTreeMap<String, String> {
 fn live_sessions_are_isolated_and_unique() {
     let found = names();
     assert!(
-        found.len() >= 6,
-        "expected 5 live files and bench: {found:?}"
+        found.len() >= 7,
+        "expected 6 live files and bench: {found:?}"
     );
     for name in found.keys() {
         assert!(name.starts_with("herdr-mcp-test"), "{name}");
