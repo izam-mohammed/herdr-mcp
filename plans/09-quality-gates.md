@@ -192,32 +192,45 @@ repository instructions for recording useful development findings.
 
 ### Phase 1: the rough cut: the floor in the check (needs you: try it)
 
-- [ ] Tests over `tests/support/fake_herdr.rs` added until line coverage
+- [x] Tests over `tests/support/fake_herdr.rs` added until line coverage
   is at least 90 %, then `scripts/check.sh` runs `cargo llvm-cov --locked
   --fail-under-lines 90` in place of `cargo test`, printing the per-file
   table, pinned by the check failing with the floor at 100 in a scratch
   copy.
-- [ ] `rust-toolchain.toml` gains `llvm-tools-preview`, `check.yml`
+  Landed 2026-11-20: no new tests were needed. The suite already held 95.9 %
+  of lines once the harness (`tests/support/mod.rs`) forwarded
+  `LLVM_PROFILE_FILE` to the spawned binary (it used `env_clear`, so the
+  child's lines counted as 0 %: 37 % total) and let the child exit on drop
+  instead of being killed (a killed child loses its counters: 52 %). The
+  live-test list in `scripts/check.sh` is one entry per line. Floor at 100
+  exits 1 (checked in place).
+- [x] `rust-toolchain.toml` gains `llvm-tools-preview`, `check.yml`
   installs cargo-llvm-cov at a pinned version with every action pinned by
   SHA, and `docs/standards.md` gains the coverage row.
-- [ ] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes and prints a
+- [x] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes and prints a
   line total of 90 % or more.
+  Landed 2026-11-20: passed, line total 95.74 % (non-live suite; the live
+  files run after it, uncounted, since CI has no herdr).
 - [ ] You try it: run `sh scripts/check.sh` and say whether the coverage
   table and the run time are acceptable on every phase.
 
 ### Phase 2: the shared gate
 
-- [ ] `.github/workflows/security.yml` calls the shared gate with
+- [x] `.github/workflows/security.yml` calls the shared gate with
   `ecosystem: rust`, pinned to its commit SHA, on PRs and weekly, and
   `docs/standards.md`'s CI and Decided sections name it.
+  Landed 2026-11-20: pinned to the gate's current main commit, not the
+  sibling repo's older pin; zizmor 1.32 reports no findings on the three
+  workflows.
 - [ ] Check: `sh scripts/check.sh` passes, and the PR's Security run
   reports stage 1 green and its comment lists osv-scanner, semgrep and
   zizmor results.
 
 ### Phase 3: open the PR
 
-- [ ] The branch pushed and its PR opened against the branch it was cut from
+- [x] The branch pushed and its PR opened against the branch it was cut from
   (or, if one is already open for this branch, its body brought up to date)
   with a Conventional Commit title for the whole change, a body naming this
   plan, what changed and why, and the checks run with their result. The PR's
   URL printed as the evidence. Opened, never merged.
+  Landed 2026-11-20: https://github.com/izam-mohammed/herdr-mcp/pull/14

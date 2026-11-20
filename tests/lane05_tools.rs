@@ -179,11 +179,13 @@ async fn the_buffer_evicts_oldest_and_says_so() {
 
 #[tokio::test]
 async fn bad_event_buffer_is_refused_at_start() {
-    let out = std::process::Command::new(env!("CARGO_BIN_EXE_herdr-mcp"))
-        .args(["--event-buffer", "0"])
-        .env_clear()
-        .output()
-        .expect("run");
+    let mut cmd = std::process::Command::new(env!("CARGO_BIN_EXE_herdr-mcp"));
+    cmd.args(["--event-buffer", "0"]).env_clear();
+    // Under cargo llvm-cov the child writes its profile where the run says.
+    if let Ok(p) = std::env::var("LLVM_PROFILE_FILE") {
+        cmd.env("LLVM_PROFILE_FILE", p);
+    }
+    let out = cmd.output().expect("run");
     assert_eq!(out.status.code(), Some(2));
     assert!(String::from_utf8_lossy(&out.stderr).contains("--event-buffer"));
 }

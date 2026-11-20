@@ -7,13 +7,23 @@ step() { printf '\n== %s\n' "$1"; }
 
 step format;  cargo fmt --all -- --check
 step lint;    cargo clippy --all-targets --locked -- -D warnings
-# The live files skip themselves without HERDR_MCP_LIVE; unset here so the live
+# The whole suite under cargo-llvm-cov, failing under 90 % of lines (plan 09).
+# The harness forwards LLVM_PROFILE_FILE so the spawned binary counts too. The
+# live files skip themselves without HERDR_MCP_LIVE; unset here so the live
 # step below is the only place they run.
-step test;    env -u HERDR_MCP_LIVE cargo test --locked
+step "test and coverage"
+env -u HERDR_MCP_LIVE cargo llvm-cov --locked --fail-under-lines 90
 if [ "${HERDR_MCP_LIVE:-}" = 1 ]; then
   # One file at a time, one thread each: every file owns its own session name
   # (herdr-mcp-test, -02 to -05; tests/session_names.rs keeps them unique).
-  for f in live lane02_live lane03_live lane04_live lane05_live; do
+  # One file per line, so lanes add theirs without touching a neighbour's.
+  for f in \
+    live \
+    lane02_live \
+    lane03_live \
+    lane04_live \
+    lane05_live \
+  ; do
     step "live $f"; cargo test --locked --test "$f" -- --test-threads=1
   done
 fi
