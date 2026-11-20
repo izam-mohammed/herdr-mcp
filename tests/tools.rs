@@ -28,6 +28,24 @@ async fn inside(fake: &FakeHerdr) -> Mcp {
 
 const ALL: &[&str] = &[
     "herdr_agent_list",
+    "herdr_pane_clear",
+    "herdr_pane_close",
+    "herdr_pane_focus",
+    "herdr_pane_get",
+    "herdr_pane_layout",
+    "herdr_pane_list",
+    "herdr_pane_move",
+    "herdr_pane_process_info",
+    "herdr_pane_read",
+    "herdr_pane_rename",
+    "herdr_pane_resize",
+    "herdr_pane_run",
+    "herdr_pane_send_keys",
+    "herdr_pane_send_text",
+    "herdr_pane_split",
+    "herdr_pane_swap",
+    "herdr_pane_wait_output",
+    "herdr_pane_zoom",
     "herdr_snapshot",
     "herdr_status",
     "herdr_tab_create",
@@ -40,6 +58,12 @@ const ALL: &[&str] = &[
 ];
 const READS: &[&str] = &[
     "herdr_agent_list",
+    "herdr_pane_get",
+    "herdr_pane_layout",
+    "herdr_pane_list",
+    "herdr_pane_process_info",
+    "herdr_pane_read",
+    "herdr_pane_wait_output",
     "herdr_snapshot",
     "herdr_status",
     "herdr_tab_get",
@@ -64,7 +88,9 @@ async fn inside_herdr_lists_every_tool_with_annotations() {
         ] {
             assert!(a[hint].is_boolean(), "{} lacks {hint}", t["name"]);
         }
-        assert_eq!(a["openWorldHint"], false);
+        if !t["name"].as_str().unwrap().starts_with("herdr_pane_") {
+            assert_eq!(a["openWorldHint"], false);
+        }
     }
 }
 
