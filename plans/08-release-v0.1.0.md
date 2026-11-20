@@ -162,3 +162,7 @@ listing (Phase 2). `docs/research/08-release-v0.1.0.md` holds the review so far.
   date) with a Conventional Commit title for the whole change, a body
   naming this plan, what changed and why, and the checks run with their
   result. The PR's URL printed as the evidence. Opened, never merged. PR: https://github.com/izam-mohammed/herdr-mcp/pull/15
+
+Landed 2026-11-20 (join): `check.yml` carries both this lane's `workflow_call:` trigger and
+lane 09's SHA pins and `permissions: {}`; `docs/standards.md` CI section describes
+`check.yml`, `security.yml` and `release.yml` together.

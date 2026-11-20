@@ -20,7 +20,7 @@ locally and in CI. Chosen in `plans/01-first-version.md` (decision 6);
 | Lint | Clippy | `Cargo.toml` `[lints]` | `cargo clippy --all-targets --locked -- -D warnings` | no errors, no warnings |
 | Types | rustc | | (part of clippy and test) | compiles |
 | Unit and fake-socket tests, with coverage | `cargo test` under cargo-llvm-cov 0.9.1 | `llvm-tools-preview` in `rust-toolchain.toml` | `cargo llvm-cov --locked --fail-under-lines 90` | all pass, 90 % of lines or more (target 95 %); the per-file table is printed |
-| Live tests | `cargo test` | | `HERDR_MCP_LIVE=1 cargo test --locked --test <file> -- --test-threads=1`, for `live`, `lane02_live`, `lane03_live`, `lane04_live`, `lane05_live` | all pass, each file against its own isolated session (`herdr-mcp-test`, `-02` to `-05`) |
+| Live tests | `cargo test` | | `HERDR_MCP_LIVE=1 cargo test --locked --test <file> -- --test-threads=1`, for `live`, `lane02_live`, `lane03_live`, `lane04_live`, `lane05_live`, `lane06_live`, `lane07_live` | all pass, each file against its own isolated session (`herdr-mcp-test`, `-02` to `-07`; the bench has `-bench`) |
 | Performance budget | `scripts/bench.sh` | the budget in the script | `sh scripts/bench.sh` | inside the budget (from plan 01 Phase 3) |
 | Dependency audit | cargo-deny | `deny.toml` | `cargo deny check advisories bans sources licenses` | no advisory, no banned or unknown source |
 | Secret scan | gitleaks | `.gitleaks.toml` (defaults) | `gitleaks git --no-banner` | no findings |

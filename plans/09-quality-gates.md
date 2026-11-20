@@ -234,3 +234,7 @@ repository instructions for recording useful development findings.
   plan, what changed and why, and the checks run with their result. The PR's
   URL printed as the evidence. Opened, never merged.
   Landed 2026-11-20: https://github.com/izam-mohammed/herdr-mcp/pull/14
+
+Landed 2026-11-20 (join): on the merged tree the floor held without new tests: 96.50 % of lines
+(lanes 06 and 07 included), `check.sh` runs `lane06_live` and `lane07_live` too, and
+`tests/session_names.rs` now counts exactly 8 names (7 live files and the bench).
