@@ -25,7 +25,7 @@ locally and in CI. Chosen in `plans/01-first-version.md` (decision 6);
 | Docs | mdBook 0.5.2 and lychee 0.24.2 (`cargo install --locked`, pinned) | `docs/book/book.toml` | `sh scripts/docs.sh` | the book builds with no warning and every local link and anchor resolves; the reference pages match the server (`cargo test --locked --test docs`, part of the test step) |
 | Dependency audit | cargo-deny | `deny.toml` | `cargo deny check advisories bans sources licenses` | no advisory, no banned or unknown source |
 | Secret scan | gitleaks | `.gitleaks.toml` (defaults) | `gitleaks git --no-banner` | no findings |
-| Shell scripts | ShellCheck | | `shellcheck scripts/*.sh scripts/prove/*.sh scripts/verify/*.sh` | no findings |
+| Shell scripts | ShellCheck | | `shellcheck scripts/*.sh scripts/prove/*.sh scripts/verify/*.sh skills/herdr-mcp/scripts/*.sh` | no findings |
 | Build | cargo | `[profile.release]` | `cargo build --release --locked` | builds |
 
 `scripts/check.sh` runs format, lint, tests with coverage, audit, secret scan, shell

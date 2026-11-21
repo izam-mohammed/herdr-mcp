@@ -81,6 +81,15 @@ If that works, you are done. Keep `herdr_agent_prompt`, `herdr_agent_send_keys`
 and the `herdr_pane_send_*` tools on "ask" in your client's permissions:
 anything that can type can run commands. [Safety](safety.md) explains why.
 
+## Teach your agent the habits
+
+The repository ships a skill, `skills/herdr-mcp/`, that teaches an agent to
+call `herdr_whoami` first, wait instead of poll, ask before closing, and fix
+a broken setup with a small doctor script. Copy it into
+`~/.claude/skills/herdr-mcp/` (the one command is in the
+[README](https://github.com/izam-mohammed/herdr-mcp#teach-your-agent)) and
+start a new session. It is optional: the server works without it.
+
 ## Slash commands and attachments
 
 Type `@herdr:` in Claude Code to attach herdr's state, and use the three
