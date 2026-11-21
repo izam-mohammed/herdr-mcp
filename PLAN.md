@@ -28,5 +28,5 @@ ticked here when all its boxes are.
 
 ### Phase 2: next, every herdr command as a tool
 
-- [ ] `plans/13-cli-parity.md` - every herdr command is also an MCP tool,
+- [x] `plans/13-cli-parity.md` - every herdr command is also an MCP tool,
   and a check says when herdr gets a new one.

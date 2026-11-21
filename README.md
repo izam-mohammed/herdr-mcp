@@ -105,6 +105,7 @@ read-only: no promotion without the paperwork.
 | `herdr_workspace_focus` | Switches to a workspace |
 | `herdr_workspace_rename` | Renames a workspace. "untitled-3" was never a strategy |
 | `herdr_workspace_move` | Reorders workspaces in the sidebar |
+| `herdr_workspace_move_block` | Moves several workspaces at once, because one at a time is how meetings happen |
 | `herdr_workspace_report_metadata` | Pins status text to a workspace, with an expiry |
 | `herdr_workspace_close` | Closes a workspace. Not its own |
 | `herdr_tab_list` | Lists tabs |
@@ -131,6 +132,9 @@ read-only: no promotion without the paperwork.
 | `herdr_pane_move` | Moves a pane to another tab or workspace |
 | `herdr_pane_rename` | Renames a pane |
 | `herdr_pane_clear` | Clears a pane's screen |
+| `herdr_pane_scroll` | Scrolls a pane's view up the scrollback, or back down |
+| `herdr_pane_selection_read` | Reads the text between two points on a pane's screen, capped |
+| `herdr_pane_report_metadata` | Pins a title, labels and tokens to a pane. Display only |
 | `herdr_pane_close` | Closes a pane |
 | `herdr_agent_list` | Every agent and its state: idle, working, blocked or done |
 | `herdr_agent_get` | One agent, in detail |
@@ -142,6 +146,8 @@ read-only: no promotion without the paperwork.
 | `herdr_agent_start` | Starts a new agent in a pane |
 | `herdr_agent_focus` | Focuses an agent's pane |
 | `herdr_agent_rename` | Renames an agent |
+| `herdr_agent_view_set` | Sets which agents herdr's agent view shows, and in what order |
+| `herdr_agent_view_clear` | Puts the agent view back |
 | `herdr_events_recent` | What changed since it last looked |
 | `herdr_events_wait` | Waits for the next matching event, e.g. "any agent goes blocked" |
 | `herdr_events_status` | Whether the event feed is connected and if anything was missed |
@@ -153,6 +159,47 @@ read-only: no promotion without the paperwork.
 | `herdr_layout_apply` | Rebuilds a tab from a saved layout |
 | `herdr_layout_set_split_ratio` | Adjusts a split |
 | `herdr_notify` | Shows a toast in herdr. Management loves an announcement |
+
+That is 63 tools by default. 26 more sit in the `admin` group, which is off.
+
+### The admin group (off by default)
+
+These administer herdr itself, so they wait until you ask:
+`--tools all,admin` or `HERDR_MCP_TOOLS=all,admin`. **Turn it on only for a
+client you trust with your herdr.** With it on, an agent can stop servers
+and sessions, install or remove agent integrations, change the update
+channel, replace the herdr binary, reset your keybindings and make herdr
+show a state an agent never had.
+
+| Tool | What it does |
+| --- | --- |
+| `herdr_integration_list`, `_install`, `_uninstall` | Agent integrations: list them, write or remove their hooks |
+| `herdr_server_reload_config`, `herdr_server_agent_manifests`, `herdr_server_reload_agent_manifests` | Reload config or agent detection, or show the manifests |
+| `herdr_server_stop` | Stops the herdr server. Not its own, unless `allow_self` |
+| `herdr_pane_set_input` | Routes a pane's right click to herdr or to the program |
+| `herdr_pane_report_agent`, `_report_agent_session`, `_release_agent`, `_clear_agent_authority` | Tells herdr what state an agent is in. Spoofing, with paperwork |
+| `herdr_config_check`, `herdr_config_reset_keys` | Validate config.toml, or reset keybindings (needs `confirm: true`) |
+| `herdr_channel_show`, `herdr_channel_set` | The update channel |
+| `herdr_session_list`, `_stop`, `_delete` | Named sessions. Not its own, unless `allow_self` |
+| `herdr_machine_list`, `_status`, `_rename`, `_remove`, `_enable`, `_disable` | Saved SSH machines |
+| `herdr_update` | Updates herdr (needs `confirm: true`) |
+
+The ones that change something are marked destructive and vanish under
+`--read-only`. The ones that need the `herdr` binary run it with an argument
+list (no shell), refuse a value starting with `-`, time out and cap what
+they return, which is untrusted text. More in the docs' safety page.
+
+### Keeping up with herdr
+
+herdr will grow methods and commands. `docs/herdr-coverage.toml` says what
+this server does about each one, and a test fails if herdr's checked-in
+list has an entry with no row. After upgrading herdr:
+
+```sh
+sh scripts/sync-herdr.sh   # rewrites docs/external/herdr-*.txt, prints what is new
+# add a row per new entry to docs/herdr-coverage.toml: a tool, or { skip = "reason" }
+cargo test --locked --test coverage
+```
 
 The reference for every tool, resource and prompt is in the docs (`docs/book/`,
 generated from the server; build it with `sh scripts/docs.sh`).
@@ -213,7 +260,7 @@ Flag first, then the environment variable.
 | `--socket <path>` | `HERDR_SOCKET_PATH` | Talk to that socket (wins over `--session`) |
 | `--read-only` | `HERDR_MCP_READ_ONLY=1` | Register read tools only |
 | `--allow-outside-herdr` | `HERDR_MCP_ALLOW_OUTSIDE=1` | Allow writes when not started inside herdr |
-| `--tools <a,b>` | `HERDR_MCP_TOOLS` | Register only these groups: `session`, `workspaces`, `tabs`, `panes`, `agents`, `events`, `worktrees`, `layout`, `notify` (default all) |
+| `--tools <a,b>` | `HERDR_MCP_TOOLS` | Register only these groups: `session`, `workspaces`, `tabs`, `panes`, `agents`, `events`, `worktrees`, `layout`, `notify` (default these nine), plus `admin` (off; `all` means the nine) |
 | `--confirm-destructive` | `HERDR_MCP_CONFIRM_DESTRUCTIVE=1` | Closes also ask you every time, even in auto mode (`requiresUserInteraction`) |
 | `--event-buffer <n>` | `HERDR_MCP_EVENT_BUFFER` | Events kept for `herdr_events_*` (default 1000, at most 1000000) |
 | `--debug` | | Log request and reply payloads to stderr |
@@ -246,8 +293,8 @@ herdr's `agent_blocked` and `agent_prompt_stalled` come back as they are.
 - **Prompt, type into, clear or close its own pane**, or close the tab or
   workspace it lives in (code `self_target`). Self-awareness, at last.
 - **Steer your session from outside herdr.** There it's read-only.
-- **Stop, restart or reconfigure herdr itself.** Those methods aren't
-  exposed at all.
+- **Stop, restart or reconfigure herdr itself, unless you turn on the
+  admin group.** And even then, never its own session without `allow_self`.
 - **Trust pane output.** Whatever another program prints is treated as
   data, never as instructions.
 

@@ -35,9 +35,10 @@ to steer from outside, such as a test session.
 ## Choosing tool groups
 
 `--tools session,tabs` or `HERDR_MCP_TOOLS=session,tabs` registers only the
-named groups. The default is all nine: `session`, `workspaces`, `tabs`,
-`panes`, `agents`, `events`, `worktrees`, `layout`, `notify`. An unknown
-group name stops the server at start. Fewer groups means fewer tool names
+named groups. The default is nine: `session`, `workspaces`, `tabs`,
+`panes`, `agents`, `events`, `worktrees`, `layout`, `notify`. A tenth,
+`admin`, is off until you name it: `--tools all,admin` (`all` is the nine
+defaults). An unknown group name stops the server at start. Fewer groups means fewer tool names
 in your client's context. The [tools reference](reference/tools.md) lists
 which tool is in which group.
 

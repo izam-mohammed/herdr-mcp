@@ -326,11 +326,12 @@ repository instructions for recording useful development findings.
 
 ### Phase 5: docs and the counts
 
-- [ ] README tool counts, the `admin` group and its warning, the sync flow
+- [x] README tool counts, the `admin` group and its warning, the sync flow
   (`sh scripts/sync-herdr.sh`, then add a row), the book's safety page and
   `docs/standards.md` updated; the reference regenerated with
   `HERDR_MCP_UPDATE_DOCS=1 cargo test --locked --test docs`.
-- [ ] Check: `sh scripts/check.sh` passes, `sh scripts/docs.sh` passes.
+- [x] Check: `sh scripts/check.sh` passes, `sh scripts/docs.sh` passes.
+  Landed: README (63 tools by default plus 26 in the `admin` group, with its warning and the sync flow), the book's configuration, safety and introduction pages, `docs/standards.md` and the site's tool count updated; `docs/book/src/reference/tools-admin.md` is generated. The `PLAN.md` line is ticked; Phase 6 (the PR) is left to the person.
 
 ### Phase 6: open the PR
 

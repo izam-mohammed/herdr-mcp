@@ -47,14 +47,13 @@ call() { # id tool args-json
   printf '{"jsonrpc":"2.0","id":%s,"method":"tools/call","params":{"name":"%s","arguments":%s}}\n' "$1" "$2" "$3"
 }
 
-# 1: a workspace and its pane (a fresh session has none).
+# 1: a workspace and its pane (a fresh session has none); its reply names the root pane.
 {
   call 2 herdr_workspace_create '{"label":"verify-13","focus":true}'
-  call 3 herdr_pane_list '{}'
 } >"$work/in1"
 mcp "$work/in1" >"$work/out1"
 ws=$(sed -n 's/.*"workspace_id":"\([^"]*\)".*/\1/p' "$work/out1" | head -n 1)
-pane=$(grep '"id":3' "$work/out1" | sed -n 's/.*"pane_id":"\([^"]*\)".*/\1/p' | head -n 1)
+pane=$(sed -n 's/.*"root_pane":{[^}]*"pane_id":"\([^"]*\)".*/\1/p' "$work/out1" | head -n 1)
 [ -n "$ws" ] && [ -n "$pane" ] || fail "no workspace or pane: $(cat "$work/out1")"
 echo "workspace $ws pane $pane" >>"$out"
 

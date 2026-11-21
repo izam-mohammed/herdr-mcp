@@ -20,12 +20,12 @@ locally and in CI. Chosen in `plans/01-first-version.md` (decision 6);
 | Lint | Clippy | `Cargo.toml` `[lints]` | `cargo clippy --all-targets --locked -- -D warnings` | no errors, no warnings |
 | Types | rustc | | (part of clippy and test) | compiles |
 | Unit and fake-socket tests, with coverage | `cargo test` under cargo-llvm-cov 0.9.1 | `llvm-tools-preview` in `rust-toolchain.toml` | `cargo llvm-cov --locked --fail-under-lines 90` | all pass, 90 % of lines or more (target 95 %); the per-file table is printed |
-| Live tests | `cargo test` | | `HERDR_MCP_LIVE=1 cargo test --locked --test <file> -- --test-threads=1`, for `live`, `lane02_live`, `lane03_live`, `lane04_live`, `lane05_live`, `lane06_live`, `lane07_live` | all pass, each file against its own isolated session (`herdr-mcp-test`, `-02` to `-07`; the bench has `-bench`) |
+| Live tests | `cargo test` | | `HERDR_MCP_LIVE=1 cargo test --locked --test <file> -- --test-threads=1`, for `live`, `lane02_live`, `lane03_live`, `lane04_live`, `lane05_live`, `lane06_live`, `lane07_live`, `lane13_live` | all pass, each file against its own isolated session (`herdr-mcp-test`, `-02` to `-07`, `-13`; the bench has `-bench`) |
 | Performance budget | `scripts/bench.sh` | the budget in the script | `sh scripts/bench.sh` | inside the budget (from plan 01 Phase 3) |
 | Docs | mdBook 0.5.2 and lychee 0.24.2 (`cargo install --locked`, pinned) | `docs/book/book.toml` | `sh scripts/docs.sh` | the book builds with no warning and every local link and anchor resolves; the reference pages match the server (`cargo test --locked --test docs`, part of the test step) |
 | Dependency audit | cargo-deny | `deny.toml` | `cargo deny check advisories bans sources licenses` | no advisory, no banned or unknown source |
 | Secret scan | gitleaks | `.gitleaks.toml` (defaults) | `gitleaks git --no-banner` | no findings |
-| Shell scripts | ShellCheck | | `shellcheck scripts/*.sh scripts/prove/*.sh` | no findings |
+| Shell scripts | ShellCheck | | `shellcheck scripts/*.sh scripts/prove/*.sh scripts/verify/*.sh` | no findings |
 | Build | cargo | `[profile.release]` | `cargo build --release --locked` | builds |
 
 `scripts/check.sh` runs format, lint, tests with coverage, audit, secret scan, shell
@@ -46,6 +46,18 @@ herdr; locally every phase's check sets it.
   has `herdr-mcp-test-bench`); `tests/session_names.rs` fails on a duplicate,
   so two files can never stop each other's server, and `scripts/check.sh`
   runs them one file at a time with `--test-threads=1`.
+- Coverage of herdr's surface (`tests/coverage.rs`, plan 13): every socket
+  method and CLI command in `docs/external/herdr-methods.txt` and
+  `herdr-commands.txt` needs a row in `docs/herdr-coverage.toml` (a tool, or
+  `{ skip = "reason" }`), no row may be stale, and every tool a row names must
+  be registered. It reads the checked-in lists, so it runs offline in CI.
+  After a herdr upgrade run `sh scripts/sync-herdr.sh`, which rewrites the
+  lists and prints what is new; then add the rows.
+- Tools that run the `herdr` binary (`src/cli.rs`) are tested against a stub
+  `herdr` script on PATH (`tests/admin_cli.rs`), never the real binary: argv
+  only, no shell, a value starting `-` refused, timeout, cap. `herdr update`,
+  `config reset-keys`, `channel set` and `integration install` are never run
+  for real in a test.
 - Test files that count requests or list tools name their groups with
   `HERDR_MCP_TOOLS` (the harness sets no default): the events hub sends its
   own requests when `events` is on.
