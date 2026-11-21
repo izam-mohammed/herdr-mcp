@@ -38,3 +38,9 @@ ticked here when all its boxes are.
 - [ ] `plans/11-docs.md` - an mdBook documentation site at `/docs/`, with
   the tool, resource and prompt reference generated from the server.
 - [ ] `plans/15-release-v0.4.0.md` - `v0.4.0` released.
+
+### Phase 5: v0.5.0, the herdr app as well as the herdr TUI
+
+- [ ] `plans/16-herdr-app-backend.md` - one server drives the herdr desktop
+  app and the herdr TUI, ids routed by shape.
+- [ ] `plans/17-release-v0.5.0.md` - `v0.5.0` released.
