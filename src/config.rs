@@ -12,7 +12,11 @@ pub const GROUPS: &[&str] = &[
     "worktrees",
     "layout",
     "notify",
+    "admin",
 ];
+
+/// Groups that are not registered unless `--tools` names them (plan 13, decision 2).
+pub const OFF_BY_DEFAULT: &[&str] = &["admin"];
 
 const USAGE: &str = "herdr-mcp: an MCP server for herdr, over stdio
 
@@ -20,7 +24,8 @@ const USAGE: &str = "herdr-mcp: an MCP server for herdr, over stdio
   --socket <path>         herdr socket (HERDR_SOCKET_PATH)
   --read-only             register read tools only (HERDR_MCP_READ_ONLY=1)
   --allow-outside-herdr   allow writes when HERDR_ENV is not 1 (HERDR_MCP_ALLOW_OUTSIDE=1)
-  --tools <a,b,...>       tool groups to register, default all (HERDR_MCP_TOOLS)
+  --tools <a,b,...>       tool groups to register (HERDR_MCP_TOOLS). Default: every group but
+                          admin; `all` is that default, so `all,admin` adds the admin group
   --confirm-destructive   ask the user on every close, even in auto mode
                           (HERDR_MCP_CONFIRM_DESTRUCTIVE=1)
   --event-buffer <n>      events kept for herdr_events_* (HERDR_MCP_EVENT_BUFFER, default 1000)
@@ -30,6 +35,9 @@ const USAGE: &str = "herdr-mcp: an MCP server for herdr, over stdio
 #[derive(Debug, Clone)]
 pub struct Config {
     pub socket: PathBuf,
+    /// The herdr session the socket belongs to, when it can be told (`None` for a
+    /// socket path outside herdr's own layout).
+    pub session: Option<String>,
     pub read_only: bool,
     pub groups: Vec<String>,
     pub debug: bool,
@@ -117,18 +125,32 @@ pub fn parse(args: &[String], env: &Env) -> Result<Parsed, String> {
         }
     }
 
+    let defaults = || {
+        GROUPS
+            .iter()
+            .filter(|g| !OFF_BY_DEFAULT.contains(g))
+            .map(|g| (*g).to_owned())
+    };
     let groups = match tools {
-        None => GROUPS.iter().map(|g| (*g).to_owned()).collect(),
+        None => defaults().collect(),
         Some(list) => {
-            let mut groups = Vec::new();
+            let mut groups: Vec<String> = Vec::new();
             for g in list.split(',').map(str::trim).filter(|g| !g.is_empty()) {
-                if !GROUPS.contains(&g) {
+                let named: Vec<String> = if g == "all" {
+                    defaults().collect()
+                } else if GROUPS.contains(&g) {
+                    vec![g.to_owned()]
+                } else {
                     return Err(format!(
-                        "unknown tool group {g} (groups: {})",
+                        "unknown tool group {g} (groups: all, {})",
                         GROUPS.join(", ")
                     ));
+                };
+                for n in named {
+                    if !groups.contains(&n) {
+                        groups.push(n);
+                    }
                 }
-                groups.push(g.to_owned());
             }
             groups
         }
@@ -143,8 +165,10 @@ pub fn parse(args: &[String], env: &Env) -> Result<Parsed, String> {
             .ok_or_else(|| format!("--event-buffer must be 1 to 1000000, got {v}"))?,
     };
     let inside = env.flag("HERDR_ENV");
+    let socket = resolve_socket(session, socket, env);
     Ok(Parsed::Run(Box::new(Config {
-        socket: resolve_socket(session, socket, env),
+        session: session_of(&socket, &env.home),
+        socket,
         read_only: read_only || (!inside && !allow_outside),
         groups,
         debug,
@@ -159,6 +183,19 @@ pub fn parse(args: &[String], env: &Env) -> Result<Parsed, String> {
         tab_id: env.get("HERDR_TAB_ID").map(str::to_owned),
         workspace_id: env.get("HERDR_WORKSPACE_ID").map(str::to_owned),
     })))
+}
+
+/// The session a socket path belongs to: `sessions/<name>/herdr.sock` is `<name>`, the
+/// default socket is `default`, anything else is unknown.
+fn session_of(socket: &std::path::Path, home: &std::path::Path) -> Option<String> {
+    if socket == home.join(".config/herdr/herdr.sock") {
+        return Some("default".to_owned());
+    }
+    let dir = socket.parent()?;
+    if socket.file_name()? != "herdr.sock" || dir.parent()?.file_name()? != "sessions" {
+        return None;
+    }
+    Some(dir.file_name()?.to_string_lossy().into_owned())
 }
 
 /// herdr's order, with the flags first.
@@ -254,9 +291,41 @@ mod tests {
             run(&["--tools", "tabs,session"], &env(&[])).groups,
             ["tabs", "session"]
         );
-        assert_eq!(run(&[], &env(&[])).groups.len(), GROUPS.len());
+        assert_eq!(
+            run(&[], &env(&[])).groups.len(),
+            GROUPS.len() - OFF_BY_DEFAULT.len()
+        );
+        assert!(!run(&[], &env(&[])).groups.contains(&"admin".to_owned()));
+        assert_eq!(
+            run(&["--tools", "all,admin"], &env(&[])).groups.len(),
+            GROUPS.len()
+        );
+        assert_eq!(
+            run(&["--tools", "tabs,admin,tabs"], &env(&[])).groups,
+            ["tabs", "admin"]
+        );
         assert!(parse(&["--tools".into(), "nope".into()], &env(&[])).is_err());
         assert!(parse(&["--bogus".into()], &env(&[])).is_err());
         assert!(parse(&["--session".into()], &env(&[])).is_err());
+    }
+
+    #[test]
+    fn the_session_is_read_from_the_socket_path() {
+        let home = PathBuf::from("/h");
+        let of = |p: &str| session_of(&PathBuf::from(p), &home);
+        assert_eq!(
+            of("/h/.config/herdr/herdr.sock").as_deref(),
+            Some("default")
+        );
+        assert_eq!(
+            of("/h/.config/herdr/sessions/work/herdr.sock").as_deref(),
+            Some("work")
+        );
+        assert_eq!(of("/tmp/x/herdr.sock"), None);
+        assert_eq!(of("/tmp/sessions/x/other.sock"), None);
+        assert_eq!(
+            run(&["--session", "t"], &env(&[])).session.as_deref(),
+            Some("t")
+        );
     }
 }

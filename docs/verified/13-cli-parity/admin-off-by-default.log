@@ -1,0 +1,16 @@
+date: 2026-11-21
+default: 63 tools, with admin: 75 tools, read-only with admin: 26 tools
+admin-only tools:
+  herdr_integration_install
+  herdr_integration_list
+  herdr_integration_uninstall
+  herdr_pane_clear_agent_authority
+  herdr_pane_release_agent
+  herdr_pane_report_agent
+  herdr_pane_report_agent_session
+  herdr_pane_set_input
+  herdr_server_agent_manifests
+  herdr_server_reload_agent_manifests
+  herdr_server_reload_config
+  herdr_server_stop
+PASS: absent by default (63 tools), 12 admin tools with the group, mutating ones hidden read-only

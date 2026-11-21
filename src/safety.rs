@@ -101,6 +101,42 @@ impl Server {
         Ok(())
     }
 
+    /// Refuse an action on a herdr session that is the one this server runs in, unless
+    /// `allow_self`: stopping it ends every pane, the caller's own included. `target` is
+    /// the session named, or `None` for the one the socket belongs to (`server.stop`).
+    /// Outside herdr (no pane id) there is no self. A server whose session cannot be
+    /// told from its socket path refuses (fail closed).
+    pub(crate) fn session_refusal(
+        &self,
+        target: Option<&str>,
+        allow_self: bool,
+    ) -> Result<(), Failure> {
+        let config = &self.shared.config;
+        if config.pane_id.is_none() || allow_self {
+            return Ok(());
+        }
+        let own = config.session.as_deref();
+        let hit = match (target, own) {
+            (None, _) | (Some(_), None) => true,
+            (Some(t), Some(o)) => t == o,
+        };
+        if !hit {
+            return Ok(());
+        }
+        Err(Failure::new(
+            SELF_TARGET,
+            match target {
+                Some(t) => format!(
+                    "session {t} is the one this server runs in; stopping or deleting it \
+would end this session. Pass allow_self: true only if the user asked for exactly that."
+                ),
+                None => "this herdr server is the one this server runs in; stopping it \
+would end this session. Pass allow_self: true only if the user asked for exactly that."
+                    .to_owned(),
+            },
+        ))
+    }
+
     async fn holds_me(&self, target: &Target<'_>) -> Result<bool, Failure> {
         let terminal = self.own_terminal().await?;
         let list = self.shared.client.call("pane.list", json!({})).await?;

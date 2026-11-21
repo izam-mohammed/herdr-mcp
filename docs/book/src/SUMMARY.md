@@ -26,6 +26,7 @@
   - [worktrees](reference/tools-worktrees.md)
   - [layout](reference/tools-layout.md)
   - [notify](reference/tools-notify.md)
+  - [admin](reference/tools-admin.md)
 - [Resources](reference/resources.md)
 - [Prompts](reference/prompts.md)
 - [Command line](reference/cli.md)

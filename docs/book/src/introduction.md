@@ -4,7 +4,7 @@ An MCP server for [herdr](https://herdr.dev). It lets Claude Code, Codex or
 any other MCP client list, open, close, read, prompt and wait on everything
 running in your herdr session. Middle management, written in Rust.
 
-It offers 63 tools, 7 resources and 3 prompts. The reference chapters list
+It offers 63 tools by default, 7 resources and 3 prompts. The reference chapters list
 all of them and are generated from the server itself, so they match the
 binary you installed.
 

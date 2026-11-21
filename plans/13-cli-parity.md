@@ -303,14 +303,15 @@ repository instructions for recording useful development findings.
 
 ### Phase 3: the admin group, over the socket
 
-- [ ] The `admin` group, off by default, with the socket-backed tools and
+- [x] The `admin` group, off by default, with the socket-backed tools and
   the own-session and read-only rules (expected in `src/tools/admin.rs`,
   `src/tools/mod.rs`, `src/config.rs`, `src/safety.rs`), pinned by tests
   that the default `tools/list` has none and `--tools all,admin` has them.
-- [ ] Check: `sh scripts/check.sh` passes.
-- [ ] Verify: `scripts/verify/admin-off-by-default.sh` lists tools with and
+- [x] Check: `sh scripts/check.sh` passes.
+- [x] Verify: `scripts/verify/admin-off-by-default.sh` lists tools with and
   without the group and prints PASS; output saved under
   `docs/verified/13-cli-parity/`.
+  Landed: 12 socket-backed tools in `src/tools/admin.rs` (integrations, server reload and stop, manifests, pane input routing and agent reports); the group is skipped by default and `--tools all` now means every group but admin, so `all,admin` turns it on. `Config` gained `session` (read from the socket path) for the own-session refusal in `safety::session_refusal`; with a socket path outside herdr's layout it refuses (fail closed). Tests: `tests/admin_tools.rs`; verify log `admin-off-by-default.log`.
 
 ### Phase 4: the admin group, through the herdr binary
 
