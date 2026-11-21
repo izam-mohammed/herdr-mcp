@@ -222,7 +222,7 @@ repository instructions for recording useful development findings.
   Landed 2026-11-20: pinned to the gate's current main commit, not the
   sibling repo's older pin; zizmor 1.32 reports no findings on the three
   workflows.
-- [ ] Check: `sh scripts/check.sh` passes, and the PR's Security run
+- [x] Check: `sh scripts/check.sh` passes (95.77 % lines, 2026-11-21), and the PR's Security run (green on PR 17)
   reports stage 1 green and its comment lists osv-scanner, semgrep and
   zizmor results.
 

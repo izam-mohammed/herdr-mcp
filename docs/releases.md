@@ -17,7 +17,7 @@ since tool names are what people write permission rules against.
 
 | Version | What a user gets | Chain phase | Plans | New channels | State |
 | --- | --- | --- | --- | --- | --- |
-| v0.1.0 | tab and workspace reads and tab management from Claude Code, safe by default, one-command install | 1 | 01, 09, 08 | GitHub Releases, shell installer | planned |
+| v0.1.0 | tab and workspace reads and tab management from Claude Code, safe by default, one-command install | 1 | 01, 09, 08 | GitHub Releases, shell installer | released 2026-11-21 |
 | v0.2.0 | full workspaces, panes, agents and events | 2 | 02, 03, 04, 05, 13 | none | planned |
 | v0.3.0 | worktrees, layouts, toasts, resources and prompts | 3 | 06, 07, 14 | none | planned |
 | v0.4.0 | a one-page site and the detailed docs | 4 | 10, 11, 15 | none | planned |

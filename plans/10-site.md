@@ -171,11 +171,11 @@ repository instructions for recording useful development findings.
 
 ### Phase 2: point people at it
 
-- [ ] `README.md` links the site under the banner (done), and the repository's
-  homepage is set to the Pages URL (`gh repo edit --homepage`) (not done: the
-  URL does not exist until Pages is on).
-- [ ] Check: `sh scripts/check.sh` passes, and the site URL answers 200 (not
-  done: needs the site live at a URL).
+- [x] `README.md` links the site under the banner, and the repository's
+  homepage is set to the Pages URL (`gh repo edit --homepage`).
+  Landed 2026-11-21: repository made public, Pages on with source GitHub Actions.
+- [x] Check: `sh scripts/check.sh` passes, and the site URL answers 200.
+  Landed 2026-11-21: `https://izam-mohammed.github.io/herdr-mcp/` answers 200.
 
 ### Phase 3: open the PR
 

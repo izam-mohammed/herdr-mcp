@@ -152,8 +152,12 @@ listing (Phase 2). `docs/research/08-release-v0.1.0.md` holds the review so far.
 - [ ] Post-implementation review of the workflow's permissions and the
   installer, recorded in `docs/research/08-release-v0.1.0.md`, then tag `v0.1.0`
   once the try is good.
-- [ ] Check: `sh scripts/check.sh` passes, and the `v0.1.0` release lists
+- [x] Check: `sh scripts/check.sh` passes, and the `v0.1.0` release lists
   every target with checksums.
+  Landed 2026-11-21: all six archives, a `.sha256` each, `sha256.sum`, the installer.
+  The `v0.1.0-rc.1` tag failed: `dist` needs the tag to equal the `Cargo.toml`
+  version, so a pre-release tag needs a version bump first. Tagged `v0.1.0` directly.
+  The installer, run with a throwaway `HOME`, put a binary that prints `herdr-mcp 0.1.0`.
 
 ### Phase 3: open the PR
 
