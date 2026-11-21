@@ -1,15 +1,15 @@
-# v0.5.0 is released: the herdr app as well as the herdr TUI
+# v0.2.0 is released: the herdr app as well as the herdr TUI
 
 ## The ask
 
-`docs/releases.md` puts support for the herdr desktop app in `v0.5.0`. The pipeline exists since
+`docs/releases.md` puts support for the herdr desktop app in `v0.2.0`. The pipeline exists since
 `plans/08-release.md`, so this plan only confirms the previous release,
 bumps the version and opens the PR.
 
 ## The decision
 
-Bump `Cargo.toml` and `CHANGELOG.md` to `0.5.0`, merge, then push tag
-`v0.5.0`; `release.yml` builds the release. No new dependency, permission or
+Bump `Cargo.toml` and `CHANGELOG.md` to `0.2.0`, merge, then push tag
+`v0.2.0`; `release.yml` builds the release. No new dependency, permission or
 channel. No rough cut: the release is the usable thing, and the installer's
 `--version` is its try.
 
@@ -27,11 +27,11 @@ repository instructions for recording useful development findings.
 
 ### Phase 1: bump and check
 
-- [ ] The `v0.4.0` release exists on GitHub with every target and `SHA256SUMS`
-  (`gh release view v0.4.0`), and the plans listed for `v0.5.0` in
+- [ ] The `v0.1.0` release exists on GitHub with every target and `SHA256SUMS`
+  (`gh release view v0.1.0`), and the plans listed for `v0.2.0` in
   `docs/releases.md` are all ticked in `PLAN.md`.
-- [ ] `Cargo.toml` and `CHANGELOG.md` bumped to `0.5.0`, and `docs/releases.md`
-  marks `v0.5.0` as released once the tag is pushed.
+- [ ] `Cargo.toml` and `CHANGELOG.md` bumped to `0.2.0`, and `docs/releases.md`
+  marks `v0.2.0` as released once the tag is pushed.
 - [ ] Check: `sh scripts/check.sh` passes.
 
 ### Phase 2: open the PR

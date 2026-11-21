@@ -21,7 +21,7 @@ ticked here when all its boxes are.
 - [ ] `plans/04-agents.md` - read, prompt and wait on other agents.
 - [ ] `plans/05-events.md` - what changed since last time, and waiting for
   the next change.
-- [ ] `plans/13-release-v0.2.0.md` - `v0.2.0` released.
+- [x] `plans/13-release-v0.2.0.md` - `v0.2.0` released. (folded into `v0.1.0`, no release cut)
 
 ### Phase 3: v0.3.0, the remaining surface
 
@@ -29,7 +29,7 @@ ticked here when all its boxes are.
   toasts.
 - [ ] `plans/07-resources-and-prompts.md` - `@herdr:` resources and the
   dashboard prompts.
-- [ ] `plans/14-release-v0.3.0.md` - `v0.3.0` released.
+- [x] `plans/14-release-v0.3.0.md` - `v0.3.0` released. (folded into `v0.1.0`, no release cut)
 
 ### Phase 4: v0.4.0, a page and docs for people
 
@@ -37,10 +37,10 @@ ticked here when all its boxes are.
   something to install and the repository is public.
 - [ ] `plans/11-docs.md` - an mdBook documentation site at `/docs/`, with
   the tool, resource and prompt reference generated from the server.
-- [ ] `plans/15-release-v0.4.0.md` - `v0.4.0` released.
+- [x] `plans/15-release-v0.4.0.md` - `v0.4.0` released. (folded into `v0.1.0`, no release cut)
 
-### Phase 5: v0.5.0, the herdr app as well as the herdr TUI
+### Phase 5: v0.2.0, the herdr app as well as the herdr TUI
 
 - [ ] `plans/16-herdr-app-backend.md` - one server drives the herdr desktop
   app and the herdr TUI, ids routed by shape.
-- [ ] `plans/17-release-v0.5.0.md` - `v0.5.0` released.
+- [ ] `plans/17-release-v0.2.0.md` - `v0.2.0` released.
