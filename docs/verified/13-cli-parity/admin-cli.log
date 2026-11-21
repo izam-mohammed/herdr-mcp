@@ -1,0 +1,9 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.84s
+     Running tests/lane13_live.rs (/tmp/claude-1000/target-13/debug/build/herdr-mcp/f8478b933649635d/out/lane13_live-f8478b933649635d)
+running 1 test
+test admin_reads_over_a_real_herdr ... config check: "config: ok\n"
+session list names herdr-mcp-test-13, running
+channel: stable
+integration list and agent manifests answered
+ok
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.44s

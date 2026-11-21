@@ -32,7 +32,15 @@ const ADMIN: &[&str] = &[
     "herdr_server_reload_config",
     "herdr_server_stop",
 ];
-const ADMIN_READS: &[&str] = &["herdr_integration_list", "herdr_server_agent_manifests"];
+const ADMIN_READS: &[&str] = &[
+    "herdr_channel_show",
+    "herdr_config_check",
+    "herdr_integration_list",
+    "herdr_machine_list",
+    "herdr_machine_status",
+    "herdr_server_agent_manifests",
+    "herdr_session_list",
+];
 
 const INSIDE: &[(&str, &str)] = &[("HERDR_ENV", "1"), ("HERDR_PANE_ID", "wA:p1")];
 
@@ -66,6 +74,7 @@ async fn admin_is_absent_by_default_and_present_when_asked() {
         let (_f, mut mcp) = start(tag, args, env).await;
         let names = mcp.tool_names().await;
         assert_eq!(admin_of(&names).len(), want, "{tag}: {names:?}");
+        assert_eq!(names.iter().any(|n| n == "herdr_update"), want > 0, "{tag}");
     }
     let (_f, mut mcp) = start(
         "adm-envvar",

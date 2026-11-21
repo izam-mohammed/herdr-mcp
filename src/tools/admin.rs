@@ -12,7 +12,9 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 pub fn router() -> ToolRouter<Server> {
-    Server::admin_router()
+    let mut all = Server::admin_router();
+    all += super::admin_cli::router();
+    all
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]

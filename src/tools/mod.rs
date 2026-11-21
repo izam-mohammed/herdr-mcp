@@ -4,6 +4,7 @@ use crate::server::Server;
 use rmcp::handler::server::router::tool::ToolRouter;
 
 mod admin;
+mod admin_cli;
 mod agents;
 mod events;
 mod layout;

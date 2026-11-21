@@ -315,13 +315,14 @@ repository instructions for recording useful development findings.
 
 ### Phase 4: the admin group, through the herdr binary
 
-- [ ] The subprocess runner (argv only, a value starting `-` refused, a
+- [x] The subprocess runner (argv only, a value starting `-` refused, a
   timeout, a capped reply) and the subprocess-backed tools (expected in
   `src/cli.rs`, `src/tools/admin_cli.rs`), pinned by a stub `herdr` script
   in the tests, including the `confirm` rules and the own-session refusal.
-- [ ] Check: `sh scripts/check.sh` passes, and with `HERDR_MCP_LIVE=1` the
+- [x] Check: `sh scripts/check.sh` passes, and with `HERDR_MCP_LIVE=1` the
   live file reads `herdr_config_check` and `herdr_session_list` against an
   isolated session.
+  Landed: `src/cli.rs` (argv only, `check_value`, `need_confirm`, 64 KiB per stream, `timed_out` result) and 14 tools in `src/tools/admin_cli.rs`, in the same `admin` group. Real shapes read from herdr's usage lines: `machine rename <profile-id> --label <label>`, and `--json` on `session list`, `machine list` and `machine status`. Tested with a stub `herdr` on PATH (`tests/admin_cli.rs`); `herdr_update` is only ever run through the stub. Live: `tests/lane13_live.rs` (session `herdr-mcp-test-13`, in `scripts/check.sh` and `tests/session_names.rs`), log in `docs/verified/13-cli-parity/admin-cli.log`. tokio gained its `process` feature (already in the lockfile). `NOT_BUILT` is gone from `tests/coverage.rs`: every named tool is registered.
 
 ### Phase 5: docs and the counts
 

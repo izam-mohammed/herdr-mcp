@@ -35,8 +35,8 @@ fn live_sessions_are_isolated_and_unique() {
     let found = names();
     assert_eq!(
         found.len(),
-        8,
-        "expected 7 live files (live, lane02 to lane07) and the bench: {found:?}"
+        9,
+        "expected 8 live files (live, lane02 to lane07, lane13) and the bench: {found:?}"
     );
     for name in found.keys() {
         assert!(name.starts_with("herdr-mcp-test"), "{name}");

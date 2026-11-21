@@ -1,4 +1,5 @@
 //! herdr-mcp: an MCP server for herdr. See `features.md` and the plans.
+pub mod cli;
 pub mod config;
 pub mod error;
 pub mod events;

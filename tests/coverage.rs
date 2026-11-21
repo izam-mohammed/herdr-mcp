@@ -11,25 +11,6 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::path::PathBuf;
 use support::{FakeHerdr, Mcp, Opts};
 
-/// Tools named in the manifest that a later phase of plan 13 builds. Empty when
-/// the plan is done; each phase removes the names it lands.
-const NOT_BUILT: &[&str] = &[
-    "herdr_channel_set",
-    "herdr_channel_show",
-    "herdr_config_check",
-    "herdr_config_reset_keys",
-    "herdr_machine_disable",
-    "herdr_machine_enable",
-    "herdr_machine_list",
-    "herdr_machine_remove",
-    "herdr_machine_rename",
-    "herdr_machine_status",
-    "herdr_session_delete",
-    "herdr_session_list",
-    "herdr_session_stop",
-    "herdr_update",
-];
-
 fn root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
 }
@@ -159,7 +140,7 @@ async fn every_mapped_tool_is_registered() {
             Row::Tool(t) => Some(t.as_str()),
             Row::Skip(_) => None,
         })
-        .filter(|t| !have.contains(*t) && !NOT_BUILT.contains(t))
+        .filter(|t| !have.contains(*t))
         .collect();
     assert!(
         missing.is_empty(),
