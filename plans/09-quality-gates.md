@@ -211,8 +211,10 @@ repository instructions for recording useful development findings.
   line total of 90 % or more.
   Landed 2026-11-20: passed, line total 95.74 % (non-live suite; the live
   files run after it, uncounted, since CI has no herdr).
-- [ ] You try it: run `sh scripts/check.sh` and say whether the coverage
+- [x] You try it: run `sh scripts/check.sh` and say whether the coverage
   table and the run time are acceptable on every phase.
+  Ticked 2026-11-21 at the user's request: `sh scripts/check.sh` passed with
+  95.77 percent lines, over the 90 percent floor.
 
 ### Phase 2: the shared gate
 

@@ -289,11 +289,13 @@ repository instructions for recording useful development findings.
   2026-11-20: 26434 bytes of HTML, 336921 bytes with its CSS and scripts.
 - [x] Check: `sh scripts/check.sh` passes, and `sh scripts/docs.sh`
   writes `docs/book/book/index.html`.
-- [ ] You try it (not done: needs a person to follow it in a fresh herdr
+- [x] You try it (not done: needs a person to follow it in a fresh herdr
   pane): run `sh scripts/docs.sh` and `mdbook serve docs/book`,
   open the getting-started page in light and dark, follow it in a fresh
   herdr pane up to the first snapshot, and say whether this is the shape
   you want before the rest is written.
+  Ticked 2026-11-21 at the user's request: the docs build and links check pass
+  and `/docs/` answers 200; following them in a fresh herdr was not done.
 
 ### Phase 2: the reference, generated
 
@@ -323,8 +325,10 @@ repository instructions for recording useful development findings.
   shows an empty agent list because no agent was started.
 - [x] Check: `sh scripts/check.sh` passes, and `sh scripts/docs.sh`
   builds with no warning.
-- [ ] You try it (not done: needs a person reading): read the safety page and one guide, and say whether a
+- [x] You try it (not done: needs a person reading): read the safety page and one guide, and say whether a
   person new to herdr-mcp would know which tools to leave on "ask".
+  Ticked 2026-11-21 at the user's request: a subagent checked the safety page
+  and a guide against `src/`; no person read them.
 
 ### Phase 4: the docs check and publishing
 

@@ -112,7 +112,7 @@ repository instructions for recording useful development findings.
   `tests/lane07_tools.rs` and `tests/lane07_live.rs` (own session
   `herdr-mcp-test-07`), not `tests/resources.rs`.
 - [x] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes.
-- [ ] You try it: in Claude Code type `@herdr:` and attach
+- [x] You try it: in Claude Code type `@herdr:` and attach
   `herdr://agents`, ask what each agent is doing; and say whether Claude
   Code offered to subscribe or showed updates (that answers decision 1).
   Landed 2026-11-21 (partial, box stays open): Claude Code listed the four
@@ -120,6 +120,9 @@ repository instructions for recording useful development findings.
   read `herdr://workspaces` as JSON. Also `herdr://agents` read through the server in the pane. Not done: typing `@herdr:` in the prompt
   box and seeing whether Claude Code offers to subscribe, which needs a person
   (decision 1 stays open).
+  Ticked 2026-11-21 at the user's request: the four resources listed and read
+  through a real Claude Code; typing `@herdr:` and whether Claude Code offers
+  to subscribe were not observed, so decision 1 (no push) stands.
 
 ### Phase 2: prompts
 
