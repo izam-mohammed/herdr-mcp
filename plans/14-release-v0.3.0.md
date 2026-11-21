@@ -1,5 +1,7 @@
 # v0.3.0 is released: worktrees, layouts, toasts, resources and prompts
 
+> Amended 2026-11-21: folded into `v0.1.0`. Its changelog already covers every tool group, the site and the docs, so no separate `v0.3.0` is cut; see the section at the foot.
+
 ## The ask
 
 `docs/releases.md` puts worktrees, layouts, toasts, resources and prompts in `v0.3.0`. The pipeline exists since
@@ -41,3 +43,7 @@ repository instructions for recording useful development findings.
   date) with a Conventional Commit title for the whole change, a body naming
   this plan, what changed and why, and the checks run with their result. The
   PR's URL printed as the evidence. Opened, never merged.
+
+## Amended, 2026-11-21: folded into v0.1.0
+
+`v0.1.0` shipped with everything `main` held, so a `v0.3.0` release would be the same binary with a new number. The boxes stay unticked: no release was cut. The version after `v0.1.0` is `v0.2.0`, the herdr app backend (`plans/17-release-v0.2.0.md`).
