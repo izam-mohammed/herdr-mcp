@@ -269,19 +269,24 @@ repository instructions for recording useful development findings.
 
 ### Phase 1: the rough cut: see what is not covered
 
-- [ ] `scripts/prove/herdr-cli.sh` runs `herdr api schema --json`,
+- [x] `scripts/prove/herdr-cli.sh` runs `herdr api schema --json`,
   `herdr --help` and one read-only subcommand, and prints PASS; nothing
   below is wired until it does.
-- [ ] `scripts/sync-herdr.sh`, the two lists, `docs/herdr-coverage.toml`
+- [x] `scripts/sync-herdr.sh`, the two lists, `docs/herdr-coverage.toml`
   with a row for every method and command (a tool, or a skip with a reason)
   and `tests/coverage.rs` (expected in `scripts/`, `docs/`, `tests/`),
   pinned by a test that fails on an unmapped entry and on a stale row.
-- [ ] Check: `sh scripts/check.sh` passes, and `sh scripts/sync-herdr.sh`
+- [x] Check: `sh scripts/check.sh` passes, and `sh scripts/sync-herdr.sh`
   prints the entries with no tool yet.
-- [ ] Verify: `scripts/verify/uncovered.sh` runs `sh scripts/sync-herdr.sh`
+- [x] Verify: `scripts/verify/uncovered.sh` runs `sh scripts/sync-herdr.sh`
   against the installed herdr and asserts it prints every entry that has no
   tool yet and exits 0; its output is saved under
   `docs/verified/13-cli-parity/`.
+  Landed: the schema lists 102 methods, not about 80, and the CLI 91 commands
+  (with `server update-agent-manifests`, `agent attach` and `api schema`, which
+  the plan did not name, skipped with reasons); the 32 new tools in the
+  manifest show as `no tool` until their phase. `tests/coverage.rs` also checks
+  every named tool is registered, with a `NOT_BUILT` list that shrinks per phase.
 
 ### Phase 2: the harmless additions
 

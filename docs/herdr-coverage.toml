@@ -1,0 +1,200 @@
+# What herdr-mcp does about every herdr socket method and CLI command (plan 13).
+# One row per line: "<entry>" = "<tool>" or "<entry>" = { skip = "<reason>" }. No quotes inside a reason.
+# `sh scripts/sync-herdr.sh` lists what is new; tests/coverage.rs fails on a missing or stale row.
+
+[methods]
+"agent.explain" = "herdr_agent_explain"
+"agent.focus" = "herdr_agent_focus"
+"agent.get" = "herdr_agent_get"
+"agent.list" = "herdr_agent_list"
+"agent.prompt" = "herdr_agent_prompt"
+"agent.read" = "herdr_agent_read"
+"agent.rename" = "herdr_agent_rename"
+"agent.send_keys" = "herdr_agent_send_keys"
+"agent.start" = "herdr_agent_start"
+"agent.view.clear" = "herdr_agent_view_clear"
+"agent.view.set" = "herdr_agent_view_set"
+"agent.wait" = "herdr_agent_wait"
+"client.window_title.clear" = { skip = "client interface plumbing for a person at a terminal, no use to an agent" }
+"client.window_title.set" = { skip = "client interface plumbing for a person at a terminal, no use to an agent" }
+"client_shell.surface.set" = { skip = "client interface plumbing for a person at a terminal, no use to an agent" }
+"command.invoke" = { skip = "runs a keybinding command in the herdr client interface: client interface plumbing for a person at a terminal, no use to an agent" }
+"events.subscribe" = "herdr_events_recent"
+"events.wait" = "herdr_events_wait"
+"integration.install" = "herdr_integration_install"
+"integration.list" = "herdr_integration_list"
+"integration.uninstall" = "herdr_integration_uninstall"
+"layout.apply" = "herdr_layout_apply"
+"layout.export" = "herdr_layout_export"
+"layout.set_split_ratio" = "herdr_layout_set_split_ratio"
+"notification.show" = "herdr_notify"
+"pane.clear" = "herdr_pane_clear"
+"pane.clear_agent_authority" = "herdr_pane_clear_agent_authority"
+"pane.close" = "herdr_pane_close"
+"pane.copy_motion" = { skip = "copy mode keys: interactive, for a person" }
+"pane.copy_search" = { skip = "copy mode search: interactive, for a person" }
+"pane.current" = "herdr_whoami"
+"pane.edges" = "herdr_pane_layout"
+"pane.edit_scrollback" = { skip = "opens an editor on the scrollback: interactive, for a person" }
+"pane.focus" = "herdr_pane_focus"
+"pane.focus_direction" = "herdr_pane_focus"
+"pane.get" = "herdr_pane_get"
+"pane.input.set" = "herdr_pane_set_input"
+"pane.layout" = "herdr_pane_layout"
+"pane.link.activate" = { skip = "opens a link in the pane: interactive, for a person" }
+"pane.link.resolve" = { skip = "finds the link under a screen point: interactive, for a person" }
+"pane.list" = "herdr_pane_list"
+"pane.move" = "herdr_pane_move"
+"pane.neighbor" = "herdr_pane_layout"
+"pane.process_info" = "herdr_pane_process_info"
+"pane.read" = "herdr_pane_read"
+"pane.release_agent" = "herdr_pane_release_agent"
+"pane.rename" = "herdr_pane_rename"
+"pane.report_agent" = "herdr_pane_report_agent"
+"pane.report_agent_session" = "herdr_pane_report_agent_session"
+"pane.report_metadata" = "herdr_pane_report_metadata"
+"pane.resize" = "herdr_pane_resize"
+"pane.scroll" = "herdr_pane_scroll"
+"pane.selection.read" = "herdr_pane_selection_read"
+"pane.send_input" = "herdr_pane_run"
+"pane.send_keys" = "herdr_pane_send_keys"
+"pane.send_text" = "herdr_pane_send_text"
+"pane.split" = "herdr_pane_split"
+"pane.swap" = "herdr_pane_swap"
+"pane.wait_for_output" = "herdr_pane_wait_output"
+"pane.zoom" = "herdr_pane_zoom"
+"ping" = "herdr_status"
+"plugin.action.invoke" = { skip = "loads or changes plugin code that runs inside herdr; not something an agent should do" }
+"plugin.action.list" = { skip = "loads or changes plugin code that runs inside herdr; not something an agent should do" }
+"plugin.disable" = { skip = "loads or changes plugin code that runs inside herdr; not something an agent should do" }
+"plugin.enable" = { skip = "loads or changes plugin code that runs inside herdr; not something an agent should do" }
+"plugin.link" = { skip = "loads or changes plugin code that runs inside herdr; not something an agent should do" }
+"plugin.list" = { skip = "loads or changes plugin code that runs inside herdr; not something an agent should do" }
+"plugin.log.list" = { skip = "loads or changes plugin code that runs inside herdr; not something an agent should do" }
+"plugin.pane.close" = { skip = "loads or changes plugin code that runs inside herdr; not something an agent should do" }
+"plugin.pane.focus" = { skip = "loads or changes plugin code that runs inside herdr; not something an agent should do" }
+"plugin.pane.open" = { skip = "loads or changes plugin code that runs inside herdr; not something an agent should do" }
+"plugin.unlink" = { skip = "loads or changes plugin code that runs inside herdr; not something an agent should do" }
+"popup.close" = { skip = "closes a popup in the herdr client interface: client interface plumbing for a person at a terminal, no use to an agent" }
+"product_announcement.dismiss" = { skip = "client interface plumbing for a person at a terminal, no use to an agent" }
+"release_notes.dismiss" = { skip = "client interface plumbing for a person at a terminal, no use to an agent" }
+"server.agent_manifests" = "herdr_server_agent_manifests"
+"server.live_handoff" = { skip = "internal step of herdr update --handoff, not a user action" }
+"server.reload_agent_manifests" = "herdr_server_reload_agent_manifests"
+"server.reload_config" = "herdr_server_reload_config"
+"server.ssh_agent.register" = { skip = "herdr's own remote client registering an SSH agent, not a user action" }
+"server.stop" = "herdr_server_stop"
+"session.snapshot" = "herdr_snapshot"
+"tab.close" = "herdr_tab_close"
+"tab.create" = "herdr_tab_create"
+"tab.focus" = "herdr_tab_focus"
+"tab.get" = "herdr_tab_get"
+"tab.list" = "herdr_tab_list"
+"tab.move" = "herdr_tab_move"
+"tab.rename" = "herdr_tab_rename"
+"workspace.close" = "herdr_workspace_close"
+"workspace.create" = "herdr_workspace_create"
+"workspace.focus" = "herdr_workspace_focus"
+"workspace.get" = "herdr_workspace_get"
+"workspace.list" = "herdr_workspace_list"
+"workspace.move" = "herdr_workspace_move"
+"workspace.move_block" = "herdr_workspace_move_block"
+"workspace.rename" = "herdr_workspace_rename"
+"workspace.report_metadata" = "herdr_workspace_report_metadata"
+"worktree.create" = "herdr_worktree_create"
+"worktree.list" = "herdr_worktree_list"
+"worktree.open" = "herdr_worktree_open"
+"worktree.remove" = "herdr_worktree_remove"
+
+[commands]
+"--default-config" = { skip = "prints the default config.toml for a person to read" }
+"--machine" = { skip = "routes a command to a saved SSH machine; the tools act on the session the server was started for" }
+"--remote" = { skip = "starts an interactive client over SSH" }
+"--skill" = { skip = "prints the herdr agent skill file for a person to read" }
+"agent attach" = { skip = "attaches the terminal to an agent: interactive" }
+"agent explain" = "herdr_agent_explain"
+"agent focus" = "herdr_agent_focus"
+"agent get" = "herdr_agent_get"
+"agent list" = "herdr_agent_list"
+"agent prompt" = "herdr_agent_prompt"
+"agent read" = "herdr_agent_read"
+"agent rename" = "herdr_agent_rename"
+"agent send-keys" = "herdr_agent_send_keys"
+"agent start" = "herdr_agent_start"
+"agent wait" = "herdr_agent_wait"
+"api schema" = { skip = "prints the API schema for developers; scripts/sync-herdr.sh reads it" }
+"api snapshot" = "herdr_snapshot"
+"channel set" = "herdr_channel_set"
+"channel show" = "herdr_channel_show"
+"completion" = { skip = "prints a shell completion script for a person to install" }
+"config check" = "herdr_config_check"
+"config reset-keys" = "herdr_config_reset_keys"
+"herdr" = { skip = "bare herdr starts or attaches an interactive client" }
+"integration install" = "herdr_integration_install"
+"integration status" = "herdr_integration_list"
+"integration uninstall" = "herdr_integration_uninstall"
+"machine add" = { skip = "asks for a password or a choice on a terminal: interactive" }
+"machine disable" = "herdr_machine_disable"
+"machine enable" = "herdr_machine_enable"
+"machine list" = "herdr_machine_list"
+"machine reconnect" = { skip = "needs the person to finish SSH authentication in their terminal: interactive" }
+"machine remove" = "herdr_machine_remove"
+"machine rename" = "herdr_machine_rename"
+"machine status" = "herdr_machine_status"
+"notification show" = "herdr_notify"
+"pane close" = "herdr_pane_close"
+"pane current" = "herdr_whoami"
+"pane edges" = "herdr_pane_layout"
+"pane focus" = "herdr_pane_focus"
+"pane get" = "herdr_pane_get"
+"pane input" = "herdr_pane_set_input"
+"pane layout" = "herdr_pane_layout"
+"pane list" = "herdr_pane_list"
+"pane move" = "herdr_pane_move"
+"pane neighbor" = "herdr_pane_layout"
+"pane process-info" = "herdr_pane_process_info"
+"pane read" = "herdr_pane_read"
+"pane release-agent" = "herdr_pane_release_agent"
+"pane rename" = "herdr_pane_rename"
+"pane report-agent" = "herdr_pane_report_agent"
+"pane report-agent-session" = "herdr_pane_report_agent_session"
+"pane report-metadata" = "herdr_pane_report_metadata"
+"pane resize" = "herdr_pane_resize"
+"pane run" = "herdr_pane_run"
+"pane send-keys" = "herdr_pane_send_keys"
+"pane send-text" = "herdr_pane_send_text"
+"pane split" = "herdr_pane_split"
+"pane swap" = "herdr_pane_swap"
+"pane wait-output" = "herdr_pane_wait_output"
+"pane zoom" = "herdr_pane_zoom"
+"server" = { skip = "bare herdr server runs a headless server in the foreground" }
+"server agent-manifests" = "herdr_server_agent_manifests"
+"server reload-agent-manifests" = "herdr_server_reload_agent_manifests"
+"server reload-config" = "herdr_server_reload_config"
+"server stop" = "herdr_server_stop"
+"server update-agent-manifests" = { skip = "fetches manifests from the network and replaces detection files; reload covers local overrides" }
+"session attach" = { skip = "attaches the terminal to a session: interactive" }
+"session delete" = "herdr_session_delete"
+"session list" = "herdr_session_list"
+"session stop" = "herdr_session_stop"
+"status" = "herdr_status"
+"status client" = "herdr_status"
+"status server" = "herdr_status"
+"tab close" = "herdr_tab_close"
+"tab create" = "herdr_tab_create"
+"tab focus" = "herdr_tab_focus"
+"tab get" = "herdr_tab_get"
+"tab list" = "herdr_tab_list"
+"tab rename" = "herdr_tab_rename"
+"update" = "herdr_update"
+"workspace close" = "herdr_workspace_close"
+"workspace create" = "herdr_workspace_create"
+"workspace focus" = "herdr_workspace_focus"
+"workspace get" = "herdr_workspace_get"
+"workspace list" = "herdr_workspace_list"
+"workspace rename" = "herdr_workspace_rename"
+"workspace report-metadata" = "herdr_workspace_report_metadata"
+"worktree create" = "herdr_worktree_create"
+"worktree list" = "herdr_worktree_list"
+"worktree open" = "herdr_worktree_open"
+"worktree remove" = "herdr_worktree_remove"
