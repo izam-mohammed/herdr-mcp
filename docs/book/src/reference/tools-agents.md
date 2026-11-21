@@ -102,6 +102,29 @@ Group `agents` (write). Read-only: no. Destructive: no. Idempotent: no. Reaches 
 | `pane_id` | string | yes | An existing pane sitting at its shell prompt. |
 | `timeout_ms` | integer | no | Wait for readiness this long: 3001 to 300000 ms, default 30000. |
 
+## `herdr_agent_view_clear`
+
+Clear the agent view set by a source (or the current one), back to herdr's default.
+
+Group `agents` (write). Read-only: no. Destructive: no. Idempotent: yes. Reaches beyond herdr: no.
+
+| Parameter | Type | Required | What it is |
+| --- | --- | --- | --- |
+| `source` | string | no | Clear the view set by this source. Omit to clear the current one. |
+
+## `herdr_agent_view_set`
+
+Set herdr's agent view: which agents the agent list shows and in what order, from a source. Changes what a person sees in herdr, not the agents.
+
+Group `agents` (write). Read-only: no. Destructive: no. Idempotent: yes. Reaches beyond herdr: no.
+
+| Parameter | Type | Required | What it is |
+| --- | --- | --- | --- |
+| `filter` | any | no | Which agents show, as herdr's filter tree: `{"op":"eq","field":"status","value":"blocked"}`, `{"op":"in","field":"agent","values":["claude"]}`, `{"op":"exists","field":{"token":"x"}}`, combined with `{"op":"all","filters":[..]}`, `{"op":"any","filters":[..]}` or `{"op":"not","filter":{..}}`. Fields: `status`, `workspace_id`, `tab_id`, `pane_id`, `agent`, `seen`, `state_change_seq`, or `{"token":"name"}`. |
+| `label` | string | no | Name shown for the view. |
+| `sort` | array of any | no | Sort keys, each `{"field":"attention","order":"asc"}` (or `"desc"`). Fields: `workspace_order`, `tab_order`, `pane_order`, `attention`, `status`, `agent`, `seen`, `state_change_seq`, or `{"token":"name"}`. |
+| `source` | string | yes | Who sets the view, e.g. `herdr-mcp`. A later set from the same source replaces it. |
+
 ## `herdr_agent_wait`
 
 Wait until an agent is idle, done or blocked (or the states given), up to timeout_ms (default 60000, at most 600000). At the cap returns timed_out: true. Does not send anything.

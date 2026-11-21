@@ -114,6 +114,33 @@ struct Rename {
     name: Option<String>,
 }
 
+#[derive(Serialize, Deserialize, JsonSchema)]
+struct ViewSet {
+    /// Who sets the view, e.g. `herdr-mcp`. A later set from the same source replaces it.
+    source: String,
+    /// Name shown for the view.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    label: Option<String>,
+    /// Which agents show, as herdr's filter tree: `{"op":"eq","field":"status","value":"blocked"}`,
+    /// `{"op":"in","field":"agent","values":["claude"]}`, `{"op":"exists","field":{"token":"x"}}`,
+    /// combined with `{"op":"all","filters":[..]}`, `{"op":"any","filters":[..]}` or
+    /// `{"op":"not","filter":{..}}`. Fields: `status`, `workspace_id`, `tab_id`, `pane_id`, `agent`, `seen`,
+    /// `state_change_seq`, or `{"token":"name"}`.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    filter: Option<Value>,
+    /// Sort keys, each `{"field":"attention","order":"asc"}` (or `"desc"`). Fields: `workspace_order`,
+    /// `tab_order`, `pane_order`, `attention`, `status`, `agent`, `seen`, `state_change_seq`, or `{"token":"name"}`.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    sort: Option<Vec<Value>>,
+}
+
+#[derive(Serialize, Deserialize, JsonSchema)]
+struct ViewClear {
+    /// Clear the view set by this source. Omit to clear the current one.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    source: Option<String>,
+}
+
 fn until_or_settled(until: Option<Vec<State>>) -> Vec<State> {
     until
         .filter(|u| !u.is_empty())
@@ -332,5 +359,32 @@ shell prompt, and wait for it to be ready (3001 to 300000 ms).",
     )]
     async fn herdr_agent_rename(&self, Parameters(p): Parameters<Rename>) -> CallToolResult {
         self.herdr("agent.rename", p).await
+    }
+
+    #[tool(
+        description = "Set herdr's agent view: which agents the agent list shows and in what \
+order, from a source. Changes what a person sees in herdr, not the agents.",
+        annotations(
+            read_only_hint = false,
+            destructive_hint = false,
+            idempotent_hint = true,
+            open_world_hint = false
+        )
+    )]
+    async fn herdr_agent_view_set(&self, Parameters(p): Parameters<ViewSet>) -> CallToolResult {
+        self.herdr("agent.view.set", p).await
+    }
+
+    #[tool(
+        description = "Clear the agent view set by a source (or the current one), back to herdr's default.",
+        annotations(
+            read_only_hint = false,
+            destructive_hint = false,
+            idempotent_hint = true,
+            open_world_hint = false
+        )
+    )]
+    async fn herdr_agent_view_clear(&self, Parameters(p): Parameters<ViewClear>) -> CallToolResult {
+        self.herdr("agent.view.clear", p).await
     }
 }

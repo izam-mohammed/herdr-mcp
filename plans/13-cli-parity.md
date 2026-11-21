@@ -290,15 +290,16 @@ repository instructions for recording useful development findings.
 
 ### Phase 2: the harmless additions
 
-- [ ] `herdr_pane_scroll`, `herdr_pane_selection_read`,
+- [x] `herdr_pane_scroll`, `herdr_pane_selection_read`,
   `herdr_pane_report_metadata`, `herdr_agent_view_set`, `_clear` and
   `herdr_workspace_move_block` over the socket (expected in
   `src/tools/panes.rs`, `agents.rs`, `workspaces.rs`), pinned by
   fake-socket tests, with the manifest rows pointing at them.
-- [ ] Check: `sh scripts/check.sh` passes and the coverage test is green.
-- [ ] Verify: `scripts/verify/harmless-tools.sh` starts an isolated
+- [x] Check: `sh scripts/check.sh` passes and the coverage test is green.
+- [x] Verify: `scripts/verify/harmless-tools.sh` starts an isolated
   `herdr --session herdr-mcp-test-13 server`, calls each of the six tools
   over stdio and prints PASS; output saved under `docs/verified/13-cli-parity/`.
+  Landed: tests in `tests/lane13_tools.rs`; `herdr_pane_report_metadata` checks herdr's token and ttl limits first; `herdr_pane_selection_read` is read-only and caps text with the new `limits::cap_strings`; the verify script drives the six tools against `herdr-mcp-test-13`, outputs in `docs/verified/13-cli-parity/harmless-tools.log`. The tools count went 57 to 63.
 
 ### Phase 3: the admin group, over the socket
 

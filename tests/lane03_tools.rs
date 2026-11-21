@@ -446,6 +446,7 @@ async fn read_only_mode_registers_only_pane_reads() {
             "herdr_pane_list",
             "herdr_pane_process_info",
             "herdr_pane_read",
+            "herdr_pane_selection_read",
             "herdr_pane_wait_output"
         ]
     );

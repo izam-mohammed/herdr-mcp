@@ -14,8 +14,6 @@ use support::{FakeHerdr, Mcp, Opts};
 /// Tools named in the manifest that a later phase of plan 13 builds. Empty when
 /// the plan is done; each phase removes the names it lands.
 const NOT_BUILT: &[&str] = &[
-    "herdr_agent_view_clear",
-    "herdr_agent_view_set",
     "herdr_channel_set",
     "herdr_channel_show",
     "herdr_config_check",
@@ -33,9 +31,6 @@ const NOT_BUILT: &[&str] = &[
     "herdr_pane_release_agent",
     "herdr_pane_report_agent",
     "herdr_pane_report_agent_session",
-    "herdr_pane_report_metadata",
-    "herdr_pane_scroll",
-    "herdr_pane_selection_read",
     "herdr_pane_set_input",
     "herdr_server_agent_manifests",
     "herdr_server_reload_agent_manifests",
@@ -45,7 +40,6 @@ const NOT_BUILT: &[&str] = &[
     "herdr_session_list",
     "herdr_session_stop",
     "herdr_update",
-    "herdr_workspace_move_block",
 ];
 
 fn root() -> PathBuf {

@@ -54,6 +54,40 @@ pub fn cap_read(result: &mut Value) {
     result["truncated"] = Value::Bool(true);
 }
 
+/// Cap every string in `result` at `MAX_CHARS` (keeping the end) and set a top-level
+/// `truncated: true` when one was cut. For replies whose text field is not `read.text`.
+pub fn cap_strings(result: &mut Value) {
+    fn walk(v: &mut Value) -> bool {
+        match v {
+            Value::String(s) => match tail(s).map(str::to_owned) {
+                Some(kept) => {
+                    *s = kept;
+                    true
+                }
+                None => false,
+            },
+            Value::Array(a) => {
+                let mut cut = false;
+                for x in a {
+                    cut |= walk(x);
+                }
+                cut
+            }
+            Value::Object(o) => {
+                let mut cut = false;
+                for x in o.values_mut() {
+                    cut |= walk(x);
+                }
+                cut
+            }
+            _ => false,
+        }
+    }
+    if walk(result) {
+        result["truncated"] = Value::Bool(true);
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -83,6 +117,17 @@ mod tests {
         assert!(r["read"]["text"].as_str().unwrap().ends_with("END"));
         let mut small = json!({"read":{"text":"hi"}});
         cap_read(&mut small);
+        assert!(small.get("truncated").is_none());
+    }
+
+    #[test]
+    fn cap_strings_cuts_nested_text() {
+        let mut r = json!({"selection":{"text": format!("{}END", "a".repeat(MAX_CHARS))}});
+        cap_strings(&mut r);
+        assert_eq!(r["truncated"], true);
+        assert!(r["selection"]["text"].as_str().unwrap().ends_with("END"));
+        let mut small = json!({"a":["hi"]});
+        cap_strings(&mut small);
         assert!(small.get("truncated").is_none());
     }
 }
