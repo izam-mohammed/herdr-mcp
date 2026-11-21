@@ -28,5 +28,5 @@ ticked here when all its boxes are.
 
 ### Phase 2: next, a skill for users
 
-- [ ] `plans/14-user-skill.md` - a skill that teaches users' agents to use,
+- [x] `plans/14-user-skill.md` - a skill that teaches users' agents to use,
   install and fix herdr-mcp.
