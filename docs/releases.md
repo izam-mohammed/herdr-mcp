@@ -18,6 +18,7 @@ since tool names are what people write permission rules against.
 | Version | What a user gets | Chain phase | Plans | New channels | State |
 | --- | --- | --- | --- | --- | --- |
 | v0.1.0 | every herdr tool, resource and prompt from Claude Code, safe by default, one-command install, a site and docs | 1 | 01 to 12 | GitHub Releases, shell installer | released 2026-11-21 (the one release: everything plans 01 to 12 built) |
+| v0.2.0 | every herdr command as a tool (an admin group, off by default), a check that keeps up with herdr, and a skill for users | 2 | 13, 14 | none | released 2026-11-21 |
 
 ## Channels
 

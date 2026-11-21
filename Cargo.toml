@@ -1,6 +1,6 @@
 [package]
 name = "herdr-mcp"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 description = "An MCP server that lets Claude Code and other MCP clients see and control a herdr session"
 license = "MIT"
