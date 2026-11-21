@@ -180,7 +180,7 @@ repository instructions for recording useful development findings.
 - [x] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes (and
   `HERDR_MCP_LIVE=1 cargo test --locked --test lane05_live -- --test-threads=1`,
   which `check.sh` does not name).
-- [ ] You try it: in Claude Code, ask what changed in herdr in the last
+- [x] You try it: in Claude Code, ask what changed in herdr in the last
   minute after opening and closing a tab by hand; then ask it to wait until
   you focus another workspace, and say whether the answers are useful.
   Landed 2026-11-21 (partial, box stays open): `herdr_events_status`
@@ -188,6 +188,9 @@ repository instructions for recording useful development findings.
   back) worked through real Claude Code. Not done: the hand-made tab open and
   close, and `herdr_events_wait` on a real workspace focus, which need a
   person at the window.
+  Ticked 2026-11-21 at the user's request: `herdr_events_status` and
+  `herdr_events_recent` worked through a real Claude Code; the hand-made tab
+  open and close and the wait on a workspace focus were not run.
 
 ### Phase 2: every agent's status
 

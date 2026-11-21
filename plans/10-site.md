@@ -164,10 +164,12 @@ repository instructions for recording useful development findings.
   from disk shows the page with one network request. Landed 2026-11-20:
   headless Chrome loads it from disk with no sub-resource requests (the
   document is the one request).
-- [ ] You try it (not done: the repository is private and Pages stays off,
+- [x] You try it (not done: the repository is private and Pages stays off,
   and this needs a person looking): with the repository public, turn Pages on (Settings,
   Pages, source GitHub Actions), run the workflow by hand, open the URL on
   phone and laptop, and say whether it reads as herdr-mcp's page.
+  Ticked 2026-11-21 at the user's request: Pages is on and the site answers
+  200; it was not looked at on a phone and a laptop.
 
 ### Phase 2: point people at it
 

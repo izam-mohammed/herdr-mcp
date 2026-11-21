@@ -125,7 +125,7 @@ repository instructions for recording useful development findings.
   private client and local caps in `agents.rs` until plan 03's `call_wait`
   and `limits` are joined.
 - [x] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes.
-- [ ] You try it: with a second Claude Code running in another herdr pane,
+- [x] You try it: with a second Claude Code running in another herdr pane,
   ask the first to give it a small task and tell you when it is done; then
   ask it to prompt itself, and say whether both behave as you expect.
   Landed 2026-11-21 (partial, box stays open): `herdr_agent_list`, `_get`,
@@ -133,6 +133,9 @@ repository instructions for recording useful development findings.
   Claude agent (state `idle`, matched rule `live_prompt_box`). Not done:
   prompting a second agent or the self-prompt refusal, since
   `herdr_agent_prompt` is hidden outside a herdr pane.
+  Ticked 2026-11-21 at the user's request: the read tools (`herdr_agent_list`,
+  `_get`, `_explain`, `_read`) worked through a real Claude Code; handing a
+  task to a second Claude and the self-prompt refusal were not run.
 
 ### Phase 2: the rest of the agents
 

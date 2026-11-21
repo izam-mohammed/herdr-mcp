@@ -140,18 +140,29 @@ listing (Phase 2). `docs/research/08-release-v0.1.0.md` holds the review so far.
   (expected in `dist-workspace.toml`), `.github/workflows/release.yml`
   generated, `Cargo.toml` metadata, `CHANGELOG.md`, the README's install
   section, and `docs/standards.md`'s CI section updated.
-- [ ] Check: `sh scripts/check.sh` passes, `dist plan` lists the six
+- [x] Check: `sh scripts/check.sh` passes, `dist plan` lists the six
   targets, and pushing tag `v0.1.0-rc.1` produces a release with archives
   and checksums.
-- [ ] You try it: on a machine without Rust (or with `PATH` stripped of
+  Ticked 2026-11-21 at the user's request: `check.sh` passes and `dist plan`
+  lists the six targets; the `v0.1.0-rc.1` tag failed (`dist` needs the tag to
+  equal the `Cargo.toml` version), so `v0.1.0` was tagged directly and
+  produced the archives and checksums.
+- [x] You try it: on a machine without Rust (or with `PATH` stripped of
   cargo), run the installer from the `v0.1.0-rc.1` release, then `claude
   mcp add herdr -- herdr-mcp`, and say whether it was one step.
+  Ticked 2026-11-21 at the user's request: the installer from the `v0.1.0`
+  release, run with a throwaway `HOME`, put a binary that prints `herdr-mcp
+  0.1.0`; `claude mcp add` was done through the dotfiles, and the server
+  connected in a real Claude Code.
 
 ### Phase 2: review and the first release
 
-- [ ] Post-implementation review of the workflow's permissions and the
+- [x] Post-implementation review of the workflow's permissions and the
   installer, recorded in `docs/research/08-release-v0.1.0.md`, then tag `v0.1.0`
   once the try is good.
+  Ticked 2026-11-21 at the user's request: the release run's permissions were
+  not reviewed line by line beyond `dist plan` and the successful run;
+  `docs/research/08-release-v0.1.0.md` is unchanged.
 - [x] Check: `sh scripts/check.sh` passes, and the `v0.1.0` release lists
   every target with checksums.
   Landed 2026-11-21: all six archives, a `.sha256` each, `sha256.sum`, the installer.
