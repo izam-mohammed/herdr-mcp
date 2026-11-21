@@ -367,6 +367,12 @@ repository instructions for recording useful development findings.
   it to list your tabs, open a new tab called `scratch` and focus it; say
   whether the answers and the permission prompts feel right. What you want
   changed goes into Phase 3 or the later plans.
+  Landed 2026-11-21 (partial, box stays open): the v0.1.0 binary, registered
+  in every profile, connected in a real Claude Code session and answered
+  `herdr_whoami`, `herdr_status`, `herdr_snapshot` and the tab and workspace
+  reads. Not done: opening and focusing a `scratch` tab and the permission
+  prompts, because that session was not inside a herdr pane (`HERDR_ENV`
+  unset), so the server was read-only and hid every write tool.
 
 ### Phase 3: within budget, and big sessions stay small
 

@@ -158,6 +158,11 @@ repository instructions for recording useful development findings.
   workspace called `sandbox` with two tabs, move the second tab first,
   then close `sandbox`; then ask it to close its own tab, and say whether
   the refusal reads clearly.
+  Landed 2026-11-21 (partial, box stays open): `herdr_workspace_list` and
+  `herdr_tab_list` read right through real Claude Code; creating, moving and
+  closing needs the write tools, hidden outside a herdr pane. The own-tab
+  refusal (`self_target`) was seen only over stdio against an isolated
+  session.
 
 ### Phase 2: edge cases and the moved pane
 

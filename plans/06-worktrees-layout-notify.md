@@ -127,6 +127,10 @@ its budget in `scripts/check.sh`.
 - [ ] You try it: ask Claude Code to open a worktree of this repository on
   a new branch as a workspace and show a toast when it is ready; say
   whether the toast and the workspace are what you expect.
+  Landed 2026-11-21 (partial, box stays open): `herdr_worktree_list` and
+  `herdr_layout_export` worked through real Claude Code. Not done: opening a
+  worktree as a workspace and the toast, since `herdr_worktree_create` and
+  `herdr_notify` are hidden outside a herdr pane.
 
 ### Phase 2: layouts
 

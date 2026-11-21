@@ -178,6 +178,11 @@ repository instructions for recording useful development findings.
 - [ ] You try it: ask Claude Code in a herdr pane to run `cargo test` (or
   any slow command) in a new pane to the right and tell you when it
   finishes; say whether it waits and reports the way you expect.
+  Landed 2026-11-21 (partial, box stays open): `herdr_pane_read` and
+  `herdr_pane_wait_output` worked through real Claude Code (a 2 s wait for
+  text that never came returned `timed_out: true`). Not done: running a
+  command in a new pane, since `herdr_pane_run` is hidden outside a herdr
+  pane.
 
 ### Phase 2: the rest of the panes
 
