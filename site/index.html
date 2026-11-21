@@ -48,15 +48,6 @@
   .tagline { color: var(--secondary); font-size: 17px; margin-top: 14px; max-width: 32rem; }
   .pitch { color: var(--tertiary); font-size: 14.5px; margin-top: 12px; max-width: 34rem; }
 
-  .download {
-    margin-top: 28px; display: inline-flex; align-items: center; gap: 10px;
-    padding: 13px 22px; border-radius: 12px;
-    background: linear-gradient(180deg, #f05b5b, var(--red-deep));
-    color: #fff; font-weight: 600; font-size: 15px; text-decoration: none;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 10px 30px rgba(239,68,68,0.3);
-  }
-  .download:hover { box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 14px 36px rgba(239,68,68,0.42); }
-  .download svg { width: 15px; height: 15px; flex: none; }
   .meta { color: var(--tertiary); font-size: 12.5px; margin-top: 14px; max-width: 32rem; }
 
   h2 { font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--tertiary); font-weight: 600; margin-top: 52px; }
@@ -66,6 +57,15 @@
     padding: 14px 16px; overflow-x: auto; font: 13px/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     color: var(--text); white-space: pre; overflow-wrap: normal;
   }
+  .start { width: 100%; text-align: left; margin-top: 14px; position: relative; }
+  .start pre { white-space: pre-wrap; overflow-wrap: anywhere; padding-top: 40px; }
+  .copy {
+    position: absolute; top: 10px; right: 10px; cursor: pointer;
+    background: rgba(255,255,255,0.08); color: var(--text); border: 1px solid var(--rule);
+    border-radius: 8px; padding: 6px 12px; font: 600 12.5px/1 -apple-system, system-ui, sans-serif;
+  }
+  .copy:hover { background: rgba(255,255,255,0.14); }
+  .copy:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
   .note { color: var(--tertiary); font-size: 13px; margin-top: 12px; text-align: left; width: 100%; }
   .note strong { color: var(--secondary); font-weight: 600; }
   code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.93em; color: var(--secondary); }
@@ -175,20 +175,25 @@
     <p class="tagline">You gave your AI agents their own terminals. Now one of them gets to be the boss.</p>
     <p class="pitch">an MCP server for herdr ~ it lets Claude Code, Codex or any other MCP client list, open, close, read, prompt and wait on everything in your herdr session. middle management, in rust, cheaper than the human kind.</p>
 
-    <a class="download" href="https://github.com/izam-mohammed/herdr-mcp/releases/latest">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7 10.5l5 5 5-5"/><path d="M5 20h14"/></svg>
-      Latest release
-    </a>
-    <p class="meta">Linux and macOS, x86_64 and arm64 ~ needs herdr ~ MIT</p>
+    <p class="meta" style="margin-top:22px">Linux and macOS, x86_64 and arm64 ~ needs herdr ~ MIT</p>
 
-    <h2>Install</h2>
-    <div class="install">
-<pre>curl --proto '=https' --tlsv1.2 -LsSf https://github.com/izam-mohammed/herdr-mcp/releases/latest/download/herdr-mcp-installer.sh | sh
-herdr-mcp --version
-claude mcp add herdr -- herdr-mcp     # Claude Code
-codex mcp add herdr -- herdr-mcp      # Codex</pre>
+    <h2>Start here</h2>
+    <p class="note" style="margin-top:14px">Paste this into Claude Code or Codex, running <strong>inside a herdr pane</strong>. It installs the server, registers it and checks that it works.</p>
+    <div class="start">
+      <button class="copy" type="button" id="copy" aria-label="Copy the starting prompt">Copy</button>
+<pre id="prompt">Install the herdr MCP server for me.
+
+1. Run the installer from the latest release:
+   curl --proto '=https' --tlsv1.2 -LsSf https://github.com/izam-mohammed/herdr-mcp/releases/latest/download/herdr-mcp-installer.sh | sh
+2. Open a new shell if needed, then run `herdr-mcp --version` and tell me the version.
+3. Register it: `claude mcp add herdr -- herdr-mcp` (Claude Code) or
+   `codex mcp add herdr -- herdr-mcp` (Codex).
+4. Tell me to restart you inside a herdr pane. After the restart, call
+   herdr_whoami and herdr_tab_list and show me what you see.
+
+No sudo, no Rust toolchain. If a step fails, show me the exact error and stop.</pre>
     </div>
-    <p class="note"><strong>The repository is private today</strong>, so the one-liner only works once it is public. Until then, with access, download a release archive with <code>gh release download</code>; the README has the steps. Then start your agent <strong>inside a herdr pane</strong>: started anywhere else, it is read-only.</p>
+    <p class="note">Started anywhere but a herdr pane, the server is read-only: it can look and not touch. Prefer to do it by hand? The same steps are in the <a href="docs/getting-started.html" style="color:inherit;text-decoration:underline">docs</a>.</p>
 
     <h2>What it can do</h2>
     <ul class="areas">
@@ -202,7 +207,7 @@ codex mcp add herdr -- herdr-mcp      # Codex</pre>
     <p class="note">63 tools by default (26 more in an admin group that is off), 7 resources and 3 prompts, each with a page in the <a href="docs/" style="color:inherit;text-decoration:underline">docs</a>.</p>
 
     <h2>What it won't do</h2>
-    <p class="safety">Read-only outside herdr. It never prompts, types into or closes its own pane, and it treats everything a pane prints as data, never instructions. It cannot stop or reconfigure herdr itself.</p>
+    <p class="safety">Read-only outside herdr. It never prompts, types into or closes its own pane, and it treats everything a pane prints as data, never instructions. Stopping or reconfiguring herdr itself needs the admin group, which is off until you turn it on.</p>
   </main>
 
   <footer>
@@ -210,5 +215,19 @@ codex mcp add herdr -- herdr-mcp      # Codex</pre>
     <a href="https://github.com/izam-mohammed/herdr-mcp#readme">how it works</a>
   </footer>
 </div>
+<script>
+(function () {
+  var b = document.getElementById("copy"), p = document.getElementById("prompt");
+  if (!b || !p) return;
+  b.addEventListener("click", function () {
+    try {
+      navigator.clipboard.writeText(p.textContent).then(function () {
+        b.textContent = "Copied";
+        setTimeout(function () { b.textContent = "Copy"; }, 1800);
+      }, function () { b.textContent = "Select and copy"; });
+    } catch (e) { b.textContent = "Select and copy"; }
+  });
+})();
+</script>
 </body>
 </html>
