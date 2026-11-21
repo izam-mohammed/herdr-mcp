@@ -89,7 +89,16 @@ struct WorkspaceClose {
 const MAX_TOKENS: usize = 16;
 const MAX_TTL_MS: u64 = 86_400_000;
 
-fn valid_key(key: &str) -> bool {
+#[derive(Serialize, Deserialize, JsonSchema)]
+struct WorkspaceMoveBlock {
+    /// Workspace ids to move together, in the order they should end up.
+    workspace_ids: Vec<String>,
+    /// Put the block before this workspace. Omit to put it at the end.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    before_workspace_id: Option<String>,
+}
+
+pub(super) fn valid_key(key: &str) -> bool {
     (1..=32).contains(&key.len())
         && key
             .bytes()
@@ -209,6 +218,23 @@ directory, with environment variables, and focused.",
         Parameters(p): Parameters<WorkspaceMove>,
     ) -> CallToolResult {
         self.herdr("workspace.move", p).await
+    }
+
+    #[tool(
+        description = "Move several workspaces together to a position in the workspace order: \
+before `before_workspace_id`, or to the end.",
+        annotations(
+            read_only_hint = false,
+            destructive_hint = false,
+            idempotent_hint = true,
+            open_world_hint = false
+        )
+    )]
+    async fn herdr_workspace_move_block(
+        &self,
+        Parameters(p): Parameters<WorkspaceMoveBlock>,
+    ) -> CallToolResult {
+        self.herdr("workspace.move_block", p).await
     }
 
     #[tool(

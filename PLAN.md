@@ -26,7 +26,9 @@ ticked here when all its boxes are.
 - [x] `plans/08-release-v0.1.0.md` - one-command install without a Rust
   toolchain, and `v0.1.0` released.
 
-### Phase 2: next, a skill for users
+### Phase 2: next, every herdr command as a tool
 
+- [x] `plans/13-cli-parity.md` - every herdr command is also an MCP tool,
+  and a check says when herdr gets a new one.
 - [x] `plans/14-user-skill.md` - a skill that teaches users' agents to use,
   install and fix herdr-mcp.

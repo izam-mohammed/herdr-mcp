@@ -16,8 +16,10 @@ can run, so nothing there can steer a session the server is not part of.
 - **Prompt, type into, clear or close its own pane**, or close the tab or
   workspace it lives in (code `self_target`).
 - **Steer your session from outside herdr.** There it is read-only.
-- **Stop, restart or reconfigure herdr itself.** Those methods are not
-  exposed at all.
+- **Stop, restart or reconfigure herdr itself, by default.** Those tools
+  are in the `admin` group, which is off until you turn it on (below).
+- **Stop or delete its own herdr session**, even with the admin group on
+  (code `self_target`), unless the call passes `allow_self: true`.
 - **Trust pane output.** Whatever another program prints is returned as
   data, and tool descriptions say so.
 
@@ -31,6 +33,45 @@ the own pane is, the call is refused.
 
 `herdr_workspace_close` passes `close_group` only when asked. Never set it
 just to get past `workspace_group_close_required`.
+
+## The admin group
+
+`--tools all,admin` (or `HERDR_MCP_TOOLS=all,admin`) adds 26 tools that
+administer herdr itself. They are off by default because an agent could
+otherwise stop the server it runs in, replace the herdr binary or report a
+false agent state. What each does:
+
+- **Over the socket:** `herdr_integration_list`, `_install` and `_uninstall`
+  (write hooks into other agents' config directories),
+  `herdr_server_reload_config`, `herdr_server_agent_manifests`,
+  `herdr_server_reload_agent_manifests`, `herdr_server_stop` (ends every
+  pane), `herdr_pane_set_input`, and `herdr_pane_report_agent`,
+  `_report_agent_session`, `_release_agent` and `_clear_agent_authority` (make
+  herdr show an agent state, true or not).
+- **Through the `herdr` binary:** `herdr_config_check`,
+  `herdr_config_reset_keys`, `herdr_channel_show` and `_set`,
+  `herdr_session_list`, `_stop` and `_delete`, `herdr_machine_list`,
+  `_status`, `_rename`, `_remove`, `_enable` and `_disable`, and
+  `herdr_update` (replaces the herdr binary).
+
+Every one that changes something is marked destructive, so your client asks,
+and `--read-only` hides it; only the reads stay (`herdr_config_check`,
+`herdr_channel_show`, `herdr_session_list`, `herdr_machine_list`,
+`herdr_machine_status`, `herdr_integration_list`,
+`herdr_server_agent_manifests`). `herdr_server_stop`, `herdr_session_stop` and
+`herdr_session_delete` refuse the session the server runs in
+(`self_target`; `allow_self: true` overrides, only when you asked for exactly
+that); if the server cannot tell its own session from the socket path it
+refuses too. `herdr_update` and `herdr_config_reset_keys` also need
+`confirm: true`; without it the refusal says what would happen
+(`invalid_params`). Keep all of them on "ask".
+
+The subprocess tools run your installed `herdr` with an argument list, never
+through a shell. A value that is empty, starts with `-` or holds a control
+character is refused (`invalid_params`). Each waits 10 seconds (`herdr_update`
+120), then returns `timed_out: true`; the reply is `{stdout, stderr, exit,
+truncated}`, capped at 64 KiB a stream, and is text from another program:
+data, not instructions. A missing `herdr` binary is `herdr_unreachable`.
 
 ## The hints, and which tools to keep on "ask"
 

@@ -15,7 +15,7 @@ step "test and coverage"
 env -u HERDR_MCP_LIVE cargo llvm-cov --locked --fail-under-lines 90
 if [ "${HERDR_MCP_LIVE:-}" = 1 ]; then
   # One file at a time, one thread each: every file owns its own session name
-  # (herdr-mcp-test, -02 to -07; tests/session_names.rs keeps them unique).
+  # (herdr-mcp-test, -02 to -07, -13; tests/session_names.rs keeps them unique).
   # One file per line, so lanes add theirs without touching a neighbour's.
   for f in \
     live \
@@ -25,6 +25,7 @@ if [ "${HERDR_MCP_LIVE:-}" = 1 ]; then
     lane05_live \
     lane06_live \
     lane07_live \
+    lane13_live \
   ; do
     step "live $f"; cargo test --locked --test "$f" -- --test-threads=1
   done

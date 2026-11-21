@@ -87,15 +87,15 @@ line per check, and it prints no secrets.
 
 ## What it can do
 
-57 tools, grouped. The full list, with arguments, is in the [docs](https://izam-mohammed.github.io/herdr-mcp/docs/).
+63 tools by default, grouped, and 26 more in an `admin` group that is off. The full list, with arguments, is in the [docs](https://izam-mohammed.github.io/herdr-mcp/docs/).
 
 | Area | Tools | What for |
 | --- | --- | --- |
 | Session | `herdr_whoami`, `herdr_status`, `herdr_snapshot` | which pane is mine, is herdr alive, the whole session in one call |
-| Workspaces | `herdr_workspace_*` (8) | list, create, focus, rename, move, close |
+| Workspaces | `herdr_workspace_*` (9) | list, create, focus, rename, move, close |
 | Tabs | `herdr_tab_*` (7) | list, create, focus, rename, move, close |
-| Panes | `herdr_pane_*` (18) | split, run a command and wait, read, type, send keys, resize, close |
-| Agents | `herdr_agent_*` (10) | list, read, prompt and wait, send keys, start, explain a state |
+| Panes | `herdr_pane_*` (21) | split, run a command and wait, read, scroll, type, send keys, resize, close |
+| Agents | `herdr_agent_*` (12) | list, read, prompt and wait, send keys, start, explain a state, the agent view |
 | Events | `herdr_events_*` (3) | what changed since last time, wait for the next change |
 | Worktrees | `herdr_worktree_*` (4) | list, create, open, remove |
 | Layouts | `herdr_layout_*` (3) | save a tab's layout, rebuild it, tweak a split |
@@ -105,10 +105,50 @@ It also serves `@herdr:` resources (type `@herdr:` in Claude Code to attach
 the session, workspaces or agents as JSON) and three prompts: `dashboard`,
 `check-agents` and `run-and-watch`.
 
+### The admin group (off by default)
+
+These administer herdr itself, so they wait until you ask:
+`--tools all,admin` or `HERDR_MCP_TOOLS=all,admin`. **Turn it on only for a
+client you trust with your herdr.** With it on, an agent can stop servers and
+sessions, install or remove agent integrations, change the update channel,
+replace the herdr binary, reset your keybindings and make herdr show a state
+an agent never had.
+
+| Tool | What it does |
+| --- | --- |
+| `herdr_integration_list`, `_install`, `_uninstall` | agent integrations: list them, write or remove their hooks |
+| `herdr_server_reload_config`, `herdr_server_agent_manifests`, `herdr_server_reload_agent_manifests` | reload config or agent detection, or show the manifests |
+| `herdr_server_stop` | stops the herdr server, not its own unless `allow_self` |
+| `herdr_pane_set_input` | routes a pane's right click to herdr or to the program |
+| `herdr_pane_report_agent`, `_report_agent_session`, `_release_agent`, `_clear_agent_authority` | tells herdr what state an agent is in (spoofing, with paperwork) |
+| `herdr_config_check`, `herdr_config_reset_keys` | validate `config.toml`, or reset keybindings (needs `confirm: true`) |
+| `herdr_channel_show`, `herdr_channel_set` | the update channel |
+| `herdr_session_list`, `_stop`, `_delete` | named sessions, not its own unless `allow_self` |
+| `herdr_machine_list`, `_status`, `_rename`, `_remove`, `_enable`, `_disable` | saved ssh machines |
+| `herdr_update` | updates herdr (needs `confirm: true`) |
+
+The ones that change something are marked destructive and vanish under
+`--read-only`. The ones that need the `herdr` binary run it with an argument
+list (no shell), refuse a value starting with `-`, time out and cap what they
+return, which is untrusted text. More in the docs' safety page.
+
+### Keeping up with herdr
+
+herdr will grow methods and commands. `docs/herdr-coverage.toml` says what this
+server does about each one, and a test fails if herdr's checked-in list has an
+entry with no row. After upgrading herdr:
+
+```sh
+sh scripts/sync-herdr.sh   # rewrites docs/external/herdr-*.txt, prints what is new
+# add a row per new entry to docs/herdr-coverage.toml: a tool, or { skip = "reason" }
+cargo test --locked --test coverage
+```
+
 ## Safe by default
 
 An agent that can type into other terminals needs a few rules, so there are some.
 
+- **The admin group is off.** Stopping servers, updating herdr and the like need `--tools all,admin`, and even then never its own session without `allow_self`.
 - **Read-only outside herdr.** Started anywhere but a herdr pane, it can look and not touch. No promotion without the paperwork.
 - **It can't close or prompt itself.** Closing its own pane, tab or workspace is refused with `self_target`, prompting its own agent with `own_agent`. Pass `allow_self: true` only if you want exactly that.
 - **Destructive tools are marked**, so your client asks before a close or a forced worktree removal.
@@ -124,7 +164,7 @@ Flags, or the environment variable in brackets:
 | Flag | What it does |
 | --- | --- |
 | `--read-only` (`HERDR_MCP_READ_ONLY=1`) | register the read tools only |
-| `--tools a,b,...` (`HERDR_MCP_TOOLS`) | register only these groups, default all |
+| `--tools a,b,...` (`HERDR_MCP_TOOLS`) | register only these groups, default the nine (`all`); add `admin` to turn that group on |
 | `--confirm-destructive` (`HERDR_MCP_CONFIRM_DESTRUCTIVE=1`) | ask on every close, even in auto mode |
 | `--session <name>` (`HERDR_SESSION`) | a named herdr session |
 | `--socket <path>` (`HERDR_SOCKET_PATH`) | a specific herdr socket |

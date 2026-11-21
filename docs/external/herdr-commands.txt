@@ -1,0 +1,93 @@
+# herdr 0.9.5, protocol 22, checked 2026-11-21
+# one command per line; regenerate with: sh scripts/sync-herdr.sh
+--default-config
+--machine
+--remote
+--skill
+agent attach
+agent explain
+agent focus
+agent get
+agent list
+agent prompt
+agent read
+agent rename
+agent send-keys
+agent start
+agent wait
+api schema
+api snapshot
+channel set
+channel show
+completion
+config check
+config reset-keys
+herdr
+integration install
+integration status
+integration uninstall
+machine add
+machine disable
+machine enable
+machine list
+machine reconnect
+machine remove
+machine rename
+machine status
+notification show
+pane close
+pane current
+pane edges
+pane focus
+pane get
+pane input
+pane layout
+pane list
+pane move
+pane neighbor
+pane process-info
+pane read
+pane release-agent
+pane rename
+pane report-agent
+pane report-agent-session
+pane report-metadata
+pane resize
+pane run
+pane send-keys
+pane send-text
+pane split
+pane swap
+pane wait-output
+pane zoom
+server
+server agent-manifests
+server reload-agent-manifests
+server reload-config
+server stop
+server update-agent-manifests
+session attach
+session delete
+session list
+session stop
+status
+status client
+status server
+tab close
+tab create
+tab focus
+tab get
+tab list
+tab rename
+update
+workspace close
+workspace create
+workspace focus
+workspace get
+workspace list
+workspace rename
+workspace report-metadata
+worktree create
+worktree list
+worktree open
+worktree remove

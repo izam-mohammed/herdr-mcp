@@ -67,6 +67,17 @@ Group `workspaces` (write). Read-only: no. Destructive: no. Idempotent: yes. Rea
 | `insert_index` | integer | yes | Zero-based position to move it to. |
 | `workspace_id` | string | yes | Workspace id, e.g. `w1`. |
 
+## `herdr_workspace_move_block`
+
+Move several workspaces together to a position in the workspace order: before `before_workspace_id`, or to the end.
+
+Group `workspaces` (write). Read-only: no. Destructive: no. Idempotent: yes. Reaches beyond herdr: no.
+
+| Parameter | Type | Required | What it is |
+| --- | --- | --- | --- |
+| `before_workspace_id` | string | no | Put the block before this workspace. Omit to put it at the end. |
+| `workspace_ids` | array of string | yes | Workspace ids to move together, in the order they should end up. |
+
 ## `herdr_workspace_rename`
 
 Rename a workspace.
