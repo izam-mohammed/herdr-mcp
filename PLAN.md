@@ -25,3 +25,8 @@ ticked here when all its boxes are.
   the tool, resource and prompt reference generated from the server.
 - [x] `plans/08-release-v0.1.0.md` - one-command install without a Rust
   toolchain, and `v0.1.0` released.
+
+### Phase 2: next, every herdr command as a tool
+
+- [ ] `plans/13-cli-parity.md` - every herdr command is also an MCP tool,
+  and a check says when herdr gets a new one.
