@@ -45,5 +45,4 @@ Measured 21/11/2026: `herdr-app ls` and `herdr-app status` each took
 ## Not found yet
 
 The app socket's wire protocol. Only the `herdr-app` CLI is documented, so
-the plan's proof phase decides between the CLI and the socket
-(`plans/16-herdr-app-backend.md` decision 2).
+use the `herdr-app` CLI.

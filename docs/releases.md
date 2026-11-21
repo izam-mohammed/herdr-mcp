@@ -10,15 +10,14 @@ channel to publish to yet. Nothing is published by hand.
 Semantic versioning, `vMAJOR.MINOR.PATCH`. The version lives in
 `Cargo.toml` and `CHANGELOG.md` names what changed. `0.x` until the tool
 names and flags in `plans/01-first-version.md` `## Contract` are declared
-stable; that is `v1.0.0`, decided after `v0.3.0` has been used for a while,
+stable; that is `v1.0.0`, decided after `v0.1.0` has been used for a while,
 since tool names are what people write permission rules against.
 
 ## Roadmap
 
 | Version | What a user gets | Chain phase | Plans | New channels | State |
 | --- | --- | --- | --- | --- | --- |
-| v0.1.0 | tab and workspace reads and tab management from Claude Code, safe by default, one-command install | 1 | 01 to 12 | GitHub Releases, shell installer | released 2026-11-21 (holds what plans 02 to 07, 10 and 11 built; the v0.2.0 to v0.4.0 plans of the first roadmap were folded in) |
-| v0.2.0 | the herdr desktop app as well as the herdr TUI, from one server | 5 | 16, 17 | none | planned |
+| v0.1.0 | every herdr tool, resource and prompt from Claude Code, safe by default, one-command install, a site and docs | 1 | 01 to 12 | GitHub Releases, shell installer | released 2026-11-21 (the one release: everything plans 01 to 12 built) |
 
 ## Channels
 
