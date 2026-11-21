@@ -25,3 +25,8 @@ ticked here when all its boxes are.
   the tool, resource and prompt reference generated from the server.
 - [x] `plans/08-release-v0.1.0.md` - one-command install without a Rust
   toolchain, and `v0.1.0` released.
+
+### Phase 2: next, a skill for users
+
+- [ ] `plans/14-user-skill.md` - a skill that teaches users' agents to use,
+  install and fix herdr-mcp.
