@@ -339,9 +339,9 @@ repository instructions for recording useful development findings.
   run (repository private, no deploy triggered).
 - [x] `docs/standards.md` names the docs check, mdBook and lychee under
   checks and decided.
-- [ ] Check: `sh scripts/check.sh` passes, and after the workflow runs on
-  `main`, `https://izam-mohammed.github.io/herdr-mcp/docs/` answers 200 (not
-  done: needs the site live at a URL; check.sh passes).
+- [x] Check: `sh scripts/check.sh` passes, and after the workflow runs on
+  `main`, `https://izam-mohammed.github.io/herdr-mcp/docs/` answers 200.
+  Landed 2026-11-21: check.sh passes, the pages run succeeded, docs answer 200.
 
 ### Phase 5: open the PR
 
