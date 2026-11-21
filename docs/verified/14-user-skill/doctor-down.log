@@ -1,0 +1,6 @@
+ok: herdr-mcp 0.1.0 at /home/izam/.cargo/bin/herdr-mcp
+ok: version 0.1.0 is the latest release
+warn: not registered in claude: run 'claude mcp add herdr -- herdr-mcp'
+ok: codex not installed, skipped
+FAIL: herdr not reachable at /tmp/herdr-mcp-doctor-down-778990/herdr.sock: start herdr, or set HERDR_SESSION to the right session name
+warn: not inside a herdr pane (HERDR_ENV is not 1): herdr-mcp is read-only here

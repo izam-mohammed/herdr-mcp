@@ -12,6 +12,7 @@ fn names() -> BTreeMap<String, String> {
         .filter(|p| p.extension().is_some_and(|x| x == "rs"))
         .collect();
     files.push(root.join("scripts/bench.sh"));
+    files.push(root.join("scripts/verify/skill-doctor-ok.sh"));
     for path in files {
         let text = std::fs::read_to_string(&path).expect("read");
         for line in text.lines() {
@@ -35,8 +36,8 @@ fn live_sessions_are_isolated_and_unique() {
     let found = names();
     assert_eq!(
         found.len(),
-        8,
-        "expected 7 live files (live, lane02 to lane07) and the bench: {found:?}"
+        9,
+        "expected 7 live files (live, lane02 to lane07), the bench and the skill verify: {found:?}"
     );
     for name in found.keys() {
         assert!(name.starts_with("herdr-mcp-test"), "{name}");

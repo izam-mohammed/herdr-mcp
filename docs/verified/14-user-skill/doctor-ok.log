@@ -1,0 +1,6 @@
+ok: herdr-mcp 0.1.0 at /home/izam/.cargo/bin/herdr-mcp
+ok: version 0.1.0 is the latest release
+warn: not registered in claude: run 'claude mcp add herdr -- herdr-mcp'
+ok: codex not installed, skipped
+ok: herdr answers ping at /home/izam/.config/herdr/sessions/herdr-mcp-test-14/herdr.sock
+ok: inside a herdr pane (HERDR_ENV=1): write tools are available
