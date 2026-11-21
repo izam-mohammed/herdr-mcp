@@ -165,43 +165,62 @@ repository instructions for recording useful development findings.
 
 ### Phase 1: the rough cut: recent and wait on lifecycle events (needs you: try it)
 
-- [ ] `EventHub` subscribing to every lifecycle type (expected in
+- [x] `EventHub` subscribing to every lifecycle type (expected in
   `src/events/hub.rs`), the ring (`src/events/ring.rs`) and
   `herdr_events_recent`, `herdr_events_wait`, `herdr_events_status`
   (`src/tools/events.rs`); pinned by `tests/events.rs` (eviction, cursor,
   filters, wake-up) and `tests/live.rs` (a tab created in the isolated
-  session shows up); `README.md` updated.
-- [ ] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes.
+  session shows up); `README.md` updated. Landed 2026-11-20: the tests are
+  `tests/lane05_tools.rs` (fake socket, streaming fake in
+  `tests/support/fake_events.rs`), `tests/lane05_live.rs` (session
+  `herdr-mcp-test-05`) and unit tests in `src/events/ring.rs`; the
+  subscription is opened in `src/events/hub.rs` without touching
+  `src/herdr.rs`; `HERDR_MCP_TOOLS` defaults to the plan 01 groups in
+  `tests/support/mod.rs` so older tests do not see later groups.
+- [x] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes (and
+  `HERDR_MCP_LIVE=1 cargo test --locked --test lane05_live -- --test-threads=1`,
+  which `check.sh` does not name).
 - [ ] You try it: in Claude Code, ask what changed in herdr in the last
   minute after opening and closing a tab by hand; then ask it to wait until
   you focus another workspace, and say whether the answers are useful.
 
 ### Phase 2: every agent's status
 
-- [ ] The hub adds `pane.agent_status_changed` per pane and rebuilds on
+- [x] The hub adds `pane.agent_status_changed` per pane and rebuilds on
   `pane.created` and `pane.closed` as decision 3 says, and
   `herdr_events_wait` takes `agent_status`; pinned by `tests/events.rs`
   (rebuild without loss or duplicates) and `tests/live.rs` (an agent's
-  status change seen).
-- [ ] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes.
+  status change seen). Landed 2026-11-20: in `tests/lane05_tools.rs` and
+  `tests/lane05_live.rs`; the live test drives status with
+  `pane.report_agent`. The old subscription is read for 150 ms after the
+  new one starts and its lines suppress their twins for 1 s.
+- [x] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes.
 
 ### Phase 3: lost events and restarts
 
-- [ ] `events_lost`, a rejected pane set and a dropped connection each
+- [x] `events_lost`, a rejected pane set and a dropped connection each
   lead to a gap marker, a snapshot refresh and a resubscribe with backoff
   (expected in `src/events/hub.rs`); pinned by `tests/events.rs` on the
   fake socket and by `tests/live.rs` stopping and restarting the isolated
-  server.
-- [ ] Post-implementation review of phases 1 to 3, recorded in
+  server. Landed 2026-11-20: a rejected rebuild falls back to a full
+  resubscribe; the gap marker carries the reason and a
+  `session.snapshot` summary, written once the new stream has started; the
+  tests are in `tests/lane05_tools.rs` and `tests/lane05_live.rs`.
+- [x] Post-implementation review of phases 1 to 3, recorded in
   `docs/research/05-events.md`: scope, findings or none, fixes and re-run
   checks, and the RSS measured with a full 1000-event buffer.
-- [ ] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes, and
+- [x] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes, and
   `sh scripts/bench.sh` stays inside the budget with the hub running.
 
 ### Phase 4: open the PR
 
-- [ ] The branch pushed and its PR opened against the branch it was cut
+- [x] The branch pushed and its PR opened against the branch it was cut
   from (or, if one is already open for this branch, its body brought up to
   date) with a Conventional Commit title for the whole change, a body
   naming this plan, what changed and why, and the checks run with their
-  result. The PR's URL printed as the evidence. Opened, never merged.
+  result. The PR's URL printed as the evidence. Opened, never merged. Landed 2026-11-20: https://github.com/izam-mohammed/herdr-mcp/pull/10
+
+Landed 2026-11-20 (join): `tests/support/mod.rs` no longer sets a default
+`HERDR_MCP_TOOLS`; with every group on, the hub sends its own requests, so each
+test file that counts requests names its groups. `scripts/check.sh` now runs
+`lane05_live`.

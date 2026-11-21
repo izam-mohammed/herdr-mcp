@@ -314,47 +314,54 @@ repository instructions for recording useful development findings.
 
 ### Phase 1: prove herdr and rmcp, and the check (needs you: install Rust with rustup)
 
-- [ ] The research is re-checked, since it is dated 22/10/2026: `herdr
+- [x] The research is re-checked, since it is dated 22/10/2026: `herdr
   --version` and `ping` protocol, `rustc --version`, and the newest `rmcp`
   on crates.io, each compared with `docs/standards.md` and
   `docs/external/`; any that moved is updated there with the new date
   before anything is built.
-- [ ] `scripts/prove/herdr-socket.sh` sends `ping` to the resolved socket
+  Landed 2026-11-20: herdr 0.9.5 and protocol 22 unchanged; rustc is 1.100.0 (standards.md said 1.99, updated); newest rmcp is 3.11.0 (was 3.6.0), so `Cargo.toml` uses 3.11 and `docs/external/rmcp.md` records it.
+- [x] `scripts/prove/herdr-socket.sh` sends `ping` to the resolved socket
   with `nc -U` per `docs/external/herdr-socket-api.md` § Wire format and
   prints `PASS` when the reply is `pong` at protocol 22.
-- [ ] `examples/prove_rmcp.rs` (one `ping` tool, per `docs/external/rmcp.md`)
+  Landed 2026-11-20: `nc -U -w 2` works (OpenBSD netcat); proof run against the isolated `herdr-mcp-test` session because no default herdr server was running here.
+- [x] `examples/prove_rmcp.rs` (one `ping` tool, per `docs/external/rmcp.md`)
   with `Cargo.toml` and `rust-toolchain.toml`, and
   `scripts/prove/rmcp-stdio.sh` that builds it, pipes `initialize`,
   `notifications/initialized` and `tools/call`, and prints `PASS` when the
   call returns herdr's `pong`; the MCP `protocolVersion` rmcp negotiates is
   recorded in `docs/external/rmcp.md`, settling decision 1's open spec
   question.
-- [ ] The standard check lands: `scripts/check.sh`, `rustfmt.toml`,
+  Landed 2026-11-20: negotiated protocolVersion is 2025-11-25 at most (2025-06-18 if offered); recorded in `docs/external/rmcp.md`.
+- [x] The standard check lands: `scripts/check.sh`, `rustfmt.toml`,
   `deny.toml`, Clippy lints in `Cargo.toml`, `.gitignore`, and
   `.github/workflows/check.yml`, as `docs/standards.md` says.
-- [ ] Check: both scripts exit 0 and print `PASS`, and `sh scripts/check.sh`
+  Landed 2026-11-20: `deny.toml` ignores RUSTSEC-2026-0543 (chrono unmaintained, transitive via rmcp and schemars).
+- [x] Check: both scripts exit 0 and print `PASS`, and `sh scripts/check.sh`
   passes on the proof crate.
 
 ### Phase 2: the rough cut: tabs from Claude Code (needs you: try it)
 
-- [ ] `HerdrClient::call` (expected in `src/herdr.rs`) resolves the socket
+- [x] `HerdrClient::call` (expected in `src/herdr.rs`) resolves the socket
   in herdr's order, opens one connection per call, applies the timeout and
   maps errors per `## Contract` (`src/error.rs`); `src/config.rs` reads the
   flags and env, with read-only the default outside herdr
   (`src/safety.rs`).
-- [ ] Tools `herdr_whoami`, `herdr_status`, `herdr_snapshot`,
+  Landed 2026-11-20: `src/lib.rs` added so tests and the binary share the crate; socket order is `--socket`, `--session`, `HERDR_SOCKET_PATH`, `HERDR_SESSION`, default. `HERDR_MCP_TIMEOUT_MS` (default 10000) is an extra env var used by the timeout test.
+- [x] Tools `herdr_whoami`, `herdr_status`, `herdr_snapshot`,
   `herdr_workspace_list`, `herdr_tab_list`, `herdr_tab_get`,
   `herdr_tab_focus`, `herdr_tab_create`, `herdr_tab_rename` and
   `herdr_agent_list` (expected in `src/tools/`), with annotations and
   server instructions saying output is untrusted; pinned by
   `tests/tools.rs` on `tests/support/fake_herdr.rs`, including every
   `## Security` row's test.
-- [ ] `tests/live.rs` runs the binary against an isolated
+  Landed 2026-11-20: registry is `src/tools/mod.rs`: one `mod` line and one `GROUPS` line per group, each group in `src/tools/<group>.rs` exposing `router()`; the read-only gate removes every tool whose `readOnlyHint` is not true, so a new group needs no gate edit. `herdr_whoami` is the one composite result (env plus herdr's `pane.current` under `pane`). Server `self_target` refusals have no tool to guard yet (no pane tool in this plan).
+- [x] `tests/live.rs` runs the binary against an isolated
   `herdr-mcp-test` session: create, rename, focus and list a tab, then
   stop and delete the session.
-- [ ] `README.md` gains how to build, register with `claude mcp add herdr
+  Landed 2026-11-20: needs `HERDR_MCP_LIVE=1`, else it skips; a workspace is created over the raw socket first because a fresh session has none; the session is stopped and deleted in a drop guard.
+- [x] `README.md` gains how to build, register with `claude mcp add herdr
   -- <path>/herdr-mcp`, the flags, and the safety defaults.
-- [ ] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes.
+- [x] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes.
 - [ ] You try it: run `cargo build --release`, then `claude mcp add herdr
   -- $PWD/target/release/herdr-mcp`, start Claude Code in a herdr pane, ask
   it to list your tabs, open a new tab called `scratch` and focus it; say
@@ -363,24 +370,28 @@ repository instructions for recording useful development findings.
 
 ### Phase 3: within budget, and big sessions stay small
 
-- [ ] `examples/bench.rs` and `scripts/bench.sh` measure start, RSS after
+- [x] `examples/bench.rs` and `scripts/bench.sh` measure start, RSS after
   1000 calls and call p99 against the live socket, failing past the budget
   (start p50 under 10 ms, RSS under 8 MB, call p99 under 2 ms), and record
   the byte size of `tools/list`; run by `scripts/check.sh` when
   `HERDR_MCP_LIVE=1`.
-- [ ] `herdr_snapshot` takes `workspace_id`, `tab_id` and `summary`
+  Landed 2026-11-20: the bench spawns the release binary 30 times for start p50, warms up 100 calls, then times 1000 `herdr_tab_list` calls end to end over stdio; `scripts/bench.sh` retries a run past the budget twice because timings jitter right after a build. Measured: start p50 about 1 ms, RSS about 4.2 MB, call p99 0.4 to 0.9 ms, `tools/list` 4295 bytes (about 1070 tokens).
+- [x] `herdr_snapshot` takes `workspace_id`, `tab_id` and `summary`
   (counts and ids only) and returns the summary by default once the reply
   passes 20 000 characters, saying so; pinned by `tests/tools.rs`.
-- [ ] Post-implementation review of phases 1 to 3, with the security pass
+  Landed 2026-11-20: summary mode returns `session_snapshot_summary` (counts and ids) with a `note`; `src/snapshot.rs` holds the filter and summary.
+- [x] Post-implementation review of phases 1 to 3, with the security pass
   over `## Security`'s rows, recorded in `docs/research/01-first-version.md`:
   scope, findings or none, fixes and the re-run checks.
-- [ ] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes, and
+  Landed 2026-11-20: recorded as a section at the end of `docs/research/01-first-version.md`; no finding needed a fix here, plan 03 must carry a `lines` cap.
+- [x] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes, and
   `sh scripts/bench.sh` prints the numbers inside the budget.
 
 ### Phase 4: open the PR
 
-- [ ] The branch pushed and its PR opened against the branch it was cut
+- [x] The branch pushed and its PR opened against the branch it was cut
   from (or, if one is already open for this branch, its body brought up to
   date) with a Conventional Commit title for the whole change, a body
   naming this plan, what changed and why, and the checks run with their
   result. The PR's URL printed as the evidence. Opened, never merged.
+  Landed 2026-11-20: https://github.com/izam-mohammed/herdr-mcp/pull/6 (open, not merged).

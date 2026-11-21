@@ -6,6 +6,8 @@
   </picture>
 </p>
 
+<p align="center"><a href="https://izam-mohammed.github.io/herdr-mcp/">the one-page site</a> and <a href="https://izam-mohammed.github.io/herdr-mcp/docs/">the docs</a> (live once the repository is public)</p>
+
 <p align="center"><em>You gave your AI agents their own terminals. Now one of them gets to be the boss.</em></p>
 
 An MCP server for [herdr](https://herdr.dev). It lets Claude Code, Codex or
@@ -13,26 +15,78 @@ any other MCP client list, open, close, read, prompt and wait on everything
 running in your herdr session. It's middle management, written in Rust,
 in 3.6 MB of RAM. Cheaper than the human kind, and it never schedules a sync.
 
-## Install: let your agent do it
+## Install
 
-You're going to delegate anyway, so paste this into Claude Code or Codex,
-running inside a herdr pane:
+Needs [herdr](https://herdr.dev). No Rust toolchain, on Linux and macOS
+(x86_64 and arm64). Windows is out: herdr doesn't run there, so neither do we.
+
+### The shell installer (recommended)
+
+```sh
+curl --proto '=https' --tlsv1.2 -LsSf https://github.com/izam-mohammed/herdr-mcp/releases/latest/download/herdr-mcp-installer.sh | sh
+herdr-mcp --version
+claude mcp add herdr -- herdr-mcp     # Claude Code
+codex mcp add herdr -- herdr-mcp      # Codex
+```
+
+It puts `herdr-mcp` in `~/.cargo/bin` (or `$CARGO_HOME/bin`) and adds that
+to your `PATH` if needed. Want to check the download yourself? Use the
+release download below, which has the checksums.
+Open a new shell if `herdr-mcp --version` says not found.
+
+**The repository is private today**, so the one-liner only works once it is
+public. Until then, with access, use the release download below (`gh` is
+logged in, so it can see private releases).
+
+### `cargo binstall`
+
+The crate is not on crates.io, so point binstall at this repository (for a
+private one, set `GITHUB_TOKEN` first):
+
+```sh
+cargo binstall --git https://github.com/izam-mohammed/herdr-mcp herdr-mcp
+herdr-mcp --version
+```
+
+### A release download
+
+Pick your target from the [releases page](https://github.com/izam-mohammed/herdr-mcp/releases)
+(`x86_64` or `aarch64`, `unknown-linux-gnu`, `unknown-linux-musl` or `apple-darwin`).
+Each archive has a `.sha256` next to it, and `sha256.sum` lists them all.
+
+```sh
+t=x86_64-unknown-linux-gnu            # your target
+gh release download --repo izam-mohammed/herdr-mcp --pattern "herdr-mcp-$t.tar.xz*"
+sha256sum -c "herdr-mcp-$t.tar.xz.sha256"      # macOS: shasum -a 256 -c
+tar -xf "herdr-mcp-$t.tar.xz"
+install "herdr-mcp-$t/herdr-mcp" ~/.local/bin/
+herdr-mcp --version
+```
+
+### Upgrade and remove
+
+Upgrade by running the same install again: the installer and `cargo
+binstall` fetch the latest release; for a download, fetch the newer archive.
+Check with `herdr-mcp --version`.
+
+Remove with `rm "$(command -v herdr-mcp)"` and
+`claude mcp remove herdr` (or `codex mcp remove herdr`).
+
+### From source, or let your agent do it
+
+Needs a Rust toolchain ([rustup](https://rustup.rs)):
+
+```sh
+cargo install --locked --git https://github.com/izam-mohammed/herdr-mcp
+```
+
+You're going to delegate anyway, so you can paste this into Claude Code or
+Codex, running inside a herdr pane:
 
 ```text
 Install the herdr MCP server: run `cargo install --locked --git https://github.com/izam-mohammed/herdr-mcp`,
 then register it with `claude mcp add herdr -- herdr-mcp` (if you are Claude Code)
 or `codex mcp add herdr -- herdr-mcp` (if you are Codex). Then list my herdr tabs.
-```
-
-## Install: by hand, like it's 2023
-
-Needs [herdr](https://herdr.dev) and a Rust toolchain ([rustup](https://rustup.rs)).
-
-```sh
-cargo install --locked --git https://github.com/izam-mohammed/herdr-mcp
-
-claude mcp add herdr -- herdr-mcp     # Claude Code
-codex mcp add herdr -- herdr-mcp      # Codex
 ```
 
 Then start your agent **inside a herdr pane**. Started anywhere else, it's
@@ -100,15 +154,111 @@ read-only: no promotion without the paperwork.
 | `herdr_layout_set_split_ratio` | Adjusts a split |
 | `herdr_notify` | Shows a toast in herdr. Management loves an announcement |
 
+The reference for every tool, resource and prompt is in the docs (`docs/book/`,
+generated from the server; build it with `sh scripts/docs.sh`).
+
+## Build it yourself
+
+```sh
+cargo build --release
+claude mcp add herdr -- $PWD/target/release/herdr-mcp
+```
+
+Start Claude Code in a herdr pane and ask it to list your tabs.
+
+## Events
+
+With the `events` group on, the server keeps one subscription to herdr and
+a ring of the latest events (`--event-buffer`). `herdr_events_recent` takes
+a cursor (`since`, the `next` of the last call) and filters (`types`,
+`workspace_id`, `tab_id`, `pane_id`); `herdr_events_wait` blocks until the
+next match, or `timed_out`, and takes `agent_status`. Both are reads and
+stay in read-only mode. A `gap` event and the `gaps` list mark where events
+may be missing (evicted, or herdr dropped the connection);
+`herdr_events_status` shows `connected` and `lost`. History starts when the
+server starts: herdr replays nothing.
+
+## Worktrees, layouts and toasts
+
+`herdr_worktree_create` opens a git worktree as a workspace; `force` and
+`trust_repository` are sent to herdr only when you pass them, and
+`herdr_worktree_remove` with `force` deletes uncommitted work. `herdr_layout_export`
+returns a tab's layout and `herdr_layout_apply` takes it back as `root`: with a
+`tab_id` it replaces that tab (and ends its panes), without one it opens a new
+tab. Remove and apply refuse the workspace or tab holding the server's own pane
+(`allow_self` overrides). `herdr_notify` shows the title and body as given, so a
+toast can say anything: treat it as a message from the model, not from herdr.
+
+## Resources and prompts
+
+Type `@herdr:` in Claude Code to attach herdr's state as read-only JSON:
+`herdr://session`, `herdr://workspaces`, `herdr://agents`,
+`herdr://workspace/{id}`, `herdr://tab/{id}`, `herdr://pane/{id}/output`
+(the last 200 lines, capped like `herdr_pane_read`) and, with the `events`
+group on, `herdr://events/recent`. Each read goes through to herdr; an
+unknown URI or id is `not_found`. Pane and agent text in them is untrusted
+data. Updates are not pushed: re-attach to refresh.
+
+Three prompts show as slash commands (`/mcp__herdr__dashboard` and so on):
+`dashboard`, `check-agents` and `run-and-watch` (takes `command`). Each
+is a short instruction that names the tools to use.
+
+## Flags
+
+Flag first, then the environment variable.
+
+| Flag | Env | What it does |
+| --- | --- | --- |
+| `--session <name>` | `HERDR_SESSION` | Talk to that herdr session |
+| `--socket <path>` | `HERDR_SOCKET_PATH` | Talk to that socket (wins over `--session`) |
+| `--read-only` | `HERDR_MCP_READ_ONLY=1` | Register read tools only |
+| `--allow-outside-herdr` | `HERDR_MCP_ALLOW_OUTSIDE=1` | Allow writes when not started inside herdr |
+| `--tools <a,b>` | `HERDR_MCP_TOOLS` | Register only these groups: `session`, `workspaces`, `tabs`, `panes`, `agents`, `events`, `worktrees`, `layout`, `notify` (default all) |
+| `--confirm-destructive` | `HERDR_MCP_CONFIRM_DESTRUCTIVE=1` | Closes also ask you every time, even in auto mode (`requiresUserInteraction`) |
+| `--event-buffer <n>` | `HERDR_MCP_EVENT_BUFFER` | Events kept for `herdr_events_*` (default 1000, at most 1000000) |
+| `--debug` | | Log request and reply payloads to stderr |
+
+Without `--debug`, stderr carries method names and ids only, never pane text.
+Every herdr call times out after 10 seconds (`timeout`).
+
+Pane reads return 200 lines by default, at most 2000, and at most 40000
+characters (the end is kept, with `truncated: true`). Agent reads default to 100 lines, at most 1000. Waits
+(`herdr_pane_wait_output`, `herdr_pane_run` with `wait`, `herdr_agent_wait`,
+`herdr_agent_prompt` with `wait`) default to 60 s and stop at 10 minutes; running out of time is a normal result with
+`timed_out: true`. A wait also matches text already on screen, including the
+command you typed, so match something the command prints but does not
+contain.
+
+## Safety defaults
+
+Started without `HERDR_ENV=1` (that is, outside a herdr pane), or with
+`--read-only`, the write tools are not registered at all: the client never
+sees them, so there is nothing to ask about. Failures come back as
+`isError` with the text `herdr <code>: <message>`; the server's own codes
+are `read_only`, `self_target`, `own_agent`, `herdr_unreachable` and `timeout`.
+
+herdr's `agent_blocked` and `agent_prompt_stalled` come back as they are.
+
 ## Things it refuses to do
 
-- **Prompt, type into or close its own pane**, or close the tab or workspace
-  it lives in. Self-awareness, at last.
+- **Prompt or send keys to its own agent**, by pane id or by name (code
+  `own_agent`).
+- **Prompt, type into, clear or close its own pane**, or close the tab or
+  workspace it lives in (code `self_target`). Self-awareness, at last.
 - **Steer your session from outside herdr.** There it's read-only.
 - **Stop, restart or reconfigure herdr itself.** Those methods aren't
   exposed at all.
 - **Trust pane output.** Whatever another program prints is treated as
   data, never as instructions.
+
+One check backs all of these. A call aimed at the own pane id is refused
+without asking herdr; any other pane, agent (resolved by name or pane id),
+tab or workspace is checked against the server's own pane, found by
+`terminal_id` (which follows the pane if it moves), and refused when it is
+that pane or holds it. A close of a tab or workspace can pass
+`allow_self: true`; input to a pane or agent cannot. If herdr cannot say
+where the own pane is, the call is refused. `herdr_workspace_close` passes `close_group` only when asked; never
+set it just to get past `workspace_group_close_required`.
 
 Writing and closing tools are marked as such, so your client asks before
 running them. Keep `herdr_agent_prompt`, `herdr_agent_send_keys` and the

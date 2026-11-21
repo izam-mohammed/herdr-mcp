@@ -278,66 +278,75 @@ repository instructions for recording useful development findings.
 
 ### Phase 1: the rough cut: the book builds locally (needs you: try it)
 
-- [ ] `docs/book/` with `book.toml` (`create-missing = false`),
+- [x] `docs/book/` with `book.toml` (`create-missing = false`),
   `SUMMARY.md`, an introduction and `getting-started.md` (install,
   `claude mcp add herdr -- herdr-mcp`, start inside a herdr pane, the
-  first `herdr_snapshot`), from the README's install text.
-- [ ] `scripts/docs.sh` builds the book with a pinned `mdbook`, failing
+  first `herdr_snapshot`), from the README's install text. Landed 2026-11-20: the book is
+  written whole in one pass, not chapter by chapter.
+- [x] `scripts/docs.sh` builds the book with a pinned `mdbook`, failing
   on any warning; the built size of `getting-started.html` and its assets
-  recorded in the phase's commit message as the baseline.
-- [ ] Check: `sh scripts/check.sh` passes, and `sh scripts/docs.sh`
+  recorded in the phase's commit message as the baseline. Landed
+  2026-11-20: 26434 bytes of HTML, 336921 bytes with its CSS and scripts.
+- [x] Check: `sh scripts/check.sh` passes, and `sh scripts/docs.sh`
   writes `docs/book/book/index.html`.
-- [ ] You try it: run `sh scripts/docs.sh` and `mdbook serve docs/book`,
+- [ ] You try it (not done: needs a person to follow it in a fresh herdr
+  pane): run `sh scripts/docs.sh` and `mdbook serve docs/book`,
   open the getting-started page in light and dark, follow it in a fresh
   herdr pane up to the first snapshot, and say whether this is the shape
   you want before the rest is written.
 
 ### Phase 2: the reference, generated
 
-- [ ] `docs_match_server` (expected in `tests/docs.rs`) writes
+- [x] `docs_match_server` (expected in `tests/docs.rs`) writes
   `docs/book/src/reference/` from the in-process server with
   `HERDR_MCP_UPDATE_DOCS=1`: one page per tool group with each tool's
   description, hints and parameter table, a resources page, a prompts
   page and a CLI page from `--help`; without the variable it fails on any
-  difference.
-- [ ] `CLAUDE.md` says a tool added or renamed also means
+  difference. Landed 2026-11-20: 13 pages (a tools index, one page per
+  group, resources, prompts, cli); 57 tools, 7 resources, 3 prompts.
+- [x] `CLAUDE.md` says a tool added or renamed also means
   `HERDR_MCP_UPDATE_DOCS=1 cargo test --locked --test docs`.
-- [ ] Check: `sh scripts/check.sh` passes, and a renamed tool in a scratch
+- [x] Check: `sh scripts/check.sh` passes, and a renamed tool in a scratch
   copy fails `cargo test --locked --test docs` until the pages are
   rewritten.
 
 ### Phase 3: configuration, safety and guides
 
-- [ ] `configuration.md` (socket resolution, sessions, read-only mode,
+- [x] `configuration.md` (socket resolution, sessions, read-only mode,
   `--tools`, `--debug`, the limits), `safety.md` (what it refuses, the
   hints, which tools to keep on "ask", untrusted output) and `errors.md`
   (herdr's error codes and what to do).
-- [ ] Guides for watching agents, running and waiting on commands, events,
+- [x] Guides for watching agents, running and waiting on commands, events,
   and worktrees and layouts, each with an example from a run against the
-  isolated `herdr-mcp-test` session.
-- [ ] Check: `sh scripts/check.sh` passes, and `sh scripts/docs.sh`
+  isolated `herdr-mcp-test` session. Landed 2026-11-20: examples are from
+  a real run on an isolated `herdr-mcp-test-docs` session; the agents guide
+  shows an empty agent list because no agent was started.
+- [x] Check: `sh scripts/check.sh` passes, and `sh scripts/docs.sh`
   builds with no warning.
-- [ ] You try it: read the safety page and one guide, and say whether a
+- [ ] You try it (not done: needs a person reading): read the safety page and one guide, and say whether a
   person new to herdr-mcp would know which tools to leave on "ask".
 
 ### Phase 4: the docs check and publishing
 
-- [ ] `scripts/docs.sh` also runs a pinned lychee `--offline` on the built
+- [x] `scripts/docs.sh` also runs a pinned lychee `--offline` on the built
   book, and `scripts/check.sh` runs it; a planted broken link and a
-  planted broken anchor each fail it.
-- [ ] Once the repository is public and `plans/10-site.md` has landed,
+  planted broken anchor each fail it. Landed 2026-11-20: lychee also needs
+  `--include-fragments` and `--exclude-path 404.html`.
+- [x] Once the repository is public and `plans/10-site.md` has landed,
   `pages.yml` builds the book into `site/docs/` before uploading `site/`,
   so one deploy serves both; `site/index.html` and `README.md` link
-  `/docs/`.
-- [ ] `docs/standards.md` names the docs check, mdBook and lychee under
+  `/docs/`. Landed 2026-11-20: edited and checked locally; the workflow has not
+  run (repository private, no deploy triggered).
+- [x] `docs/standards.md` names the docs check, mdBook and lychee under
   checks and decided.
 - [ ] Check: `sh scripts/check.sh` passes, and after the workflow runs on
-  `main`, `https://izam-mohammed.github.io/herdr-mcp/docs/` answers 200.
+  `main`, `https://izam-mohammed.github.io/herdr-mcp/docs/` answers 200 (not
+  done: needs the site live at a URL; check.sh passes).
 
 ### Phase 5: open the PR
 
-- [ ] The branch pushed and its PR opened against the branch it was cut from
+- [x] The branch pushed and its PR opened against the branch it was cut from
   (or, if one is already open for this branch, bring the open PR's body up
   to date) with a Conventional Commit title for the whole change, a body
   naming this plan, what changed and why, and the checks run with their
-  result. The PR's URL printed as the evidence. Opened, never merged.
+  result. The PR's URL printed as the evidence. Opened, never merged. Landed 2026-11-20: https://github.com/izam-mohammed/herdr-mcp/pull/17 (one PR for both plans).

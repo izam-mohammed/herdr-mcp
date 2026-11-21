@@ -105,27 +105,33 @@ repository instructions for recording useful development findings.
 
 ### Phase 1: the rough cut: @herdr resources (needs you: try it)
 
-- [ ] `list_resources` and `read_resource` for the seven URIs (expected in
+- [x] `list_resources` and `read_resource` for the seven URIs (expected in
   `src/resources.rs`), advertised in `src/server.rs`; pinned by
-  `tests/resources.rs`; `README.md` updated.
-- [ ] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes.
+  `tests/resources.rs`; `README.md` updated. Landed 2026-11-20: also
+  `list_resource_templates` for the three `{id}` URIs; tests are
+  `tests/lane07_tools.rs` and `tests/lane07_live.rs` (own session
+  `herdr-mcp-test-07`), not `tests/resources.rs`.
+- [x] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes.
 - [ ] You try it: in Claude Code type `@herdr:` and attach
   `herdr://agents`, ask what each agent is doing; and say whether Claude
   Code offered to subscribe or showed updates (that answers decision 1).
 
 ### Phase 2: prompts
 
-- [ ] `dashboard`, `check-agents` and `run-and-watch` (expected in
+- [x] `dashboard`, `check-agents` and `run-and-watch` (expected in
   `src/prompts.rs`); pinned by `tests/resources.rs`; `README.md` updated.
-- [ ] Post-implementation review of phases 1 and 2, recorded in
+  Landed 2026-11-20: written by hand (`list_prompts`, `get_prompt`), not
+  `#[prompt_router]`; pinned by `tests/lane07_tools.rs`.
+- [x] Post-implementation review of phases 1 and 2, recorded in
   `docs/research/07-resources-and-prompts.md`, with what the try showed
-  about subscriptions.
-- [ ] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes.
+  about subscriptions. Landed 2026-11-20: the try has not happened, so the
+  review says subscriptions are unanswered.
+- [x] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes.
 
 ### Phase 3: open the PR
 
-- [ ] The branch pushed and its PR opened against the branch it was cut
+- [x] The branch pushed and its PR opened against the branch it was cut
   from (or, if one is already open for this branch, its body brought up to
   date) with a Conventional Commit title for the whole change, a body
   naming this plan, what changed and why, and the checks run with their
-  result. The PR's URL printed as the evidence. Opened, never merged.
+  result. The PR's URL printed as the evidence. Opened, never merged. Landed 2026-11-20: PR #12.

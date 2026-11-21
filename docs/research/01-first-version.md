@@ -98,3 +98,37 @@ never answered, so connection-per-call is the protocol, not a choice
 The servers need their toolchains (rustup, go, node, uv). The scratch
 builds used for the numbers above are not kept in the repository; the
 sources and driver are.
+
+## Post-implementation review (20/11/2026)
+
+Scope: phases 1 to 3 of `plans/01-first-version.md`: `src/` (config,
+herdr client, safety gate, snapshot shaping, the four tool groups),
+`tests/`, `scripts/`, the CI workflow, and the dependency tree. Each row of
+the plan's `## Security` table was read against the code and run.
+
+| Threat | Result | Proof |
+| --- | --- | --- |
+| Elevation: started outside herdr | Held. Without `HERDR_ENV=1` the router keeps only tools whose `readOnlyHint` is true, so write tools are never listed; a call to one is a protocol error and herdr sees nothing | `outside_herdr_registers_no_write_tool`, `allow_outside_herdr_registers_writes` |
+| Elevation: `--read-only` | Held, same gate, also with `HERDR_ENV=1` | `read_only_flag_lists_reads_only` |
+| Tampering: malformed arguments | Held. rmcp deserialises into typed structs and the request to herdr is built from the typed struct, so unknown extra fields never reach herdr | `a_wrong_typed_argument_is_refused_before_herdr_sees_it` |
+| Information disclosure: logs | Held. stderr has method and id only; payloads need `--debug` | `stderr_has_no_reply_body_without_debug` |
+| Denial of service: hung herdr | Held. One timeout covers connect, write and read, default 10 s | `a_hung_socket_gives_timeout`, `an_absent_socket_gives_herdr_unreachable` |
+| Prompt injection | Held as far as text can. Server instructions and every tool that returns labels, titles or agent names say the output is untrusted data | `instructions_say_output_is_untrusted` |
+
+Findings, none needing a fix in this plan:
+
+- The reply line from herdr is read without a size cap. herdr is the
+  user's own process behind a 0600 socket, and the large-result tools
+  (`pane.read`) arrive in plan 03, which sets the `lines` cap there. Left as
+  is; plan 03 must carry the cap.
+- `HERDR_MCP_TIMEOUT_MS` is an undocumented-in-contract env var (used by the
+  timeout test); a value of 0 makes every call time out. Harmless, but it is
+  not part of `## Contract`.
+- The advisory database flags `chrono` as unmaintained (RUSTSEC-2026-0543),
+  pulled in by rmcp and schemars. It is ignored in `deny.toml` with the
+  reason; recheck when rmcp or schemars drops it.
+- No server-side `self_target` refusal exists yet because no tool targets a
+  pane; plans 02 to 04 add it with their tools.
+
+Re-run after the review: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes, and
+`sh scripts/bench.sh` prints PASS (numbers in the PR).

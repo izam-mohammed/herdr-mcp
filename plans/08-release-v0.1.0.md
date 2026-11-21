@@ -121,11 +121,22 @@ answers `--version`; `claude mcp add` with it works in the try.
 Read root `KNOWLEDGE.md` when present before each phase. Follow the global and
 repository instructions for recording useful development findings.
 
+## Join notes
+
+Phase 1's first box landed with two deviations from the plan, found by
+running `dist` 0.34.0 (`docs/external/dist.md`): `release.yml` has two marked
+hand edits (check job first, `contents: write` on the `host` job only) with
+`allow-dirty = ["ci"]`, since `dist` cannot generate either; and the
+checksums are `sha256.sum` plus a `.sha256` per archive, not `SHA256SUMS`.
+Still open, each needs a pushed tag: the `v0.1.0-rc.1` run (second box), the
+try on a machine without Rust (third box), tagging `v0.1.0` and the release
+listing (Phase 2). `docs/research/08-release-v0.1.0.md` holds the review so far.
+
 ## Phases
 
 ### Phase 1: the rough cut: a pre-release you install (needs you: try it)
 
-- [ ] `dist` configured for the six targets with the shell installer
+- [x] `dist` configured for the six targets with the shell installer
   (expected in `dist-workspace.toml`), `.github/workflows/release.yml`
   generated, `Cargo.toml` metadata, `CHANGELOG.md`, the README's install
   section, and `docs/standards.md`'s CI section updated.
@@ -146,8 +157,12 @@ repository instructions for recording useful development findings.
 
 ### Phase 3: open the PR
 
-- [ ] The branch pushed and its PR opened against the branch it was cut
+- [x] The branch pushed and its PR opened against the branch it was cut
   from (or, if one is already open for this branch, its body brought up to
   date) with a Conventional Commit title for the whole change, a body
   naming this plan, what changed and why, and the checks run with their
-  result. The PR's URL printed as the evidence. Opened, never merged.
+  result. The PR's URL printed as the evidence. Opened, never merged. PR: https://github.com/izam-mohammed/herdr-mcp/pull/15
+
+Landed 2026-11-20 (join): `check.yml` carries both this lane's `workflow_call:` trigger and
+lane 09's SHA pins and `permissions: {}`; `docs/standards.md` CI section describes
+`check.yml`, `security.yml` and `release.yml` together.

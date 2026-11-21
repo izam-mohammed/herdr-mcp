@@ -150,28 +150,37 @@ repository instructions for recording useful development findings.
 
 ### Phase 1: the rough cut: the page, published (needs you: try it)
 
-- [ ] `site/index.html` with the header, tagline, banner, install and
+- [x] `site/index.html` with the header, tagline, banner, install and
   register lines, tool areas, safety line, latest-release link and footer,
-  self-contained, readable at 360 px wide.
-- [ ] `.github/workflows/pages.yml` uploads `site/` and deploys it on push
+  self-contained, readable at 360 px wide. Landed 2026-11-20: also
+  a docs link (plan 11); copy states 57 tools, 7 resources and 3 prompts, as the
+  server reports; checked at 360 px in headless Chrome.
+- [x] `.github/workflows/pages.yml` uploads `site/` and deploys it on push
   to `main` and by hand, write permissions on the deploy job only, actions
-  pinned by SHA; `docs/standards.md` names it under CI.
-- [ ] Check: `sh scripts/check.sh` passes, and opening `site/index.html`
-  from disk shows the page with one network request.
-- [ ] You try it: with the repository public, turn Pages on (Settings,
+  pinned by SHA; `docs/standards.md` names it under CI. Landed 2026-11-20: SHAs are
+  the commits of the `v5` and `v4` tags of the three pages actions; zizmor was
+  not installed here, so the shared gate's zizmor stage is the check.
+- [x] Check: `sh scripts/check.sh` passes, and opening `site/index.html`
+  from disk shows the page with one network request. Landed 2026-11-20:
+  headless Chrome loads it from disk with no sub-resource requests (the
+  document is the one request).
+- [ ] You try it (not done: the repository is private and Pages stays off,
+  and this needs a person looking): with the repository public, turn Pages on (Settings,
   Pages, source GitHub Actions), run the workflow by hand, open the URL on
   phone and laptop, and say whether it reads as herdr-mcp's page.
 
 ### Phase 2: point people at it
 
-- [ ] `README.md` links the site under the banner, and the repository's
-  homepage is set to the Pages URL (`gh repo edit --homepage`).
-- [ ] Check: `sh scripts/check.sh` passes, and the site URL answers 200.
+- [ ] `README.md` links the site under the banner (done), and the repository's
+  homepage is set to the Pages URL (`gh repo edit --homepage`) (not done: the
+  URL does not exist until Pages is on).
+- [ ] Check: `sh scripts/check.sh` passes, and the site URL answers 200 (not
+  done: needs the site live at a URL).
 
 ### Phase 3: open the PR
 
-- [ ] The branch pushed and its PR opened against the branch it was cut from
+- [x] The branch pushed and its PR opened against the branch it was cut from
   (or, if one is already open for this branch, its body brought up to date)
   with a Conventional Commit title for the whole change, a body naming this
   plan, what changed and why, and the checks run with their result. The PR's
-  URL printed as the evidence. Opened, never merged.
+  URL printed as the evidence. Opened, never merged. Landed 2026-11-20: https://github.com/izam-mohammed/herdr-mcp/pull/17 (one PR for both plans).

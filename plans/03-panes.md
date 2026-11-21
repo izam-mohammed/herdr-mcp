@@ -159,38 +159,57 @@ repository instructions for recording useful development findings.
 
 ### Phase 1: the rough cut: run, wait, read (needs you: try it)
 
-- [ ] `herdr_pane_list`, `_get`, `_read`, `_split`, `_run`, `_send_text`,
+- [x] `herdr_pane_list`, `_get`, `_read`, `_split`, `_run`, `_send_text`,
   `_send_keys`, `_wait_output` and `_close` (expected in
   `src/tools/panes.rs`), `call_wait` in `src/herdr.rs` and the caps in
   `src/limits.rs`; pinned by `tests/tools.rs` for each tool and every
   `## Security` row, and by `tests/live.rs` running `echo herdr-mcp-ok` in
   a new pane, waiting for it and reading it; the enter key's name recorded
   in `docs/external/herdr-socket-api.md`; `README.md` updated.
-- [ ] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes.
+  Landed 2026-11-20: tests are in `tests/lane03_tools.rs` and
+  `tests/lane03_live.rs` (isolated session `herdr-mcp-test-03`), fixtures in
+  `tests/fixtures/lane03.jsonl`; `call_wait` is in `src/herdr.rs` with a 2 s
+  guard and a 16 MiB reply cap (`reply_too_large`); the own-pane check is
+  private to `src/tools/panes.rs` (`refuse_own_pane`, code `self_target`)
+  because plan 02's `refuse_self` is not on this branch; the enter key is
+  `enter`; `herdr_pane_list` filters by tab on this side since herdr takes
+  only a workspace.
+- [x] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes.
 - [ ] You try it: ask Claude Code in a herdr pane to run `cargo test` (or
   any slow command) in a new pane to the right and tell you when it
   finishes; say whether it waits and reports the way you expect.
 
 ### Phase 2: the rest of the panes
 
-- [ ] `herdr_pane_layout`, `_process_info`, `_focus`, `_zoom`, `_resize`,
+- [x] `herdr_pane_layout`, `_process_info`, `_focus`, `_zoom`, `_resize`,
   `_swap`, `_move`, `_rename` and `_clear` (expected in
   `src/tools/panes.rs`), `_clear` refusing the own pane; pinned by
   `tests/tools.rs`, with the edge cases above.
-- [ ] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes.
+  Landed 2026-11-20: pinned by `tests/lane03_tools.rs`; `herdr_pane_swap`
+  takes `source_pane_id` with `target_pane_id` or `direction` (herdr rejects
+  `pane_id` alone); `tests/tools.rs` only had its tool-name lists and the
+  open-world check updated.
+- [x] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes.
 
 ### Phase 3: review
 
-- [ ] Post-implementation review of phases 1 and 2 with the security pass
+- [x] Post-implementation review of phases 1 and 2 with the security pass
   over `## Security`, recorded in `docs/research/03-panes.md`: scope,
   findings or none, fixes and re-run checks.
-- [ ] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes, and
+- [x] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes, and
   `sh scripts/bench.sh` stays inside the budget.
 
 ### Phase 4: open the PR
 
-- [ ] The branch pushed and its PR opened against the branch it was cut
+- [x] The branch pushed and its PR opened against the branch it was cut
   from (or, if one is already open for this branch, its body brought up to
   date) with a Conventional Commit title for the whole change, a body
   naming this plan, what changed and why, and the checks run with their
   result. The PR's URL printed as the evidence. Opened, never merged.
+
+Landed 2026-11-20 (join): the private `refuse_own_pane` is gone. Input to a pane
+now goes through `safety::Target::Pane`: the own pane id is refused without a
+call, any other pane costs a `pane.list` (and one `pane.current`, cached) to catch
+the own pane after a move. `DEFAULT_WAIT_MS` and `MAX_WAIT_MS` moved to
+`src/limits.rs`. `tests/lane03_tools.rs` names its group (`panes`) and ignores
+the check's lookups.

@@ -5,7 +5,8 @@ the binary), `herdr --skill`, the socket API page
 (https://raw.githubusercontent.com/herdrdev/herdr/v0.9.5/docs/next/website/src/content/docs/socket-api.mdx),
 and read-only calls against the live socket on this machine. The full schema is 272 KB; regenerate it with
 `herdr api schema --json` rather than copying it here.
-Version: herdr 0.9.5, protocol 22, API schema version 1.
+Version: herdr 0.9.5, protocol 22, API schema version 1. Re-checked 20/11/2026: `herdr --version` is still 0.9.5 and `ping` on an isolated session answers protocol 22.
+`nc -U -w 2 <socket>` works for a one-shot request on this machine (OpenBSD netcat); `-q` is also accepted.
 
 ## Authentication
 
@@ -209,7 +210,28 @@ unchanged.
   first, or the CLI targets the inherited session.
 - Never run `herdr server stop` against the live session: it kills every
   pane process.
+- Pane input (measured live 20/11/2026, herdr 0.9.5): `pane.send_input` with
+  `{"text":"echo hi","keys":["enter"]}` types and submits in one request;
+  the key name is `enter` (`Enter` is accepted too). `pane.read` returns
+  `result.read.{text, source, truncated, ...}`; `pane.wait_for_output`
+  matches text already on screen (so the typed command line itself can
+  match), returns `output_matched` with `matched_line` and `read.text`, and a
+  miss is the error `{"code":"timeout"}`; a bad regex is `invalid_regex`.
+  `pane.swap` needs `source_pane_id` (with `target_pane_id` or `direction`);
+  `pane_id` alone fails with `invalid_pane_swap`. `pane.move` returns
+  `result.move_result.pane`. `pane.edges` and `pane.neighbor` embed the whole
+  layout in their replies.
 - Pane and agent output is arbitrary terminal text from another program.
 - `workspace.close` without `close_group` on a worktree group returns
   `workspace_group_close_required`; never add `close_group` just to get past
   it.
+- Worktrees, layout, notifications (measured live 20/11/2026, herdr 0.9.5):
+  `worktree.create` and `worktree.remove` succeed without `trust_repository`
+  on a repository with no setup scripts; the docs do not say what it unlocks,
+  so herdr-mcp sends it only when asked. Without `path` the checkout lands in
+  `~/.herdr/worktrees/<repo>/<branch>`. `layout.apply` without `tab_id` opens a
+  new tab; with `tab_id` it replaces that tab and the result has a new tab id.
+  `layout.export` gives `layout.root`, which is valid as `root` for apply.
+  `layout.set_split_ratio` takes `path` (booleans, `[]` is the root split) and
+  `ratio`. `notification.show` with no attached client returns
+  `shown: false, reason: no_foreground_client`, not an error.
