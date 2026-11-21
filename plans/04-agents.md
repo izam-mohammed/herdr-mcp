@@ -128,6 +128,11 @@ repository instructions for recording useful development findings.
 - [ ] You try it: with a second Claude Code running in another herdr pane,
   ask the first to give it a small task and tell you when it is done; then
   ask it to prompt itself, and say whether both behave as you expect.
+  Landed 2026-11-21 (partial, box stays open): `herdr_agent_list`, `_get`,
+  `_explain` and `_read` worked through real Claude Code on the pane's own
+  Claude agent (state `idle`, matched rule `live_prompt_box`). Not done:
+  prompting a second agent or the self-prompt refusal, since
+  `herdr_agent_prompt` is hidden outside a herdr pane.
 
 ### Phase 2: the rest of the agents
 

@@ -6,7 +6,7 @@ ticked here when all its boxes are.
 ### Phase 1: v0.1.0, the first version you can try
 
 - [x] `plans/12-repo-hygiene.md` - a security policy and an MIT licence.
-- [ ] `plans/01-first-version.md` - the Rust server, the safety defaults,
+- [x] `plans/01-first-version.md` - the Rust server, the safety defaults,
   and tab management from Claude Code.
 - [ ] `plans/09-quality-gates.md` - a 90 % coverage floor in the check and
   the shared security gate on every PR, before any later plan lands.
@@ -15,9 +15,9 @@ ticked here when all its boxes are.
 
 ### Phase 2: v0.2.0, control the rest of herdr
 
-- [ ] `plans/02-workspaces-and-tabs.md` - workspaces and tabs in full, and
+- [x] `plans/02-workspaces-and-tabs.md` - workspaces and tabs in full, and
   never closing its own.
-- [ ] `plans/03-panes.md` - split, run, read and wait on panes.
+- [x] `plans/03-panes.md` - split, run, read and wait on panes.
 - [ ] `plans/04-agents.md` - read, prompt and wait on other agents.
 - [ ] `plans/05-events.md` - what changed since last time, and waiting for
   the next change.
@@ -25,7 +25,7 @@ ticked here when all its boxes are.
 
 ### Phase 3: v0.3.0, the remaining surface
 
-- [ ] `plans/06-worktrees-layout-notify.md` - worktrees, layouts and
+- [x] `plans/06-worktrees-layout-notify.md` - worktrees, layouts and
   toasts.
 - [ ] `plans/07-resources-and-prompts.md` - `@herdr:` resources and the
   dashboard prompts.

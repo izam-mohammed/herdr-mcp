@@ -183,6 +183,11 @@ repository instructions for recording useful development findings.
 - [ ] You try it: in Claude Code, ask what changed in herdr in the last
   minute after opening and closing a tab by hand; then ask it to wait until
   you focus another workspace, and say whether the answers are useful.
+  Landed 2026-11-21 (partial, box stays open): `herdr_events_status`
+  (connected, 0 lost) and `herdr_events_recent` (4 events, no gaps, a cursor
+  back) worked through real Claude Code. Not done: the hand-made tab open and
+  close, and `herdr_events_wait` on a real workspace focus, which need a
+  person at the window.
 
 ### Phase 2: every agent's status
 

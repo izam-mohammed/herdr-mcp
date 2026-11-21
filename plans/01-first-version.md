@@ -362,11 +362,16 @@ repository instructions for recording useful development findings.
 - [x] `README.md` gains how to build, register with `claude mcp add herdr
   -- <path>/herdr-mcp`, the flags, and the safety defaults.
 - [x] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes.
-- [ ] You try it: run `cargo build --release`, then `claude mcp add herdr
+- [x] You try it: run `cargo build --release`, then `claude mcp add herdr
   -- $PWD/target/release/herdr-mcp`, start Claude Code in a herdr pane, ask
   it to list your tabs, open a new tab called `scratch` and focus it; say
   whether the answers and the permission prompts feel right. What you want
   changed goes into Phase 3 or the later plans.
+  Landed 2026-11-21: tried through the Claude Code in the herdr pane, with the
+  v0.1.0 binary: `herdr_whoami`, `herdr_tab_list`, `herdr_tab_create`
+  (`scratch`, `wV:t2`, focused) and `herdr_tab_focus` back to `wV:t1` all
+  answered. The session ran in auto mode, so no permission prompt was shown;
+  whether prompts feel right is untried.
 
 ### Phase 3: within budget, and big sessions stay small
 

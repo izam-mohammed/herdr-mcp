@@ -154,10 +154,15 @@ repository instructions for recording useful development findings.
   close, not at start, so a start sends no call (plan 01's tests count
   requests); a stale id fails closed.
 - [x] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes.
-- [ ] You try it: in Claude Code in a herdr pane, ask it to make a
+- [x] You try it: in Claude Code in a herdr pane, ask it to make a
   workspace called `sandbox` with two tabs, move the second tab first,
   then close `sandbox`; then ask it to close its own tab, and say whether
   the refusal reads clearly.
+  Landed 2026-11-21: tried through the Claude Code in the herdr pane:
+  `sandbox` made with a second tab, that tab moved to index 0 and the
+  workspace closed; closing its own tab was refused with `herdr self_target:
+  tab wV:t1 holds the pane this server runs in; closing it would end this
+  session. Pass allow_self: true only if the user asked for exactly that.`
 
 ### Phase 2: edge cases and the moved pane
 
