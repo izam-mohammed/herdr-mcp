@@ -117,7 +117,7 @@ repository instructions for recording useful development findings.
   Code offered to subscribe or showed updates (that answers decision 1).
   Landed 2026-11-21 (partial, box stays open): Claude Code listed the four
   resources (`herdr://session`, `workspaces`, `agents`, `events/recent`) and
-  read `herdr://workspaces` as JSON. Not done: typing `@herdr:` in the prompt
+  read `herdr://workspaces` as JSON. Also `herdr://agents` read through the server in the pane. Not done: typing `@herdr:` in the prompt
   box and seeing whether Claude Code offers to subscribe, which needs a person
   (decision 1 stays open).
 

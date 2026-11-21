@@ -175,14 +175,12 @@ repository instructions for recording useful development findings.
   `enter`; `herdr_pane_list` filters by tab on this side since herdr takes
   only a workspace.
 - [x] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes.
-- [ ] You try it: ask Claude Code in a herdr pane to run `cargo test` (or
+- [x] You try it: ask Claude Code in a herdr pane to run `cargo test` (or
   any slow command) in a new pane to the right and tell you when it
   finishes; say whether it waits and reports the way you expect.
-  Landed 2026-11-21 (partial, box stays open): `herdr_pane_read` and
-  `herdr_pane_wait_output` worked through real Claude Code (a 2 s wait for
-  text that never came returned `timed_out: true`). Not done: running a
-  command in a new pane, since `herdr_pane_run` is hidden outside a herdr
-  pane.
+  Landed 2026-11-21: tried through the Claude Code in the herdr pane:
+  `herdr_pane_run` split `wV:p3` to the right, ran `sleep 5; echo try-done`,
+  matched `try-done` (`output_matched`) and reported it after 5 seconds.
 
 ### Phase 2: the rest of the panes
 

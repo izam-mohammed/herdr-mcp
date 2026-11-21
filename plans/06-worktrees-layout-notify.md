@@ -124,13 +124,14 @@ its budget in `scripts/check.sh`.
   repository; what herdr does without `trust_repository` recorded in
   `docs/external/herdr-socket-api.md`; `README.md` updated.
 - [x] Check: `HERDR_MCP_LIVE=1 sh scripts/check.sh` passes.
-- [ ] You try it: ask Claude Code to open a worktree of this repository on
+- [x] You try it: ask Claude Code to open a worktree of this repository on
   a new branch as a workspace and show a toast when it is ready; say
   whether the toast and the workspace are what you expect.
-  Landed 2026-11-21 (partial, box stays open): `herdr_worktree_list` and
-  `herdr_layout_export` worked through real Claude Code. Not done: opening a
-  worktree as a workspace and the toast, since `herdr_worktree_create` and
-  `herdr_notify` are hidden outside a herdr pane.
+  Landed 2026-11-21: tried through the Claude Code in the herdr pane:
+  `herdr_worktree_create` made branch `try-wt` as workspace `wY`,
+  `herdr_notify` returned `shown: true` for the toast, and
+  `herdr_worktree_remove` cleaned up. Whether the toast looked right on screen
+  is untried.
 
 ### Phase 2: layouts
 
