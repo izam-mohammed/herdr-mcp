@@ -182,28 +182,38 @@ repository instructions for recording useful development findings.
 
 ### Phase 1: the skill and its doctor
 
-- [ ] `skills/herdr-mcp/SKILL.md` and `skills/herdr-mcp/scripts/doctor.sh`
+- [x] `skills/herdr-mcp/SKILL.md` and `skills/herdr-mcp/scripts/doctor.sh`
   as in `## The decision`, with `scripts/check.sh` running ShellCheck on the
   new folder (expected in `skills/herdr-mcp/`, `scripts/check.sh`), pinned by
   `tests/skill.rs`.
-- [ ] Check: `sh scripts/check.sh` passes, and `sh skills/herdr-mcp/scripts/doctor.sh`
+  Landed: ShellCheck also covers `scripts/verify/*.sh`, and `docs/standards.md`
+  names the new globs. The doctor takes `HERDR_MCP_DOCTOR_RELEASE_URL` so the
+  test reads a `file://` release instead of the GitHub API. The skill names
+  only `herdr_whoami` and `herdr_snapshot` plus tool families, and links the
+  README and docs by URL, since a copied skill folder has no repo around it.
+  `tests/session_names.rs` now also scans `scripts/verify/skill-doctor-ok.sh`
+  (nine names).
+- [x] Check: `sh scripts/check.sh` passes, and `sh skills/herdr-mcp/scripts/doctor.sh`
   prints one line per check.
-- [ ] Verify: `scripts/verify/skill-doctor-ok.sh` and
+  Landed: check passed at 95.77 % line coverage.
+- [x] Verify: `scripts/verify/skill-doctor-ok.sh` and
   `scripts/verify/skill-doctor-down.sh` run the doctor against an isolated
   `herdr --session herdr-mcp-test-14 server` and against none, print PASS,
   and save their output under `docs/verified/14-user-skill/`.
 
 ### Phase 2: tell users
 
-- [ ] README "Teach your agent" (one copy command to
+- [x] README "Teach your agent" (one copy command to
   `~/.claude/skills/herdr-mcp/`) and one paragraph in
   `docs/book/src/getting-started.md` (expected in `README.md`,
   `docs/book/src/getting-started.md`).
-- [ ] Verify: a `claude -p` run on a throwaway config dir with the skill
+- [x] Verify: a `claude -p` run on a throwaway config dir with the skill
   copied in is offered it for "run my tests in another herdr pane"; the
   result, or `cannot_verify` where `claude` is not logged in, is recorded in
   `docs/verified/14-user-skill/RESULT.md`.
-- [ ] Check: `sh scripts/check.sh` passes and `sh scripts/docs.sh` passes.
+  Landed: `cannot_verify` on 2026-11-21, the nested `claude` printed `Not
+  logged in`; `RESULT.md` says how to close it on a logged-in machine.
+- [x] Check: `sh scripts/check.sh` passes and `sh scripts/docs.sh` passes.
 
 ### Phase 3: open the PR
 

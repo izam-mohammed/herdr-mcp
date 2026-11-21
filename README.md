@@ -67,6 +67,24 @@ Say it in plain words. These all work:
 - "open a worktree of this repo on a new branch as a workspace, and show a toast when it's ready"
 - "save this tab's layout, I'll want it back tomorrow"
 
+## Teach your agent
+
+the server gives your agent the tools. the skill gives it the manners: call
+`herdr_whoami` first, wait instead of poll, ask before closing things, and
+what to do when it breaks.
+
+Copy the skill into Claude Code's skills folder:
+
+```sh
+git clone --depth 1 https://github.com/izam-mohammed/herdr-mcp /tmp/herdr-mcp-skill && mkdir -p ~/.claude/skills && cp -r /tmp/herdr-mcp-skill/skills/herdr-mcp ~/.claude/skills/
+```
+
+Start a new session and say "run my tests in another herdr pane"; the agent
+loads it on its own. Any agent that reads `SKILL.md` folders can use the same
+`skills/herdr-mcp/` directory. If it ever won't connect, ask the agent to run
+`sh ~/.claude/skills/herdr-mcp/scripts/doctor.sh`: one `ok`, `warn` or `FAIL`
+line per check, and it prints no secrets.
+
 ## What it can do
 
 57 tools, grouped. The full list, with arguments, is in the [docs](https://izam-mohammed.github.io/herdr-mcp/docs/).
